@@ -1,0 +1,199 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap");
+@import "tailwindcss";
+
+@layer base {
+    :root {
+        /* Fluent Inspired Dark Theme */
+        --theme-font-sans: "Figtree", system-ui, sans-serif;
+        --theme-font-mono: "Fira Code", ui-monospace, monospace;
+
+        /* Backgrounds & Surfaces */
+        --color-bg-base: oklch(12% 0.003 240); /* Very dark cool gray */
+        --color-bg-layer-1: oklch(16% 0.005 240); /* Card/surface background */
+        --color-bg-layer-2: oklch(20% 0.006 240); /* Slightly lighter surface, e.g., input hover */
+        --color-bg-acrylic-base: oklch(
+            from var(--color-bg-layer-1) l c h / 0.75
+        ); /* For blurred elements */
+        --color-bg-acrylic-navbar: oklch(from var(--color-bg-layer-1) l c h / 0.6);
+
+        /* Text */
+        --color-text-primary: oklch(92% 0.002 240); /* Near white, slightly cool */
+        --color-text-secondary: oklch(70% 0.004 240); /* Lighter gray for secondary info */
+        --color-text-muted: oklch(55% 0.005 240); /* Muted gray for placeholders, tertiary */
+        --color-text-disabled: oklch(40% 0.005 240);
+        --color-text-on-accent: oklch(98% 0 0); /* Pure white on accent */
+        --color-text-on-destructive: oklch(98% 0 0); /* Pure white on destructive */
+
+        /* Accent (Fluent Blue inspired) */
+        --color-accent-primary: oklch(60% 0.22 255); /* Vibrant Blue */
+        --color-accent-primary-hover: oklch(65% 0.23 255);
+        --color-accent-primary-active: oklch(55% 0.21 255);
+        --color-accent-primary-soft: oklch(
+            from var(--color-accent-primary) l c h / 0.15
+        ); /* For subtle backgrounds */
+        --color-accent-primary-soft-hover: oklch(from var(--color-accent-primary) l c h / 0.25);
+
+        /* Borders */
+        --color-border-subtle: oklch(25% 0.005 240); /* Subtle borders for inputs, cards */
+        --color-border-interactive: oklch(35% 0.008 240); /* Slightly more visible for hover states */
+        --color-border-focus: var(--color-accent-primary);
+
+        /* Destructive Actions */
+        --color-destructive: oklch(55% 0.24 25); /* Fluent Red */
+        --color-destructive-hover: oklch(60% 0.25 25);
+        --color-destructive-soft: oklch(from var(--color-destructive) l c h / 0.15);
+
+        /* Other Semantic Colors */
+        --color-success: oklch(65% 0.2 150); /* Green */
+        --color-warning: oklch(75% 0.18 85); /* Yellow */
+        --color-info: var(--color-accent-primary); /* Blue */
+
+        /* Shadows - Key for Depth */
+        /* Inspired by Fluent elevation, using oklch for smooth falloff */
+        /* Shadow for cards and general elements */
+        --shadow-sm:
+            0 1px 2px oklch(from var(--color-bg-base) l c h / 0.1),
+            0 1px 3px oklch(from var(--color-bg-base) l c h / 0.08);
+        --shadow-md:
+            0 4px 8px oklch(from var(--color-bg-base) l c h / 0.12),
+            0 2px 4px oklch(from var(--color-bg-base) l c h / 0.08);
+        /* Shadow for elevated elements like modals or popovers */
+        --shadow-lg:
+            0 8px 16px oklch(from var(--color-bg-base) l c h / 0.15),
+            0 4px 8px oklch(from var(--color-bg-base) l c h / 0.1);
+        --shadow-xl:
+            0 12px 24px oklch(from var(--color-bg-base) l c h / 0.2),
+            0 6px 12px oklch(from var(--color-bg-base) l c h / 0.15);
+        /* Inner shadow for specific states */
+        --shadow-inner: inset 0 2px 4px 0 oklch(from var(--color-bg-base) l c h / 0.05);
+
+        /* UI Sizing & Motion */
+        --theme-radius-sm: 0.25rem; /* 4px */
+        --theme-radius-md: 0.375rem; /* 6px */
+        --theme-radius-lg: 0.5rem; /* 8px */
+
+        --transition-short: 150ms;
+        --transition-medium: 250ms;
+        --transition-long: 400ms;
+        --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+        --navbar-height: 4rem; /* 64px */
+    }
+
+    body {
+        background-color: var(--color-bg-base);
+        color: var(--color-text-primary);
+        font-family: var(--theme-font-sans);
+        @apply antialiased min-h-screen;
+        padding-top: var(--navbar-height);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--theme-font-sans); /* Changed from mono */
+        color: var(--color-text-primary);
+        font-weight: 600; /* Bolder for headings */
+        letter-spacing: -0.01em;
+    }
+    h1 {
+        @apply text-3xl font-bold;
+    } /* Example, can be fine-tuned */
+    h2 {
+        @apply text-2xl font-semibold;
+    }
+    h3 {
+        @apply text-xl font-semibold;
+    }
+
+    p {
+        color: var(--color-text-secondary);
+        line-height: 1.65;
+    }
+
+    a {
+        color: var(--color-accent-primary);
+        text-decoration: none;
+        transition: color var(--transition-short) var(--transition-easing);
+    }
+    a:hover {
+        color: var(--color-accent-primary-hover);
+        text-decoration: underline;
+        text-decoration-thickness: 1.5px;
+        text-underline-offset: 2px;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: var(--color-bg-base);
+    }
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--color-bg-layer-2);
+        border-radius: var(--theme-radius-md);
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: oklch(30% 0.006 240);
+    }
+
+    ::selection {
+        background-color: var(--color-accent-primary);
+        color: var(--color-text-on-accent);
+    }
+
+    /* Focus Visible Base (can be overridden by components) */
+    *:focus-visible {
+        outline: 2px solid var(--color-border-focus);
+        outline-offset: 2px;
+        border-radius: var(--theme-radius-sm); /* Consistent focus ring rounding */
+    }
+    /* Remove default outline when focus-visible is supported and active */
+    *:focus:not(:focus-visible) {
+        outline: none;
+    }
+}
+
+@layer utilities {
+    .text-balance {
+        text-wrap: balance;
+    }
+    .acrylic-bg {
+        background-color: var(--color-bg-acrylic-base);
+        @apply backdrop-blur-md; /* Or -lg for more blur */
+    }
+    .acrylic-navbar-bg {
+        background-color: var(--color-bg-acrylic-navbar);
+        @apply backdrop-blur-lg;
+    }
+
+    /* Reveal highlight effect (simplified) */
+    .reveal-hover {
+        position: relative;
+        overflow: hidden;
+    }
+    .reveal-hover::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+            oklch(from white l c h / 0.07) 0%,
+            oklch(from white l c h / 0) 40%
+        );
+        opacity: 0;
+        transition: opacity var(--transition-short) ease-out;
+        pointer-events: none; /* Important */
+    }
+    .reveal-hover:hover::before {
+        opacity: 1;
+    }
+}

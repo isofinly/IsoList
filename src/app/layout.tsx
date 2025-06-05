@@ -5,6 +5,7 @@ import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fira_Code } from "next/font/google";
 import "./globals.css";
+import { ConflictProvider } from "@/components/ConflictProvider";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -24,7 +25,15 @@ export const metadata: Metadata = {
   title: "IsoList - Your Personal Media Tracker",
   description:
     "Track movies, series, and anime you've watched or want to watch with beautiful Fluent Design and cloud sync.",
-  keywords: ["media tracker", "movies", "tv series", "anime", "ratings", "watchlist", "cloud sync"],
+  keywords: [
+    "media tracker",
+    "movies",
+    "tv series",
+    "anime",
+    "ratings",
+    "watchlist",
+    "cloud sync",
+  ],
   authors: [{ name: "IsoList Team" }],
   creator: "IsoList",
   publisher: "IsoList",
@@ -68,14 +77,20 @@ export default function RootLayout({
 
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
 
         {/* Preconnect to Google APIs */}
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://www.googleapis.com" />
       </head>
 
-      <body className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}>
+      <body
+        className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}
+      >
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
@@ -87,52 +102,54 @@ export default function RootLayout({
         {/* Wrap everything in providers */}
         <AuthProvider>
           <StoreInitializer>
-            {/* Navigation */}
-            <Navbar />
+            <ConflictProvider>
+              {/* Navigation */}
+              <Navbar />
 
-            {/* Main content area */}
-            <main
-              id="main-content"
-              className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
-            >
-              {/* Content wrapper with Fluent Design animations */}
-              <div className="flex-grow">{children}</div>
+              {/* Main content area */}
+              <main
+                id="main-content"
+                className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
+              >
+                {/* Content wrapper with Fluent Design animations */}
+                <div className="flex-grow">{children}</div>
 
-              {/* Footer */}
-              <footer className="mt-16 pt-8 border-t border-border-divider/30">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
-                  <div className="flex items-center gap-2">
-                    <span>© {new Date().getFullYear()} IsoList</span>
-                    <span>•</span>
-                    <span>Built with Fluent Design</span>
+                {/* Footer */}
+                <footer className="mt-16 pt-8 border-t border-border-divider/30">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
+                    <div className="flex items-center gap-2">
+                      <span>© {new Date().getFullYear()} IsoList</span>
+                      <span>•</span>
+                      <span>Built with Fluent Design</span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <a
+                        href="/privacy"
+                        className="hover:text-text-primary transition-colors duration-short"
+                      >
+                        Privacy
+                      </a>
+                      <a
+                        href="/terms"
+                        className="hover:text-text-primary transition-colors duration-short"
+                      >
+                        Terms
+                      </a>
+                      <a
+                        href="/about"
+                        className="hover:text-text-primary transition-colors duration-short"
+                      >
+                        About
+                      </a>
+                    </div>
                   </div>
+                </footer>
+              </main>
 
-                  <div className="flex items-center gap-4">
-                    <a
-                      href="/privacy"
-                      className="hover:text-text-primary transition-colors duration-short"
-                    >
-                      Privacy
-                    </a>
-                    <a
-                      href="/terms"
-                      className="hover:text-text-primary transition-colors duration-short"
-                    >
-                      Terms
-                    </a>
-                    <a
-                      href="/about"
-                      className="hover:text-text-primary transition-colors duration-short"
-                    >
-                      About
-                    </a>
-                  </div>
-                </div>
-              </footer>
-            </main>
-
-            {/* Sync status indicator */}
-            <SyncStatusIndicator />
+              {/* Sync status indicator */}
+              <SyncStatusIndicator />
+            </ConflictProvider>
           </StoreInitializer>
         </AuthProvider>
 
@@ -141,13 +158,15 @@ export default function RootLayout({
           <div
             className="absolute -top-[40vh] -right-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.02] rounded-full blur-3xl"
             style={{
-              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
             }}
           />
           <div
             className="absolute -bottom-[40vh] -left-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.01] rounded-full blur-3xl"
             style={{
-              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
             }}
           />
         </div>

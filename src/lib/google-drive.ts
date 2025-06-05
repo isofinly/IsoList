@@ -8,37 +8,59 @@ export class GoogleDriveService {
     this.accessToken = accessToken;
   }
 
-  async saveData(data: any): Promise<boolean> {
-    if (!this.accessToken) throw new Error('Drive service not initialized');
+  async saveData(data: any, fileName: string = 'isolist-data.json'): Promise<boolean> {
+    console.log('☁️ GoogleDrive: Starting save operation...');
+
+    if (!this.accessToken) {
+      console.error('❌ GoogleDrive: No access token available');
+      throw new Error('Drive service not initialized');
+    }
 
     try {
       // Check if file exists
-      const existingFile = await this.findDataFile();
+      console.log('🔍 Checking for existing file...');
+      const existingFile = await this.findDataFile(fileName);
 
       const jsonData = JSON.stringify(data, null, 2);
-      const blob = new Blob([jsonData], { type: 'application/json' });
+      console.log('📦 Data to save:', {
+        size: jsonData.length,
+        itemCount: data.mediaItems?.length || 0,
+        hasExistingFile: !!existingFile
+      });
 
       if (existingFile) {
-        // Update existing file
+        console.log('📝 Updating existing file:', existingFile.id);
+
+        // Update existing file using simple upload
         const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=media`, {
           method: 'PATCH',
           headers: {
             'Authorization': `Bearer ${this.accessToken}`,
             'Content-Type': 'application/json',
           },
-          body: blob,
+          body: jsonData,
         });
 
-        if (!response.ok) throw new Error('Failed to update file');
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Failed to update file:', response.status, errorText);
+          throw new Error(`Failed to update file: ${response.status} ${errorText}`);
+        }
+
+        console.log('✅ File updated successfully');
       } else {
-        // Create new file
+        console.log('📁 Creating new file...');
+
+        // Create new file WITHOUT specifying parents (no appDataFolder)
         const metadata = {
-          name: FILE_NAME,
+          name: fileName,
+          description: 'IsoList media tracking data',
+          // Remove parents array completely to store in root Drive folder
         };
 
         const form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', blob);
+        form.append('file', new Blob([jsonData], { type: 'application/json' }));
 
         const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
           method: 'POST',
@@ -48,22 +70,59 @@ export class GoogleDriveService {
           body: form,
         });
 
-        if (!response.ok) throw new Error('Failed to create file');
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ Failed to create file:', response.status, errorText);
+          throw new Error(`Failed to create file: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('✅ File created successfully:', result.id);
       }
 
-      console.log('✅ Data synced to Google Drive');
+      console.log('🎉 Data saved to Google Drive successfully');
       return true;
     } catch (error) {
-      console.error('❌ Failed to save to Google Drive:', error);
-      return false;
+      console.error('💥 GoogleDrive save failed:', error);
+      throw error;
     }
   }
 
-  async loadData(): Promise<any | null> {
+  // Update the search query to look in root folder instead of appDataFolder
+  private async findDataFile(fileName: string): Promise<{ id: string; name: string; modifiedTime: string } | null> {
+    if (!this.accessToken) return null;
+
+    try {
+      // Search for files created by this app (no parent folder restriction)
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=name='${fileName}' and trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ Search failed:', response.status, errorText);
+        throw new Error('Failed to search files');
+      }
+
+      const data = await response.json();
+      console.log('🔍 Search results:', data.files?.length || 0, 'files found');
+      return data.files?.[0] || null;
+    } catch (error) {
+      console.error('Failed to find data file:', error);
+      return null;
+    }
+  }
+
+  async loadData(fileName?: string): Promise<any | null> {
     if (!this.accessToken) throw new Error('Drive service not initialized');
 
     try {
-      const file = await this.findDataFile();
+      const file = await this.findDataFile(fileName || FILE_NAME);
       if (!file) {
         console.log('📂 No data file found in Google Drive');
         return null;
@@ -97,11 +156,11 @@ export class GoogleDriveService {
     }
   }
 
-  async getFileInfo(): Promise<{ lastModified: Date; size: number } | null> {
+  async getFileInfo(fileName?: string): Promise<{ lastModified: Date; size: number } | null> {
     if (!this.accessToken) return null;
 
     try {
-      const file = await this.findDataFile();
+      const file = await this.findDataFile(fileName || FILE_NAME);
       if (!file) return null;
 
       const response = await fetch(
@@ -126,32 +185,9 @@ export class GoogleDriveService {
     }
   }
 
-  private async findDataFile(): Promise<{ id: string; name: string; modifiedTime: string } | null> {
-    if (!this.accessToken) return null;
-
+  async getLastModified(fileName?: string): Promise<Date | null> {
     try {
-      const response = await fetch(
-        `https://www.googleapis.com/drive/v3/files?q=name='${FILE_NAME}' and trashed=false&fields=files(id,name,modifiedTime)&orderBy=modifiedTime desc`,
-        {
-          headers: {
-            'Authorization': `Bearer ${this.accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) throw new Error('Failed to search files');
-
-      const data = await response.json();
-      return data.files?.[0] || null;
-    } catch (error) {
-      console.error('Failed to find data file:', error);
-      return null;
-    }
-  }
-
-  async getLastModified(): Promise<Date | null> {
-    try {
-      const file = await this.findDataFile();
+      const file = await this.findDataFile(fileName || FILE_NAME);
       if (!file?.modifiedTime) return null;
 
       return new Date(file.modifiedTime);
@@ -161,9 +197,9 @@ export class GoogleDriveService {
     }
   }
 
-  async isCloudDataNewer(localTimestamp: string): Promise<boolean> {
+  async isCloudDataNewer(localTimestamp: string, fileName?: string): Promise<boolean> {
     try {
-      const fileInfo = await this.getFileInfo();
+      const fileInfo = await this.getFileInfo(fileName);
       if (!fileInfo) return false;
 
       const cloudTime = fileInfo.lastModified.getTime();

@@ -3,7 +3,15 @@
 import * as React from "react";
 import { type DialogProps } from "@radix-ui/react-dialog";
 import { Command as CommandPrimitive } from "cmdk";
-import { Search, ArrowRight, Hash, User, Calendar, Film, Star } from "lucide-react";
+import {
+  Search,
+  ArrowRight,
+  Hash,
+  User,
+  Calendar,
+  Film,
+  Star,
+} from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -18,7 +26,7 @@ const Command = React.forwardRef<
     className={cn(
       "flex h-full w-full flex-col overflow-hidden rounded-lg",
       "bg-bg-layer-1 text-text-primary",
-      className,
+      className
     )}
     {...props}
   />
@@ -34,7 +42,7 @@ const CommandDialog = ({ children, ...props }: CommandDialogProps) => {
         className={cn(
           "overflow-hidden p-0 shadow-fluent-dialog",
           "fluent-glass border border-border-subtle",
-          "max-w-[640px] w-full",
+          "max-w-[640px] w-full"
         )}
       >
         <VisuallyHidden>
@@ -52,7 +60,10 @@ const CommandInput = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Input>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>
 >(({ className, ...props }, ref) => (
-  <div className="flex items-center border-b border-border-subtle px-4 py-3" cmdk-input-wrapper="">
+  <div
+    className="flex items-center border-b border-border-subtle px-4 py-3"
+    cmdk-input-wrapper=""
+  >
     <Search className="mr-3 h-5 w-5 shrink-0 text-text-muted" />
     <CommandPrimitive.Input
       ref={ref}
@@ -61,7 +72,7 @@ const CommandInput = React.forwardRef<
         "placeholder:text-text-muted",
         "outline-none disabled:cursor-not-allowed disabled:opacity-50",
         "transition-all duration-short ease-fluent-standard",
-        className,
+        className
       )}
       {...props}
     />
@@ -76,7 +87,11 @@ const CommandList = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn("max-h-[300px] overflow-y-auto overflow-x-hidden p-2", "fluent-scroll", className)}
+    className={cn(
+      "max-h-[300px] overflow-y-auto overflow-x-hidden p-2",
+      "fluent-scroll",
+      className
+    )}
     {...props}
   />
 ));
@@ -105,7 +120,7 @@ const CommandGroup = React.forwardRef<
     className={cn(
       "overflow-hidden p-1 text-text-primary",
       "[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-xs [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-text-muted [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wide",
-      className,
+      className
     )}
     {...props}
   />
@@ -127,15 +142,20 @@ CommandSeparator.displayName = CommandPrimitive.Separator.displayName;
 
 const CommandItem = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Item>,
-  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item> & {
+  Omit<
+    React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item>,
+    "onSelect" | "value"
+  > & {
     icon?: React.ReactNode;
     shortcut?: string;
+    value: string;
+    onSelect: (value: string) => void;
   }
->(({ className, icon, shortcut, children, ...props }, ref) => (
+>(({ className, icon, shortcut, children, value, onSelect, ...props }, ref) => (
   <CommandPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex cursor-default select-none items-center rounded-md px-3 py-2.5 text-sm outline-none",
+      "relative flex cursor-default items-center rounded-md px-3 py-2.5 text-sm outline-none",
       "text-text-primary",
       "aria-selected:bg-accent-primary-soft aria-selected:text-accent-primary",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
@@ -143,11 +163,17 @@ const CommandItem = React.forwardRef<
       "reveal-hover",
       "hover:bg-accent-primary-soft hover:text-accent-primary",
       "gap-3",
-      className,
+      className
     )}
+    value={value}
+    onSelect={onSelect}
     {...props}
   >
-    {icon && <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">{icon}</div>}
+    {icon && (
+      <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center">
+        {icon}
+      </div>
+    )}
 
     <div className="flex-grow min-w-0">{children}</div>
 
@@ -155,9 +181,9 @@ const CommandItem = React.forwardRef<
       <div className="flex-shrink-0 ml-auto">
         <kbd
           className={cn(
-            "pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border px-1.5 text-[10px] font-medium",
+            "pointer-events-none inline-flex h-5 items-center gap-1 rounded border px-1.5 text-[10px] font-medium",
             "bg-bg-layer-2 text-text-muted border-border-subtle",
-            "opacity-70",
+            "opacity-70"
           )}
         >
           {shortcut.split("+").map((key, index) => (
@@ -174,9 +200,18 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
-const CommandShortcut = ({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) => {
+const CommandShortcut = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLSpanElement>) => {
   return (
-    <span className={cn("ml-auto text-xs tracking-widest text-text-muted", className)} {...props} />
+    <span
+      className={cn(
+        "ml-auto text-xs tracking-widest text-text-muted",
+        className
+      )}
+      {...props}
+    />
   );
 };
 CommandShortcut.displayName = "CommandShortcut";
@@ -200,6 +235,47 @@ const CommandMenu = ({
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         onOpenChange?.(!open);
+        return;
+      }
+
+      // Handle individual shortcuts when menu is open
+      if (open && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        switch (e.key.toLowerCase()) {
+          case "m":
+            e.preventDefault();
+            window.location.href = "/movies";
+            onOpenChange?.(false);
+            break;
+          case "r":
+            e.preventDefault();
+            window.location.href = "/ratings";
+            onOpenChange?.(false);
+            break;
+          case "c":
+            e.preventDefault();
+            window.location.href = "/calendar";
+            onOpenChange?.(false);
+            break;
+          case "p":
+            e.preventDefault();
+            window.location.href = "/profile";
+            onOpenChange?.(false);
+            break;
+        }
+      }
+
+      // Handle action shortcuts
+      if (open) {
+        if (e.key === "n" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          console.log("Action: Add New Item");
+          onOpenChange?.(false);
+        }
+        if (e.key === "/" && (e.metaKey || e.ctrlKey)) {
+          e.preventDefault();
+          console.log("Action: Search Media");
+          onOpenChange?.(false);
+        }
       }
     };
 
@@ -208,26 +284,60 @@ const CommandMenu = ({
   }, [open, onOpenChange]);
 
   const navigationItems = [
-    { icon: <Film className="w-4 h-4" />, label: "Movies", shortcut: "M", href: "/movies" },
-    { icon: <Star className="w-4 h-4" />, label: "Ratings", shortcut: "R", href: "/ratings" },
-    { icon: <Calendar className="w-4 h-4" />, label: "Calendar", shortcut: "C", href: "/calendar" },
-    { icon: <User className="w-4 h-4" />, label: "Profile", shortcut: "P", href: "/profile" },
+    {
+      icon: <Film className="w-4 h-4" />,
+      label: "Movies",
+      shortcut: "M",
+      href: "/movies",
+    },
+    {
+      icon: <Star className="w-4 h-4" />,
+      label: "Ratings",
+      shortcut: "R",
+      href: "/ratings",
+    },
+    {
+      icon: <Calendar className="w-4 h-4" />,
+      label: "Calendar",
+      shortcut: "C",
+      href: "/calendar",
+    },
+    {
+      icon: <User className="w-4 h-4" />,
+      label: "Profile",
+      shortcut: "P",
+      href: "/profile",
+    },
   ];
 
   const actions = [
-    { icon: <Hash className="w-4 h-4" />, label: "Add New Item", shortcut: "⌘+N" },
-    { icon: <Search className="w-4 h-4" />, label: "Search Media", shortcut: "⌘+/" },
+    {
+      icon: <Hash className="w-4 h-4" />,
+      label: "Add New Item",
+      shortcut: "⌘+N",
+    },
+    {
+      icon: <Search className="w-4 h-4" />,
+      label: "Search Media",
+      shortcut: "⌘+",
+    },
   ];
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder={placeholder} value={searchQuery} onValueChange={setSearchQuery} />
+      <CommandInput
+        placeholder={placeholder}
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
 
       <CommandList>
         <CommandEmpty>
           <div className="flex flex-col items-center gap-2 py-4">
             <Search className="w-8 h-8 text-text-muted opacity-50" />
-            <p className="text-sm text-text-muted">No results found for "{searchQuery}"</p>
+            <p className="text-sm text-text-muted">
+              No results found for "{searchQuery}"
+            </p>
           </div>
         </CommandEmpty>
 
@@ -235,9 +345,13 @@ const CommandMenu = ({
           {navigationItems.map((item) => (
             <CommandItem
               key={item.href}
+              value={item.label}
               icon={item.icon}
               shortcut={item.shortcut}
-              onSelect={() => {
+              onSelect={(selectedValue) => {
+                console.log(
+                  `Selected: ${selectedValue}, Navigating to: ${item.href}`
+                );
                 window.location.href = item.href;
                 onOpenChange?.(false);
               }}
@@ -253,10 +367,11 @@ const CommandMenu = ({
           {actions.map((action) => (
             <CommandItem
               key={action.label}
+              value={action.label}
               icon={action.icon}
               shortcut={action.shortcut}
-              onSelect={() => {
-                console.log(`Action: ${action.label}`);
+              onSelect={(selectedValue) => {
+                console.log(`Action: ${selectedValue}`);
                 onOpenChange?.(false);
               }}
             >
@@ -268,22 +383,49 @@ const CommandMenu = ({
         <CommandSeparator />
 
         <CommandGroup heading="Recent">
-          <CommandItem icon={<Film className="w-4 h-4" />}>The Matrix (1999)</CommandItem>
-          <CommandItem icon={<Film className="w-4 h-4" />}>Inception (2010)</CommandItem>
-          <CommandItem icon={<Film className="w-4 h-4" />}>Interstellar (2014)</CommandItem>
+          <CommandItem
+            value="The Matrix (1999)"
+            icon={<Film className="w-4 h-4" />}
+            onSelect={(selectedValue) => {
+              console.log(`Selected: ${selectedValue}`);
+              onOpenChange?.(false);
+            }}
+          >
+            The Matrix (1999)
+          </CommandItem>
+          <CommandItem
+            value="Inception (2010)"
+            icon={<Film className="w-4 h-4" />}
+            onSelect={(selectedValue) => {
+              console.log(`Selected: ${selectedValue}`);
+              onOpenChange?.(false);
+            }}
+          >
+            Inception (2010)
+          </CommandItem>
+          <CommandItem
+            value="Interstellar (2014)"
+            icon={<Film className="w-4 h-4" />}
+            onSelect={(selectedValue) => {
+              console.log(`Selected: ${selectedValue}`);
+              onOpenChange?.(false);
+            }}
+          >
+            Interstellar (2014)
+          </CommandItem>
         </CommandGroup>
       </CommandList>
 
       <div className="border-t border-border-subtle p-3">
         <div className="flex items-center justify-between text-xs text-text-muted">
           <div className="flex items-center gap-2">
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-bg-layer-2 px-1.5 font-mono text-[10px] font-medium text-text-muted border-border-subtle">
-              <Command className="h-3 w-3" />K
+            <kbd className="pointer-events-none inline-flex h-5 items-center gap-1 rounded border bg-bg-layer-2 px-1.5 font-mono text-[10px] font-medium text-text-muted border-border-subtle">
+              <span>⌘</span>K
             </kbd>
             <span>to open</span>
           </div>
           <div className="flex items-center gap-2">
-            <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-bg-layer-2 px-1.5 font-mono text-[10px] font-medium text-text-muted border-border-subtle">
+            <kbd className="pointer-events-none inline-flex h-5 items-center gap-1 rounded border bg-bg-layer-2 px-1.5 font-mono text-[10px] font-medium text-text-muted border-border-subtle">
               ↵
             </kbd>
             <span>to select</span>

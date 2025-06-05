@@ -1,4 +1,7 @@
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/components/AuthProvider";
+import { StoreInitializer } from "@/components/StoreInitializer";
+import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fira_Code } from "next/font/google";
 import "./globals.css";
@@ -20,8 +23,8 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   title: "IsoList - Your Personal Media Tracker",
   description:
-    "Track movies, series, and anime you've watched or want to watch with beautiful Fluent Design.",
-  keywords: ["media tracker", "movies", "tv series", "anime", "ratings", "watchlist"],
+    "Track movies, series, and anime you've watched or want to watch with beautiful Fluent Design and cloud sync.",
+  keywords: ["media tracker", "movies", "tv series", "anime", "ratings", "watchlist", "cloud sync"],
   authors: [{ name: "IsoList Team" }],
   creator: "IsoList",
   publisher: "IsoList",
@@ -66,6 +69,10 @@ export default function RootLayout({
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Preconnect to Google APIs */}
+        <link rel="preconnect" href="https://accounts.google.com" />
+        <link rel="preconnect" href="https://www.googleapis.com" />
       </head>
 
       <body className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}>
@@ -77,40 +84,57 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        {/* Navigation */}
-        <Navbar />
+        {/* Wrap everything in providers */}
+        <AuthProvider>
+          <StoreInitializer>
+            {/* Navigation */}
+            <Navbar />
 
-        {/* Main content area */}
-        <main
-          id="main-content"
-          className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
-        >
-          {/* Content wrapper with Fluent Design animations */}
-          <div className="flex-grow">{children}</div>
+            {/* Main content area */}
+            <main
+              id="main-content"
+              className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
+            >
+              {/* Content wrapper with Fluent Design animations */}
+              <div className="flex-grow">{children}</div>
 
-          {/* Footer */}
-          <footer className="mt-16 pt-8 border-t border-border-divider/30">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
-              <div className="flex items-center gap-2">
-                <span>© {new Date().getFullYear()} IsoList</span>
-                <span>•</span>
-                <span>Built with Fluent Design</span>
-              </div>
+              {/* Footer */}
+              <footer className="mt-16 pt-8 border-t border-border-divider/30">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
+                  <div className="flex items-center gap-2">
+                    <span>© {new Date().getFullYear()} IsoList</span>
+                    <span>•</span>
+                    <span>Built with Fluent Design</span>
+                  </div>
 
-              <div className="flex items-center gap-4">
-                <a href="/privacy" className="hover:text-text-primary transition-colors duration-short">
-                  Privacy
-                </a>
-                <a href="/terms" className="hover:text-text-primary transition-colors duration-short">
-                  Terms
-                </a>
-                <a href="/about" className="hover:text-text-primary transition-colors duration-short">
-                  About
-                </a>
-              </div>
-            </div>
-          </footer>
-        </main>
+                  <div className="flex items-center gap-4">
+                    <a
+                      href="/privacy"
+                      className="hover:text-text-primary transition-colors duration-short"
+                    >
+                      Privacy
+                    </a>
+                    <a
+                      href="/terms"
+                      className="hover:text-text-primary transition-colors duration-short"
+                    >
+                      Terms
+                    </a>
+                    <a
+                      href="/about"
+                      className="hover:text-text-primary transition-colors duration-short"
+                    >
+                      About
+                    </a>
+                  </div>
+                </div>
+              </footer>
+            </main>
+
+            {/* Sync status indicator */}
+            <SyncStatusIndicator />
+          </StoreInitializer>
+        </AuthProvider>
 
         {/* Background decorative elements */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
@@ -126,14 +150,6 @@ export default function RootLayout({
               background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
             }}
           />
-        </div>
-
-        {/* Global loading indicator */}
-        <div id="global-loading" className="hidden fixed top-2 right-4 z-[9999]">
-          <div className="fluent-glass px-3 py-2 rounded-lg shadow-fluent-popup flex items-center gap-2 text-sm text-text-primary">
-            <div className="w-4 h-4 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />
-            <span>Loading...</span>
-          </div>
         </div>
 
         {/* Toast notifications container */}

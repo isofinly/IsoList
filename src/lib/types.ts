@@ -19,3 +19,19 @@ export interface MediaItem {
   director?: string; // Optional
   platform?: string; // Optional: e.g., "Netflix", "Cinema"
 }
+
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: any) => void;
+          prompt: () => void;
+          renderButton: (element: HTMLElement, config: any) => void;
+        };
+      };
+    };
+  }
+}
+
+export { };

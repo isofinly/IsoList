@@ -1,14 +1,27 @@
 import { create } from "zustand";
 import type { MediaItem } from "./types";
+import { PersistenceService } from "./persistence";
+import { AuthService } from "./auth";
 
 interface MediaState {
   mediaItems: MediaItem[];
+  isLoading: boolean;
+  syncStatus: { isSync: boolean; lastSync: Date | null; hasLocalChanges: boolean };
+
+  // Actions
   addMediaItem: (item: Omit<MediaItem, "id">) => void;
   updateMediaItem: (item: MediaItem) => void;
   deleteMediaItem: (id: string) => void;
-  // For controlling modal and expanded card globally if needed, or manage locally.
-  // For simplicity, modal control will be local to pages.
+
+  // Sync actions
+  initializeStore: () => Promise<void>;
+  manualSync: () => Promise<void>;
+  updateSyncStatus: () => void;
+  forceRefresh: () => Promise<void>;
 }
+
+const persistenceService = PersistenceService.getInstance();
+const authService = AuthService.getInstance();
 
 const initialMediaItems: MediaItem[] = [
   {
@@ -88,18 +101,131 @@ const initialMediaItems: MediaItem[] = [
   },
 ];
 
-export const useMediaStore = create<MediaState>((set) => ({
-  mediaItems: initialMediaItems,
-  addMediaItem: (item) =>
-    set((state) => ({
-      mediaItems: [...state.mediaItems, { ...item, id: crypto.randomUUID() }],
-    })),
-  updateMediaItem: (updatedItem) =>
-    set((state) => ({
-      mediaItems: state.mediaItems.map((item) => (item.id === updatedItem.id ? updatedItem : item)),
-    })),
-  deleteMediaItem: (id) =>
-    set((state) => ({
-      mediaItems: state.mediaItems.filter((item) => item.id !== id),
-    })),
+export const useMediaStore = create<MediaState>((set, get) => ({
+  mediaItems: [],
+  isLoading: false,
+  syncStatus: { isSync: false, lastSync: null, hasLocalChanges: false },
+
+  initializeStore: async () => {
+    set({ isLoading: true });
+
+    try {
+      // Load from localStorage first
+      const localData = persistenceService.loadFromLocal();
+      let items = localData.items;
+
+      // If no local data, use initial items
+      if (items.length === 0) {
+        items = initialMediaItems;
+        persistenceService.saveToLocal({ items, timestamp: new Date().toISOString() });
+      }
+
+      set({ mediaItems: items });
+
+      // If authenticated, perform smart sync
+      if (authService.isAuthenticated()) {
+        const user = authService.getUser();
+        if (user?.accessToken) {
+          await authService.getDriveService().initialize(user.accessToken);
+
+          // Smart sync determines what to do
+          const syncResult = await persistenceService.smartSync(items);
+
+          if (syncResult.success && syncResult.action === 'downloaded') {
+            // Update with downloaded data
+            const newLocalData = persistenceService.loadFromLocal();
+            set({ mediaItems: newLocalData.items });
+          } else if (syncResult.success && syncResult.action === 'merged') {
+            // Update with merged data
+            const newLocalData = persistenceService.loadFromLocal();
+            set({ mediaItems: newLocalData.items });
+          }
+
+          console.log('🔄 Smart sync result:', syncResult);
+
+          // Start auto-sync
+          persistenceService.startAutoSync(() => get().mediaItems);
+        }
+      }
+
+      get().updateSyncStatus();
+    } catch (error) {
+      console.error('Failed to initialize store:', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  addMediaItem: (item) => {
+    const newItem = { ...item, id: crypto.randomUUID() };
+    const updatedItems = [...get().mediaItems, newItem];
+
+    set({ mediaItems: updatedItems });
+    persistenceService.saveToLocal({ items: updatedItems, timestamp: new Date().toISOString() });
+    get().updateSyncStatus();
+  },
+
+  updateMediaItem: (updatedItem) => {
+    const updatedItems = get().mediaItems.map((item) =>
+      item.id === updatedItem.id ? updatedItem : item,
+    );
+
+    set({ mediaItems: updatedItems });
+    persistenceService.saveToLocal({ items: updatedItems, timestamp: new Date().toISOString() });
+    get().updateSyncStatus();
+  },
+
+  deleteMediaItem: (id) => {
+    const updatedItems = get().mediaItems.filter((item) => item.id !== id);
+
+    set({ mediaItems: updatedItems });
+    persistenceService.saveToLocal({ items: updatedItems, timestamp: new Date().toISOString() });
+    get().updateSyncStatus();
+  },
+
+  manualSync: async () => {
+    if (!authService.isAuthenticated()) return;
+
+    set({ isLoading: true });
+    try {
+      const currentItems = get().mediaItems;
+      const syncResult = await persistenceService.smartSync(currentItems);
+
+      if (syncResult.success && (syncResult.action === 'downloaded' || syncResult.action === 'merged')) {
+        const newLocalData = persistenceService.loadFromLocal();
+        set({ mediaItems: newLocalData.items });
+      }
+
+      get().updateSyncStatus();
+      console.log('📱 Manual sync result:', syncResult);
+    } catch (error) {
+      console.error('Manual sync failed:', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  // Force refresh from cloud
+  forceRefresh: async () => {
+    if (!authService.isAuthenticated()) return;
+
+    set({ isLoading: true });
+    try {
+      const cloudItems = await persistenceService.forceDownload();
+      if (cloudItems) {
+        set({ mediaItems: cloudItems });
+        get().updateSyncStatus();
+        console.log('🔄 Force refreshed from cloud');
+      }
+    } catch (error) {
+      console.error('Force refresh failed:', error);
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  updateSyncStatus: () => {
+    const status = persistenceService.getSyncStatus();
+    set({ syncStatus: status });
+  },
 }));

@@ -2,7 +2,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Film, ListChecks, CalendarDays, PlusSquare, Tv, Menu, Search, Command } from "lucide-react";
+import {
+  Film,
+  ListChecks,
+  CalendarDays,
+  PlusSquare,
+  Tv,
+  Menu,
+  Search,
+  Command,
+  LogIn,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { CommandMenu } from "@/components/ui/command";
@@ -12,6 +22,7 @@ const navLinks = [
   { href: "/watchlist", label: "Watchlist", icon: <Tv size={18} /> },
   { href: "/calendar", label: "Calendar", icon: <CalendarDays size={18} /> },
   { href: "/add", label: "Add Item", icon: <PlusSquare size={18} /> },
+  { href: "/login", label: "Login", icon: <LogIn size={18} /> },
 ];
 
 export default function Navbar() {

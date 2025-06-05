@@ -2,7 +2,14 @@ import { MediaItem } from './types';
 import { AuthService } from './auth';
 
 export interface SyncConflict {
-    type: 'local-empty' | 'cloud-empty' | 'both-have-data' | 'different-data';
+    type: 'real-conflict' | 'deletion-conflict';
+    conflictedItems: {
+        id: string;
+        title: string;
+        local: MediaItem;
+        cloud: MediaItem;
+        conflictType: 'modified' | 'deleted-locally' | 'deleted-in-cloud';
+    }[];
     local: {
         items: MediaItem[];
         count: number;
@@ -12,6 +19,10 @@ export interface SyncConflict {
         items: MediaItem[];
         count: number;
         timestamp: string;
+    };
+    additionsOnly: {
+        localOnly: MediaItem[];
+        cloudOnly: MediaItem[];
     };
 }
 
@@ -102,7 +113,7 @@ export class SyncManager {
         return backup.items;
     }
 
-    // Detect conflicts between local and cloud data
+    // Enhanced conflict detection that only flags real conflicts
     async detectConflict(localItems: MediaItem[]): Promise<SyncConflict | null> {
         if (!this.authService.isAuthenticated()) return null;
 
@@ -111,54 +122,276 @@ export class SyncManager {
             const cloudData = await driveService.loadData();
 
             const localTimestamp = localStorage.getItem('localTimestamp') || '';
-            const localCount = localItems.length;
             const cloudItems = cloudData?.mediaItems || [];
-            const cloudCount = cloudItems.length;
             const cloudTimestamp = cloudData?.lastModified || '';
 
+            // Analyze the differences
+            const analysis = this.analyzeDataDifferences(localItems, cloudItems);
+
+            console.log('🔍 Data analysis:', {
+                realConflicts: analysis.conflicts.length,
+                localOnlyItems: analysis.localOnly.length,
+                cloudOnlyItems: analysis.cloudOnly.length,
+                identical: analysis.identical.length,
+            });
+
+            // Only return conflict if there are REAL conflicts (same item modified differently)
+            if (analysis.conflicts.length === 0) {
+                console.log('✅ No real conflicts detected - just additions/differences that can be auto-merged');
+                return null;
+            }
+
+            // Real conflicts found
             const conflict: SyncConflict = {
-                type: this.determineConflictType(localCount, cloudCount, localItems, cloudItems),
+                type: analysis.conflicts.some(c => c.conflictType === 'modified') ? 'real-conflict' : 'deletion-conflict',
+                conflictedItems: analysis.conflicts,
                 local: {
                     items: localItems,
-                    count: localCount,
+                    count: localItems.length,
                     timestamp: localTimestamp,
                 },
                 cloud: {
                     items: cloudItems,
-                    count: cloudCount,
+                    count: cloudItems.length,
                     timestamp: cloudTimestamp,
+                },
+                additionsOnly: {
+                    localOnly: analysis.localOnly,
+                    cloudOnly: analysis.cloudOnly,
                 },
             };
 
-            // Only return conflict if it's significant
-            if (conflict.type === 'local-empty' && cloudCount > 0) return conflict;
-            if (conflict.type === 'cloud-empty' && localCount > 0) return conflict;
-            if (conflict.type === 'both-have-data' && this.hasSignificantDifference(localItems, cloudItems)) return conflict;
-            if (conflict.type === 'different-data') return conflict;
-
-            return null;
+            console.log('⚠️ Real conflicts detected:', analysis.conflicts.length);
+            return conflict;
         } catch (error) {
             console.error('Failed to detect conflict:', error);
             return null;
         }
     }
 
-    private determineConflictType(localCount: number, cloudCount: number, localItems: MediaItem[], cloudItems: MediaItem[]): SyncConflict['type'] {
-        if (localCount === 0 && cloudCount > 0) return 'local-empty';
-        if (cloudCount === 0 && localCount > 0) return 'cloud-empty';
-        if (localCount > 0 && cloudCount > 0) {
-            if (this.areItemsIdentical(localItems, cloudItems)) return 'both-have-data';
-            return 'different-data';
+    async safeSyncWithUserChoice(localItems: MediaItem[], userChoice: 'local' | 'cloud' | 'merge' | 'cancel'): Promise<MediaItem[]> {
+        const conflict = await this.detectConflict(localItems);
+        if (!conflict) return localItems;
+
+        // Create backup before any changes
+        await this.createBackup(conflict.cloud.items, `Before sync - user chose ${userChoice}`);
+
+        switch (userChoice) {
+            case 'local':
+                // Use local data, upload to cloud
+                await this.authService.getDriveService().saveData({
+                    mediaItems: localItems,
+                    lastModified: new Date().toISOString(),
+                    version: 1,
+                });
+                this.updateLocalTimestamp();
+                return localItems;
+
+            case 'cloud':
+                // Use cloud data, update local
+                this.saveToLocalSafely(conflict.cloud.items);
+                return conflict.cloud.items;
+
+            case 'merge':
+                // Merge both datasets
+                const merged = this.autoMergeAdditions(conflict.local.items, conflict.cloud.items);
+                await this.authService.getDriveService().saveData({
+                    mediaItems: merged,
+                    lastModified: new Date().toISOString(),
+                    version: 1,
+                });
+                this.saveToLocalSafely(merged);
+                return merged;
+
+            case 'cancel':
+                // Don't sync, keep local as-is
+                return localItems;
+
+            default:
+                throw new Error('Invalid user choice');
         }
-        return 'both-have-data';
     }
 
-    private hasSignificantDifference(localItems: MediaItem[], cloudItems: MediaItem[]): boolean {
-        const threshold = 0.3; // 30% difference is significant
-        const maxCount = Math.max(localItems.length, cloudItems.length);
-        const difference = Math.abs(localItems.length - cloudItems.length);
 
-        return difference / maxCount > threshold;
+    // Analyze what type of differences exist between local and cloud
+    private analyzeDataDifferences(localItems: MediaItem[], cloudItems: MediaItem[]) {
+        const localMap = new Map(localItems.map(item => [item.id, item]));
+        const cloudMap = new Map(cloudItems.map(item => [item.id, item]));
+
+        const conflicts: SyncConflict['conflictedItems'] = [];
+        const localOnly: MediaItem[] = [];
+        const cloudOnly: MediaItem[] = [];
+        const identical: MediaItem[] = [];
+
+        // Check local items
+        for (const localItem of localItems) {
+            const cloudItem = cloudMap.get(localItem.id);
+
+            if (!cloudItem) {
+                // Item only exists locally (new addition)
+                localOnly.push(localItem);
+            } else {
+                // Item exists in both - check if they're different
+                if (this.areItemsIdentical([localItem], [cloudItem])) {
+                    identical.push(localItem);
+                } else {
+                    // Same item, different content = real conflict
+                    conflicts.push({
+                        id: localItem.id,
+                        title: localItem.title,
+                        local: localItem,
+                        cloud: cloudItem,
+                        conflictType: 'modified',
+                    });
+                }
+            }
+        }
+
+        // Check cloud items that don't exist locally
+        for (const cloudItem of cloudItems) {
+            if (!localMap.has(cloudItem.id)) {
+                // Item only exists in cloud (new addition)
+                cloudOnly.push(cloudItem);
+            }
+        }
+
+        return {
+            conflicts,
+            localOnly,
+            cloudOnly,
+            identical,
+        };
+    }
+
+    // Smart sync that auto-merges additions and only prompts for real conflicts
+    async intelligentSync(localItems: MediaItem[]): Promise<{ success: boolean; items: MediaItem[]; action: string }> {
+        if (!this.authService.isAuthenticated()) {
+            return { success: false, items: localItems, action: 'not-authenticated' };
+        }
+
+        try {
+            const driveService = this.authService.getDriveService();
+            const conflict = await this.detectConflict(localItems);
+
+            if (!conflict) {
+                // No real conflicts - perform auto-merge
+                console.log('🔄 No conflicts detected, performing intelligent auto-merge...');
+                const cloudData = await driveService.loadData();
+                const cloudItems = cloudData?.mediaItems || [];
+
+                if (cloudItems.length === 0) {
+                    // No cloud data, upload local
+                    console.log('⬆️ No cloud data, uploading local items');
+                    await this.uploadToCloud(localItems);
+                    return { success: true, items: localItems, action: 'uploaded-to-cloud' };
+                }
+
+                if (localItems.length === 0) {
+                    // No local data, download cloud
+                    console.log('⬇️ No local data, downloading cloud items');
+                    this.saveToLocalSafely(cloudItems);
+                    return { success: true, items: cloudItems, action: 'downloaded-from-cloud' };
+                }
+
+                // Both have data, auto-merge
+                console.log('🔀 Auto-merging additions from both sources');
+                const merged = this.autoMergeAdditions(localItems, cloudItems);
+                await this.uploadToCloud(merged);
+                this.saveToLocalSafely(merged);
+
+                return { success: true, items: merged, action: 'auto-merged' };
+            } else {
+                // Real conflicts exist - return conflict for user resolution
+                console.log('⚠️ Real conflicts detected, user intervention required');
+                return { success: false, items: localItems, action: 'requires-user-resolution' };
+            }
+        } catch (error) {
+            console.error('Intelligent sync failed:', error);
+            return { success: false, items: localItems, action: 'error' };
+        }
+    }
+
+    // Auto-merge items that are just additions (no conflicts)
+    private autoMergeAdditions(localItems: MediaItem[], cloudItems: MediaItem[]): MediaItem[] {
+        const merged = new Map<string, MediaItem>();
+
+        // Add all items, preferring newer modifications
+        [...cloudItems, ...localItems].forEach(item => {
+            const existing = merged.get(item.id);
+            if (!existing) {
+                // New item
+                merged.set(item.id, item);
+            } else {
+                // Item exists, prefer the one with more recent data or more complete data
+                const existingScore = this.getItemCompleteness(existing);
+                const newScore = this.getItemCompleteness(item);
+
+                if (newScore > existingScore) {
+                    merged.set(item.id, item);
+                }
+                // If scores are equal, keep existing (first one wins)
+            }
+        });
+
+        const result = Array.from(merged.values());
+        console.log('🔀 Auto-merge result:', {
+            local: localItems.length,
+            cloud: cloudItems.length,
+            merged: result.length,
+        });
+
+        return result;
+    }
+
+    // Score item completeness to help with auto-merge decisions
+    private getItemCompleteness(item: MediaItem): number {
+        let score = 0;
+
+        if (item.rating) score += 2;
+        if (item.notes && item.notes.trim()) score += 2;
+        if (item.completionDate) score += 1;
+        if (item.startDate) score += 1;
+        if (item.genres && item.genres.length > 0) score += 1;
+        if (item.director && item.director.trim()) score += 1;
+        if (item.platform && item.platform.trim()) score += 1;
+        if (item.episodesWatched && item.totalEpisodes) score += 1;
+
+        return score;
+    }
+
+    private async uploadToCloud(items: MediaItem[]): Promise<void> {
+        const driveService = this.authService.getDriveService();
+        const success = await driveService.saveData({
+            mediaItems: items,
+            lastModified: new Date().toISOString(),
+            version: 1,
+        });
+
+        if (!success) {
+            throw new Error('Failed to upload to cloud');
+        }
+
+        console.log('☁️ Upload successful, clearing local changes flag');
+        this.updateLocalTimestamp();
+    }
+
+    private updateLocalTimestamp(): void {
+        console.log('🕒 Updating local timestamp and clearing changes flag...');
+        const timestamp = new Date().toISOString();
+        localStorage.setItem('localTimestamp', timestamp);
+        localStorage.setItem('lastSync', timestamp);
+        localStorage.removeItem('hasLocalChanges');
+        console.log('✅ Local timestamp updated, changes flag cleared');
+    }
+
+    private saveToLocalSafely(items: MediaItem[]): void {
+        console.log('💾 Saving to local storage safely...');
+        const timestamp = new Date().toISOString();
+        localStorage.setItem('mediaItems', JSON.stringify(items));
+        localStorage.setItem('localTimestamp', timestamp);
+        localStorage.setItem('lastSync', timestamp);
+        localStorage.removeItem('hasLocalChanges');
+        console.log('✅ Saved to local storage:', items.length, 'items, changes flag cleared');
     }
 
     private areItemsIdentical(items1: MediaItem[], items2: MediaItem[]): boolean {
@@ -170,133 +403,5 @@ export class SyncManager {
         return JSON.stringify(sorted1) === JSON.stringify(sorted2);
     }
 
-    // Safe sync with conflict resolution
-    async safeSyncWithUserChoice(localItems: MediaItem[], userChoice: 'local' | 'cloud' | 'merge' | 'cancel'): Promise<MediaItem[]> {
-        console.log('🔧 SyncManager: safeSyncWithUserChoice called with:', userChoice);
 
-        if (userChoice === 'cancel') {
-            console.log('❌ User cancelled sync');
-            return localItems;
-        }
-
-        const conflict = await this.detectConflict(localItems);
-        console.log('🔍 Conflict detection result:', conflict?.type);
-
-        if (!conflict) {
-            console.log('ℹ️ No conflict detected, returning local items');
-            return localItems;
-        }
-
-        // Create backup before any changes
-        try {
-            console.log('💾 Creating backup before sync...');
-            await this.createBackup(conflict.cloud.items, `Before sync - user chose ${userChoice}`);
-            console.log('✅ Backup created successfully');
-        } catch (error) {
-            console.warn('⚠️ Failed to create backup:', error);
-            // Continue anyway - backup failure shouldn't stop sync
-        }
-
-        const driveService = this.authService.getDriveService();
-        if (!driveService) {
-            throw new Error('Google Drive service not available');
-        }
-
-        switch (userChoice) {
-            case 'local':
-                console.log('⬆️ Using local data, uploading to cloud...');
-
-                try {
-                    const success = await driveService.saveData({
-                        mediaItems: localItems,
-                        lastModified: new Date().toISOString(),
-                        version: 1,
-                    });
-
-                    if (!success) {
-                        throw new Error('Failed to upload to Google Drive');
-                    }
-
-                    console.log('✅ Local data uploaded to cloud successfully');
-                    this.updateLocalTimestamp();
-                    return localItems;
-                } catch (error) {
-                    console.error('❌ Failed to upload local data:', error);
-                    throw new Error(`Failed to upload to Google Drive: ${error}`);
-                }
-
-            case 'cloud':
-                console.log('⬇️ Using cloud data, updating local...');
-
-                try {
-                    this.saveToLocalSafely(conflict.cloud.items);
-                    console.log('✅ Cloud data saved to local successfully');
-                    return conflict.cloud.items;
-                } catch (error) {
-                    console.error('❌ Failed to save cloud data locally:', error);
-                    throw new Error(`Failed to save cloud data: ${error}`);
-                }
-
-            case 'merge':
-                console.log('🔀 Merging local and cloud data...');
-
-                try {
-                    const merged = this.mergeItems(conflict.local.items, conflict.cloud.items);
-                    console.log('📊 Merged data:', {
-                        local: conflict.local.items.length,
-                        cloud: conflict.cloud.items.length,
-                        merged: merged.length
-                    });
-
-                    const success = await driveService.saveData({
-                        mediaItems: merged,
-                        lastModified: new Date().toISOString(),
-                        version: 1,
-                    });
-
-                    if (!success) {
-                        throw new Error('Failed to upload merged data to Google Drive');
-                    }
-
-                    this.saveToLocalSafely(merged);
-                    console.log('✅ Merged data saved successfully');
-                    return merged;
-                } catch (error) {
-                    console.error('❌ Failed to merge data:', error);
-                    throw new Error(`Failed to merge data: ${error}`);
-                }
-
-            default:
-                throw new Error('Invalid user choice: ' + userChoice);
-        }
-    }
-
-    private mergeItems(localItems: MediaItem[], cloudItems: MediaItem[]): MediaItem[] {
-        const merged = new Map<string, MediaItem>();
-
-        // Add all items, preferring local changes for duplicates
-        cloudItems.forEach(item => merged.set(item.id, item));
-        localItems.forEach(item => merged.set(item.id, item));
-
-        return Array.from(merged.values());
-    }
-
-    private updateLocalTimestamp(): void {
-        console.log('🕒 Updating local timestamp...');
-        const timestamp = new Date().toISOString();
-        localStorage.setItem('localTimestamp', timestamp);
-        localStorage.setItem('lastSync', timestamp);
-        localStorage.removeItem('hasLocalChanges');
-        console.log('✅ Local timestamp updated:', timestamp);
-    }
-
-    private saveToLocalSafely(items: MediaItem[]): void {
-        console.log('💾 Saving to local storage safely...');
-        const timestamp = new Date().toISOString();
-        localStorage.setItem('mediaItems', JSON.stringify(items));
-        localStorage.setItem('localTimestamp', timestamp);
-        localStorage.setItem('lastSync', timestamp);
-        localStorage.removeItem('hasLocalChanges');
-        console.log('✅ Saved to local storage:', items.length, 'items');
-    }
 }

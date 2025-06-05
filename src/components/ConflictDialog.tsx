@@ -49,6 +49,17 @@ export function ConflictDialog({
     onClose();
   };
 
+  const getConflictDescription = () => {
+    if (!conflict) return "";
+
+    if (conflict.type === "real-conflict") {
+      const conflictCount = conflict.conflictedItems.length;
+      return `Found ${conflictCount} item(s) that have been modified differently in local storage and cloud. These need manual resolution.`;
+    } else {
+      return `Some items have been deleted in one location but modified in another. Please choose how to handle these conflicts.`;
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-bg-base border border-border-interactive rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
@@ -73,10 +84,30 @@ export function ConflictDialog({
           {/* Description */}
           <div className="bg-warning-soft/20 border border-warning-soft rounded-lg p-4 mb-6">
             <p className="text-sm text-text-secondary">
-              We found different data in your local storage and Google Drive.
-              Please choose which version to keep:
+              {getConflictDescription()}
             </p>
           </div>
+
+          {conflict.conflictedItems.length > 0 && (
+            <div className="mt-4 p-4 bg-error-soft/20 border border-error-soft rounded-lg">
+              <h4 className="font-medium text-text-primary mb-2">
+                Conflicted Items ({conflict.conflictedItems.length})
+              </h4>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {conflict.conflictedItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="font-medium">{item.title}</span>
+                    <span className="text-xs px-2 py-1 bg-error-soft rounded">
+                      {item.conflictType}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Data Comparison */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">

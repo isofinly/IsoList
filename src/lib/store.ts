@@ -119,7 +119,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      // Always load from localStorage first
+      // Load from localStorage first
       const stored = localStorage.getItem('mediaItems');
       let localItems: MediaItem[] = [];
 
@@ -132,33 +132,38 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         }
       }
 
-      // If no local data, use initial items but don't save yet
+      // If no local data, use initial items
       if (localItems.length === 0) {
         localItems = initialMediaItems;
-        // Don't save to localStorage yet - wait for conflict resolution
+        // Save initial items to localStorage
+        localStorage.setItem('mediaItems', JSON.stringify(localItems));
+        localStorage.setItem('localTimestamp', new Date().toISOString());
+        // Don't set hasLocalChanges for initial data
       }
 
       set({ mediaItems: localItems });
 
-      // If authenticated, check for conflicts
+      // If authenticated, try intelligent sync
       if (authService.isAuthenticated()) {
         const user = authService.getUser();
         if (user?.accessToken) {
           await authService.getDriveService().initialize(user.accessToken);
 
-          // Detect conflicts before any sync operation
-          const conflict = await syncManager.detectConflict(localItems);
+          console.log('🧠 Starting intelligent sync...');
+          const syncResult = await syncManager.intelligentSync(localItems);
 
-          if (conflict) {
-            console.log('⚠️ Conflict detected:', conflict.type);
-            set({ conflict, showConflictDialog: true });
-            // Don't auto-sync when there's a conflict
-          } else {
-            // No conflict, safe to sync normally
-            const hasLocalChanges = localStorage.getItem('hasLocalChanges') === 'true';
-            if (hasLocalChanges) {
-              await syncManager.safeSyncWithUserChoice(localItems, 'local');
-              set({ showConflictDialog: false }); // Ensure dialog is closed if it was open from a previous state
+          if (syncResult.success) {
+            console.log('✅ Intelligent sync completed:', syncResult.action);
+            set({ mediaItems: syncResult.items });
+
+            // Ensure changes flag is cleared after successful sync
+            localStorage.removeItem('hasLocalChanges');
+            localStorage.setItem('lastSync', new Date().toISOString());
+          } else if (syncResult.action === 'requires-user-resolution') {
+            const conflict = await syncManager.detectConflict(localItems);
+            if (conflict) {
+              console.log('⚠️ Real conflicts detected, showing resolution dialog');
+              set({ conflict, showConflictDialog: true });
             }
           }
         }
@@ -204,17 +209,16 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         showConflictDialog: false,
       });
 
-      // Save resolved data to localStorage with proper timestamp
+      // Properly clear all sync-related flags
       localStorage.setItem('mediaItems', JSON.stringify(resolvedItems));
       localStorage.setItem('localTimestamp', new Date().toISOString());
       localStorage.setItem('lastSync', new Date().toISOString());
-      localStorage.removeItem('hasLocalChanges');
+      localStorage.removeItem('hasLocalChanges'); // Clear this!
 
       get().updateSyncStatus();
-      console.log('🎉 Conflict resolved successfully with choice:', choice);
+      console.log('🎉 Conflict resolved successfully, all flags cleared');
     } catch (error) {
       console.error('💥 Failed to resolve conflict:', error);
-      // Don't close dialog on error, let user try again
       alert('Failed to resolve conflict: ' + (error as Error).message);
     } finally {
       set({ isLoading: false });
@@ -227,17 +231,20 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       set({ conflict: null });
     }
   },
-
   addMediaItem: (item) => {
     const newItem = { ...item, id: crypto.randomUUID() };
     const updatedItems = [...get().mediaItems, newItem];
 
     set({ mediaItems: updatedItems });
 
-    // Save safely
+    // Only set changes flag if authenticated (no point if not syncing)
     localStorage.setItem('mediaItems', JSON.stringify(updatedItems));
-    localStorage.setItem('hasLocalChanges', 'true');
     localStorage.setItem('localTimestamp', new Date().toISOString());
+
+    if (authService.isAuthenticated()) {
+      localStorage.setItem('hasLocalChanges', 'true');
+      console.log('📝 Item added, changes flag set');
+    }
 
     get().updateSyncStatus();
   },
@@ -250,8 +257,12 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ mediaItems: updatedItems });
 
     localStorage.setItem('mediaItems', JSON.stringify(updatedItems));
-    localStorage.setItem('hasLocalChanges', 'true');
     localStorage.setItem('localTimestamp', new Date().toISOString());
+
+    if (authService.isAuthenticated()) {
+      localStorage.setItem('hasLocalChanges', 'true');
+      console.log('✏️ Item updated, changes flag set');
+    }
 
     get().updateSyncStatus();
   },
@@ -262,8 +273,12 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ mediaItems: updatedItems });
 
     localStorage.setItem('mediaItems', JSON.stringify(updatedItems));
-    localStorage.setItem('hasLocalChanges', 'true');
     localStorage.setItem('localTimestamp', new Date().toISOString());
+
+    if (authService.isAuthenticated()) {
+      localStorage.setItem('hasLocalChanges', 'true');
+      console.log('🗑️ Item deleted, changes flag set');
+    }
 
     get().updateSyncStatus();
   },
@@ -274,13 +289,24 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ isLoading: true });
     try {
       const currentItems = get().mediaItems;
-      const conflict = await syncManager.detectConflict(currentItems);
+      console.log('🔄 Starting manual intelligent sync...');
 
-      if (conflict) {
-        set({ conflict, showConflictDialog: true });
-      } else {
-        const resolvedItems = await syncManager.safeSyncWithUserChoice(currentItems, 'local');
-        set({ mediaItems: resolvedItems });
+      const syncResult = await syncManager.intelligentSync(currentItems);
+
+      if (syncResult.success) {
+        console.log('✅ Manual sync completed:', syncResult.action);
+        set({ mediaItems: syncResult.items });
+
+        // Clear the changes flag after successful manual sync
+        localStorage.removeItem('hasLocalChanges');
+        localStorage.setItem('lastSync', new Date().toISOString());
+
+        console.log('🎉 Manual sync successful, changes flag cleared');
+      } else if (syncResult.action === 'requires-user-resolution') {
+        const conflict = await syncManager.detectConflict(currentItems);
+        if (conflict) {
+          set({ conflict, showConflictDialog: true });
+        }
       }
 
       get().updateSyncStatus();

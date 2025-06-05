@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem, MediaStatus, MediaType } from "@/lib/types";
@@ -175,24 +175,34 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
         </div>
         <div>
           <Label htmlFor="type">Type</Label>
-          <Select id="type" name="type" value={formData.type} onChange={handleChange}>
-            {mediaTypes.map((t) => (
-              <option key={t} value={t}>
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </option>
-            ))}
+          <Select value={formData.type} onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as MediaType }))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {mediaTypes.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
       </div>
 
       <div>
         <Label htmlFor="status">Status</Label>
-        <Select id="status" name="status" value={formData.status} onChange={handleChange}>
-          {mediaStatuses.map((s) => (
-            <option key={s} value={s}>
-              {s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")}
-            </option>
-          ))}
+        <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as MediaStatus }))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {mediaStatuses.map((s) => (
+              <SelectItem key={s} value={s}>
+                {s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
       </div>
 

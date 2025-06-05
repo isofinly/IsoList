@@ -2,51 +2,273 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Film, ListChecks, CalendarDays, PlusSquare, Tv, Menu } from "lucide-react"; // Added Menu for consistency
+import { Film, ListChecks, CalendarDays, PlusSquare, Tv, Menu, Search, Command } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { CommandMenu } from "@/components/ui/command";
 
 const navLinks = [
-  { href: "/ratings", label: "Ratings", icon: <ListChecks size={20} /> },
-  { href: "/watchlist", label: "Watchlist", icon: <Tv size={20} /> },
-  { href: "/calendar", label: "Calendar", icon: <CalendarDays size={20} /> },
-  { href: "/add", label: "Add Item", icon: <PlusSquare size={20} /> },
+  { href: "/ratings", label: "Ratings", icon: <ListChecks size={18} /> },
+  { href: "/watchlist", label: "Watchlist", icon: <Tv size={18} /> },
+  { href: "/calendar", label: "Calendar", icon: <CalendarDays size={18} /> },
+  { href: "/add", label: "Add Item", icon: <PlusSquare size={18} /> },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-30 h-navbar border-b border-border-subtle acrylic-navbar-bg">
-      <div className="container mx-auto flex h-full items-center justify-between px-4">
-        <Link
-          href="/"
-          className="flex items-center group text-text-primary hover:text-accent-primary transition-colors duration-short"
-        >
-          <Film size={28} className="text-accent-primary group-hover:opacity-80" />
-          <span className="ml-2.5 font-sans text-xl font-semibold ">IsoView</span>
-        </Link>
-        <div className="flex items-center space-x-1 sm:space-x-2">
-          {navLinks.map((link) => {
-            const isActive =
-              pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
+    <>
+      <nav className={cn(
+        // Base positioning and layout
+        "fixed top-0 left-0 right-0 z-fixed h-navbar",
+
+        // Fluent Design acrylic background
+        "fluent-acrylic-navbar",
+
+        // Border with dynamic opacity based on scroll
+        "border-b transition-all duration-medium ease-fluent-standard",
+        isScrolled
+          ? "border-border-interactive shadow-fluent-popup"
+          : "border-border-subtle/50",
+
+        // Reveal effect for interactivity
+        "reveal-hover"
+      )}>
+        <div className="container mx-auto flex h-full items-center justify-between px-4 lg:px-6">
+          {/* Logo/Brand */}
+          <Link
+            href="/"
+            className={cn(
+              "flex items-center group transition-all duration-short ease-fluent-standard",
+              "text-text-primary hover:text-accent-primary",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary",
+              "focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base rounded-md",
+              "px-2 py-1 -ml-2" // Expand click area
+            )}
+          >
+            <div className="relative">
+              <Film
+                size={32}
                 className={cn(
-                  "flex items-center px-2.5 py-1.5 rounded-md text-sm font-medium transition-all duration-short hover:bg-accent-primary-soft-hover",
-                  isActive
-                    ? "bg-accent-primary-soft text-accent-primary"
-                    : "text-text-secondary hover:text-text-primary",
+                  "text-accent-primary transition-all duration-short ease-fluent-standard",
+                  "group-hover:scale-110 group-hover:text-accent-primary-hover",
+                  "drop-shadow-sm"
                 )}
-                title={link.label} // For accessibility on icon-only view
-              >
-                <span className="mr-0 sm:mr-1.5">{link.icon}</span>
-                <span className="hidden sm:inline">{link.label}</span>
-              </Link>
-            );
-          })}
+              />
+              {/* Subtle glow effect on hover */}
+              <div className={cn(
+                "absolute inset-0 rounded-full bg-accent-primary/20 blur-md",
+                "opacity-0 group-hover:opacity-100 transition-opacity duration-medium",
+                "scale-150"
+              )} />
+            </div>
+            <span className={cn(
+              "ml-3 font-sans text-xl font-semibold tracking-tight",
+              "bg-gradient-to-r from-text-primary to-accent-primary bg-clip-text",
+              "group-hover:from-accent-primary group-hover:to-accent-primary-hover",
+              "transition-all duration-medium ease-fluent-standard"
+            )}>
+              IsoView
+            </span>
+          </Link>
+
+          {/* Search/Command Button */}
+          <div className="hidden sm:flex items-center mr-4">
+            <Button
+              variant="ghost"
+              onClick={() => setIsCommandOpen(true)}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 text-sm text-text-secondary",
+                "hover:text-text-primary hover:bg-bg-layer-1/80",
+                "border border-border-subtle/50 rounded-lg min-w-[200px] justify-start",
+                "transition-all duration-short ease-fluent-standard"
+              )}
+            >
+              <Search size={16} className="text-text-muted" />
+              <span className="text-text-muted">Search or command...</span>
+              <div className="ml-auto flex items-center gap-1">
+                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-bg-layer-2 px-1.5 font-mono text-[10px] font-medium text-text-muted border-border-subtle">
+                  <Command size={10} />
+                  K
+                </kbd>
+              </div>
+            </Button>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-1">
+            {navLinks.map((link) => {
+              const isActive =
+                pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    // Base styles
+                    "flex items-center px-3 py-2 rounded-lg text-sm font-medium",
+                    "transition-all duration-short ease-fluent-standard",
+                    "reveal-hover relative overflow-hidden",
+
+                    // Focus styles
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary",
+                    "focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base",
+
+                    // Active state
+                    isActive ? [
+                      "bg-accent-primary-soft text-accent-primary border border-accent-primary/20",
+                      "shadow-sm backdrop-blur-sm"
+                    ] : [
+                      "text-text-secondary hover:text-text-primary border border-transparent",
+                      "hover:bg-bg-layer-1/80 hover:backdrop-blur-sm"
+                    ],
+
+                    // Hover states
+                    "hover:shadow-sm hover:scale-[1.02]",
+                    "active:scale-[0.98] active:transition-transform active:duration-75"
+                  )}
+                  title={link.label}
+                >
+                  <span className={cn(
+                    "transition-all duration-short ease-fluent-standard",
+                    isActive ? "text-accent-primary" : "text-current"
+                  )}>
+                    {link.icon}
+                  </span>
+                  <span className="ml-2 hidden lg:inline font-medium">
+                    {link.label}
+                  </span>
+
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className={cn(
+                      "absolute bottom-0 left-1/2 -translate-x-1/2",
+                      "w-1 h-1 bg-accent-primary rounded-full",
+                      "animate-scale-in"
+                    )} />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Mobile Actions */}
+          <div className="flex items-center gap-2 md:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsCommandOpen(true)}
+              className="text-text-secondary hover:text-text-primary hover:bg-bg-layer-1/80"
+              aria-label="Open command palette"
+            >
+              <Search size={18} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={cn(
+                "text-text-secondary hover:text-text-primary",
+                "hover:bg-bg-layer-1/80 hover:backdrop-blur-sm",
+                isMobileMenuOpen && "bg-accent-primary-soft text-accent-primary"
+              )}
+              aria-label="Toggle mobile menu"
+            >
+              <Menu size={20} />
+            </Button>
+          </div>
         </div>
-      </div>
-    </nav>
+
+        {/* Mobile Navigation */}
+        <div className={cn(
+          "md:hidden absolute top-full left-0 right-0 z-dropdown",
+          "fluent-acrylic border-b border-border-subtle",
+          "transition-all duration-medium ease-fluent-standard",
+          "shadow-fluent-popup",
+          isMobileMenuOpen
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-2 pointer-events-none"
+        )}>
+          <div className="container mx-auto px-4 py-4">
+            <div className="grid grid-cols-2 gap-2">
+              {navLinks.map((link) => {
+                const isActive =
+                  pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={cn(
+                      // Base styles
+                      "flex flex-col items-center px-4 py-3 rounded-lg text-sm font-medium",
+                      "transition-all duration-short ease-fluent-standard",
+                      "reveal-hover relative overflow-hidden",
+
+                      // Focus styles
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary",
+                      "focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base",
+
+                      // Active state
+                      isActive ? [
+                        "bg-accent-primary-soft text-accent-primary border border-accent-primary/20",
+                        "shadow-sm"
+                      ] : [
+                        "text-text-secondary hover:text-text-primary border border-transparent",
+                        "hover:bg-bg-layer-1/80"
+                      ],
+
+                      // Hover states
+                      "hover:shadow-sm hover:scale-[1.02]",
+                      "active:scale-[0.98] active:transition-transform active:duration-75"
+                    )}
+                  >
+                    <span className={cn(
+                      "mb-1 transition-all duration-short ease-fluent-standard",
+                      isActive ? "text-accent-primary scale-110" : "text-current"
+                    )}>
+                      {link.icon}
+                    </span>
+                    <span className="text-xs font-medium">
+                      {link.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 z-sticky bg-bg-base/20 backdrop-blur-sm md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Command Palette */}
+      <CommandMenu 
+        open={isCommandOpen} 
+        onOpenChange={setIsCommandOpen}
+        placeholder="Search media, navigate, or run commands..."
+      />
+    </>
   );
 }

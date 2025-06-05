@@ -4,7 +4,7 @@ import MediaForm from "@/components/MediaForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem } from "@/lib/types";
 import { ListFilter, SortAsc, SortDesc, Tv } from "lucide-react";
@@ -111,15 +111,18 @@ export default function WatchlistPage() {
             Filter:
           </Label>
           <Select
-            id="filterStatus"
             value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as WatchlistStatus | "all")}
-            className="w-auto bg-theme-surface-alt border-theme-border"
+            onValueChange={(value) => setFilterStatus(value as WatchlistStatus | "all")}
           >
-            <option value="all">All Watchlist</option>
-            <option value="watching">Watching</option>
-            <option value="planned">Planned</option>
-            <option value="on-hold">On Hold</option>
+            <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Watchlist</SelectItem>
+              <SelectItem value="watching">Watching</SelectItem>
+              <SelectItem value="planned">Planned</SelectItem>
+              <SelectItem value="on-hold">On Hold</SelectItem>
+            </SelectContent>
           </Select>
           <Label
             htmlFor="sortKey"
@@ -128,14 +131,17 @@ export default function WatchlistPage() {
             Sort by:
           </Label>
           <Select
-            id="sortKey"
             value={sortKey}
-            onChange={(e) => setSortKey(e.target.value as SortKey)}
-            className="w-auto bg-theme-surface-alt border-theme-border"
+            onValueChange={(value) => setSortKey(value as SortKey)}
           >
-            <option value="premiereDate">Date (Premiere/Start)</option>
-            <option value="title">Title</option>
-            <option value="status">Status</option>
+            <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="premiereDate">Date (Premiere/Start)</SelectItem>
+              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="status">Status</SelectItem>
+            </SelectContent>
           </Select>
           <Button
             variant="ghost"

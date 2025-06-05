@@ -1,8 +1,8 @@
-# IsoView - Fluent Design System Implementation
+# IsoList - Fluent Design System Implementation
 
 ## Overview
 
-IsoView has been completely redesigned using Microsoft's Fluent Design System principles, creating a modern, beautiful, and highly interactive media tracking application. This document outlines all the enhancements and design principles implemented.
+IsoList has been completely redesigned using Microsoft's Fluent Design System principles, creating a modern, beautiful, and highly interactive media tracking application. This document outlines all the enhancements and design principles implemented.
 
 ## 🎨 Design System Features
 
@@ -17,32 +17,36 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ## 🌈 Color System
 
 ### Enhanced Color Palette
+
 - **Background Layers**: Multi-layer background system with `bg-base`, `bg-layer-1`, `bg-layer-2`, `bg-layer-3`
 - **Semantic Colors**: Success, warning, info, destructive with soft variants
 - **Interactive States**: Hover, active, and focus states for all interactive elements
 - **Accent Colors**: Primary accent with hover and active variations
 
 ### CSS Variables
+
 ```css
---color-accent-primary: oklch(60% 0.22 255)
---color-accent-primary-hover: oklch(65% 0.23 255)
---color-accent-primary-active: oklch(55% 0.21 255)
---color-accent-primary-soft: oklch(from var(--color-accent-primary) l c h / 0.15)
+--color-accent-primary: oklch(60% 0.22 255) --color-accent-primary-hover: oklch(65% 0.23 255)
+  --color-accent-primary-active: oklch(55% 0.21 255)
+  --color-accent-primary-soft: oklch(from var(--color-accent-primary) l c h / 0.15);
 ```
 
 ## 🎭 Visual Effects
 
 ### Acrylic Materials
+
 - **Navbar Acrylic**: Translucent navigation with backdrop blur
 - **Card Acrylic**: Glass-morphism effects on content cards
 - **Dialog Acrylic**: Enhanced modal backgrounds
 
 ### Reveal Effects
+
 - **Hover Reveal**: Subtle highlight effects that follow cursor position
 - **Border Reveal**: Animated border highlights on interaction
 - **Focus Reveal**: Enhanced focus indicators with smooth transitions
 
 ### Shadows & Elevation
+
 - **Fluent Card Shadow**: `0 1.6px 3.6px 0 oklch(from black l c h / 0.11)`
 - **Fluent Dialog Shadow**: `0 6.4px 14.4px 0 oklch(from black l c h / 0.13)`
 - **Fluent Popup Shadow**: `0 3.2px 7.2px 0 oklch(from black l c h / 0.12)`
@@ -51,6 +55,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ## 🎬 Animation System
 
 ### Fluent Motion Curves
+
 - **Accelerate**: `cubic-bezier(0.7, 0, 1, 0.5)` - Fast out
 - **Decelerate**: `cubic-bezier(0, 0.5, 0.3, 1)` - Slow out
 - **Standard**: `cubic-bezier(0.4, 0, 0.2, 1)` - Balanced
@@ -58,6 +63,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 - **Exit**: `cubic-bezier(0.7, 0, 0.84, 0)` - Quick exit
 
 ### Animation Library
+
 - `fadeIn` / `fadeOut`
 - `slideInUp` / `slideInDown` / `slideInLeft` / `slideInRight`
 - `scaleIn` / `scaleOut`
@@ -67,6 +73,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ## 🧩 Enhanced Components
 
 ### Button System
+
 ```tsx
 <Button variant="primary">Primary Action</Button>
 <Button variant="accent">Gradient Accent</Button>
@@ -76,6 +83,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ```
 
 #### Features:
+
 - Loading states with spinners
 - Icon support with proper spacing
 - Reveal hover effects
@@ -83,6 +91,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 - Focus ring management
 
 ### Card System
+
 ```tsx
 <Card>Standard card with hover effects</Card>
 <CardGlass>Glass morphism card</CardGlass>
@@ -91,6 +100,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ```
 
 #### Features:
+
 - Multiple elevation levels
 - Glass morphism variants
 - Interactive states with scaling
@@ -98,6 +108,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 - Reveal hover effects
 
 ### Input System
+
 ```tsx
 <Input placeholder="Standard input" />
 <InputSearch placeholder="Search..." />
@@ -105,6 +116,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ```
 
 #### Features:
+
 - Start/end adornments
 - Error states with validation
 - Helper text support
@@ -112,12 +124,13 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 - Focus ring animations
 
 ### Dialog System
+
 ```tsx
 <Dialog>
   <DialogContent>Enhanced modal with blur backdrop</DialogContent>
 </Dialog>
 
-<DialogConfirm 
+<DialogConfirm
   title="Confirm Action"
   description="Are you sure?"
   variant="destructive"
@@ -129,6 +142,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 ```
 
 #### Features:
+
 - Glass morphism backgrounds
 - Smooth scale and fade animations
 - Backdrop blur effects
@@ -136,6 +150,7 @@ IsoView has been completely redesigned using Microsoft's Fluent Design System pr
 - Accessible focus management
 
 ### Toast Notifications
+
 ```tsx
 const { toast } = useToast();
 
@@ -146,6 +161,7 @@ toast.info("New feature available");
 ```
 
 #### Features:
+
 - Type-specific icons and colors
 - Slide-in animations from right
 - Auto-dismiss timers
@@ -153,15 +169,13 @@ toast.info("New feature available");
 - Swipe to dismiss
 
 ### Command Palette
+
 ```tsx
-<CommandMenu 
-  open={isOpen}
-  onOpenChange={setIsOpen}
-  placeholder="Search or command..."
-/>
+<CommandMenu open={isOpen} onOpenChange={setIsOpen} placeholder="Search or command..." />
 ```
 
 #### Features:
+
 - Keyboard shortcut (⌘K)
 - Fuzzy search
 - Grouped commands
@@ -169,6 +183,7 @@ toast.info("New feature available");
 - Navigation shortcuts
 
 ### Badge System
+
 ```tsx
 <Badge variant="success">Completed</Badge>
 <StatusBadge status="watching" />
@@ -177,6 +192,7 @@ toast.info("New feature available");
 ```
 
 #### Features:
+
 - Status indicators with dots
 - Rating badges with stars
 - Type-specific icons
@@ -186,6 +202,7 @@ toast.info("New feature available");
 ## 🎯 Component Enhancements
 
 ### Navbar
+
 - **Acrylic Background**: Translucent with backdrop blur
 - **Dynamic Scrolling**: Changes appearance on scroll
 - **Mobile-First**: Responsive grid layout for mobile
@@ -193,6 +210,7 @@ toast.info("New feature available");
 - **Active States**: Visual indicators for current page
 
 ### MediaCard
+
 - **Glass Effects**: Enhanced visual hierarchy
 - **Image Loading**: Skeleton states and error handling
 - **Expandable Content**: Smooth animations for detailed view
@@ -201,6 +219,7 @@ toast.info("New feature available");
 - **Hover Effects**: Scale and shadow transitions
 
 ### Home Page
+
 - **Hero Section**: Gradient backgrounds with floating elements
 - **Feature Grid**: Glass morphism cards with hover effects
 - **Statistics Display**: Real-time counters with animations
@@ -208,6 +227,7 @@ toast.info("New feature available");
 - **Terminal Section**: Retro-styled code display
 
 ### Ratings Page
+
 - **Search Integration**: Real-time filtering
 - **View Mode Toggle**: Grid/List view options
 - **Statistics Cards**: Overview metrics
@@ -217,6 +237,7 @@ toast.info("New feature available");
 ## 🎨 Utility Classes
 
 ### Acrylic Materials
+
 ```css
 .fluent-acrylic
 .fluent-acrylic-navbar
@@ -224,18 +245,21 @@ toast.info("New feature available");
 ```
 
 ### Reveal Effects
+
 ```css
 .reveal-hover
 .reveal-border-hover
 ```
 
 ### Typography
+
 ```css
 .text-gradient-primary
 .text-balance
 ```
 
 ### Surfaces
+
 ```css
 .fluent-surface
 .fluent-surface-hover
@@ -243,11 +267,13 @@ toast.info("New feature available");
 ```
 
 ### Scrollbars
+
 ```css
 .fluent-scroll
 ```
 
 ### Elevation
+
 ```css
 .elevation-1
 .elevation-2
@@ -260,18 +286,21 @@ toast.info("New feature available");
 ## 🚀 Performance Optimizations
 
 ### Animation Performance
+
 - Hardware acceleration with `transform3d`
 - Optimized animation curves
 - Reduced motion support with `prefers-reduced-motion`
 - Efficient CSS transitions
 
 ### Layout Performance
+
 - CSS Grid for responsive layouts
 - Flexbox for component alignment
 - Container queries for responsive components
 - Optimized re-renders with React hooks
 
 ### Asset Optimization
+
 - Preloaded critical fonts
 - Optimized SVG icons
 - Lazy loaded images with skeleton states
@@ -280,12 +309,14 @@ toast.info("New feature available");
 ## 📱 Responsive Design
 
 ### Breakpoint System
+
 - Mobile-first approach
 - Fluid typography scaling
 - Adaptive component layouts
 - Touch-friendly interactions
 
 ### Mobile Enhancements
+
 - Large touch targets (minimum 44px)
 - Swipe gestures for toasts
 - Mobile-optimized navigation
@@ -294,24 +325,28 @@ toast.info("New feature available");
 ## ♿ Accessibility Features
 
 ### Keyboard Navigation
+
 - Tab order management
 - Arrow key navigation in menus
 - Escape key handling
 - Enter/Space activation
 
 ### Screen Reader Support
+
 - Semantic HTML structure
 - ARIA labels and descriptions
 - Live regions for dynamic content
 - Skip navigation links
 
 ### Focus Management
+
 - Visible focus indicators
 - Focus trapping in modals
 - Logical focus flow
 - Focus restoration
 
 ### Color & Contrast
+
 - High contrast mode support
 - Color-blind friendly palettes
 - Sufficient contrast ratios
@@ -320,37 +355,29 @@ toast.info("New feature available");
 ## 🛠 Development Guidelines
 
 ### Component Structure
+
 ```tsx
-const Component = forwardRef<HTMLElement, ComponentProps>(
-  ({ className, variant, ...props }, ref) => {
-    return (
-      <element
-        ref={ref}
-        className={cn(
-          baseStyles,
-          variantStyles[variant],
-          className
-        )}
-        {...props}
-      />
-    );
-  }
-);
+const Component = forwardRef<HTMLElement, ComponentProps>(({ className, variant, ...props }, ref) => {
+  return <element ref={ref} className={cn(baseStyles, variantStyles[variant], className)} {...props} />;
+});
 ```
 
 ### Animation Guidelines
+
 - Use consistent timing functions
 - Provide reduced motion alternatives
 - Keep animations under 300ms for interactions
 - Use appropriate easing curves
 
 ### Color Usage
+
 - Use semantic color variables
 - Provide soft variants for backgrounds
 - Ensure proper contrast ratios
 - Support high contrast mode
 
 ### Typography
+
 - Use the Figtree font family
 - Implement proper heading hierarchy
 - Provide readable line heights
@@ -370,6 +397,7 @@ const Component = forwardRef<HTMLElement, ComponentProps>(
 ## 📖 Usage Examples
 
 ### Basic Card with Fluent Effects
+
 ```tsx
 <Card className="reveal-hover fluent-surface-hover">
   <CardHeader>
@@ -384,27 +412,23 @@ const Component = forwardRef<HTMLElement, ComponentProps>(
 ```
 
 ### Interactive Button with Loading
+
 ```tsx
-<Button 
-  variant="accent" 
-  loading={isLoading}
-  onClick={handleAction}
->
+<Button variant="accent" loading={isLoading} onClick={handleAction}>
   Save Changes
 </Button>
 ```
 
 ### Toast Notification
+
 ```tsx
 const { toast } = useToast();
 
 const handleSuccess = () => {
-  toast.success(
-    "Item saved successfully!",
-    "Your changes have been saved to the database.",
-    { duration: 5000 }
-  );
+  toast.success("Item saved successfully!", "Your changes have been saved to the database.", {
+    duration: 5000,
+  });
 };
 ```
 
-This Fluent Design System implementation transforms IsoView into a modern, beautiful, and highly functional media tracking application that provides an exceptional user experience across all devices and interaction methods.
+This Fluent Design System implementation transforms IsoList into a modern, beautiful, and highly functional media tracking application that provides an exceptional user experience across all devices and interaction methods.

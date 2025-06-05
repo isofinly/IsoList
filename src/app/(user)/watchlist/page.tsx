@@ -130,10 +130,7 @@ export default function WatchlistPage() {
           >
             Sort by:
           </Label>
-          <Select
-            value={sortKey}
-            onValueChange={(value) => setSortKey(value as SortKey)}
-          >
+          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
             <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
               <SelectValue />
             </SelectTrigger>

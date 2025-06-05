@@ -9,18 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem } from "@/lib/types";
-import { 
-  ListFilter, 
-  SortAsc, 
-  SortDesc, 
-  Star, 
+import {
+  ListFilter,
+  SortAsc,
+  SortDesc,
+  Star,
   Search,
   Filter,
   Grid3X3,
   List,
   TrendingUp,
   Award,
-  BarChart3
+  BarChart3,
 } from "lucide-react";
 import React, { useMemo, useState } from "react";
 
@@ -44,10 +44,11 @@ export default function RatingsPage() {
 
     // Filter by search query
     if (searchQuery) {
-      items = items.filter((item) =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.director?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.genres?.some(genre => genre.toLowerCase().includes(searchQuery.toLowerCase()))
+      items = items.filter(
+        (item) =>
+          item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.director?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.genres?.some((genre) => genre.toLowerCase().includes(searchQuery.toLowerCase())),
       );
     }
 
@@ -75,18 +76,19 @@ export default function RatingsPage() {
       if (valA > valB) return sortOrder === "asc" ? 1 : -1;
       return 0;
     });
-    
+
     return items;
   }, [mediaItems, sortKey, sortOrder, searchQuery]);
 
   // Calculate statistics
   const stats = useMemo(() => {
     const totalItems = completedItems.length;
-    const averageRating = totalItems > 0 
-      ? completedItems.reduce((sum, item) => sum + (item.rating || 0), 0) / totalItems 
-      : 0;
-    const topRated = completedItems.filter(item => (item.rating || 0) >= 8).length;
-    
+    const averageRating =
+      totalItems > 0
+        ? completedItems.reduce((sum, item) => sum + (item.rating || 0), 0) / totalItems
+        : 0;
+    const topRated = completedItems.filter((item) => (item.rating || 0) >= 8).length;
+
     return { totalItems, averageRating, topRated };
   }, [completedItems]);
 
@@ -117,8 +119,8 @@ export default function RatingsPage() {
           </div>
           <h2 className="text-2xl font-bold mb-4 text-text-primary">No Rated Items Yet</h2>
           <p className="text-text-secondary mb-6 leading-relaxed">
-            You haven't marked any movies, series, or anime as 'completed' with a rating.
-            Start building your personal collection!
+            You haven't marked any movies, series, or anime as 'completed' with a rating. Start building
+            your personal collection!
           </p>
           <Button asChild variant="accent" size="lg" className="group">
             <a href="/add" className="flex items-center">
@@ -141,11 +143,9 @@ export default function RatingsPage() {
               <Award size={32} className="mr-3 text-accent-primary" />
               My Ratings
             </h1>
-            <p className="text-text-secondary">
-              Your personal collection of rated entertainment
-            </p>
+            <p className="text-text-secondary">Your personal collection of rated entertainment</p>
           </div>
-          
+
           {/* Stats Cards */}
           <div className="flex gap-4">
             <CardGlass className="px-4 py-3 text-center min-w-[80px]">
@@ -234,19 +234,16 @@ export default function RatingsPage() {
           <p className="text-text-secondary">
             Try adjusting your search terms or clearing the search to see all items.
           </p>
-          <Button
-            variant="outline"
-            onClick={() => setSearchQuery("")}
-            className="mt-4"
-          >
+          <Button variant="outline" onClick={() => setSearchQuery("")} className="mt-4">
             Clear Search
           </Button>
         </div>
       ) : (
-        <div className={viewMode === "grid" 
-          ? "grid grid-cols-1 xl:grid-cols-2 gap-6" 
-          : "space-y-4"
-        }>
+        <div
+          className={
+            viewMode === "grid" ? "grid grid-cols-1 xl:grid-cols-2 gap-6 lg:items-start" : "space-y-4"
+          }
+        >
           {completedItems.map((item) => (
             <MediaCard
               key={item.id}

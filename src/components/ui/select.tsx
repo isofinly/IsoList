@@ -90,8 +90,7 @@ const SelectScrollDownButton = React.forwardRef<
     <ChevronDown className="h-4 w-4" />
   </SelectPrimitive.ScrollDownButton>
 ));
-SelectScrollDownButton.displayName =
-  SelectPrimitive.ScrollDownButton.displayName;
+SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
@@ -101,11 +100,11 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        // Fixed positioning to prevent layout shifts
-        "z-dropdown min-w-[8rem] overflow-hidden",
+        // Positioning
+        "relative z-dropdown min-w-[8rem] overflow-hidden",
 
-        // Fluent Design styling without backdrop filter
-        "bg-bg-layer-1 rounded-lg border border-border-subtle",
+        // Fluent Design styling
+        "fluent-glass rounded-lg border border-border-subtle",
         "shadow-fluent-popup",
 
         // Typography
@@ -115,13 +114,16 @@ const SelectContent = React.forwardRef<
         "data-[state=open]:animate-fadeIn",
         "data-[state=closed]:animate-fadeOut",
 
+        // Popper positioning adjustments
+        position === "popper" &&
+          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+
         // Scroll styling
         "fluent-scroll",
 
         className
       )}
       position={position}
-      sideOffset={4}
       {...props}
     >
       <SelectScrollUpButton />

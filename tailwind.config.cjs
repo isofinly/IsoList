@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/app/**/*.{js,ts,jsx,tsx,mdx}", "./src/components/**/*.{js,ts,jsx,tsx,mdx}"],
+  content: [
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
   theme: {
     extend: {
       colors: {
@@ -105,12 +108,25 @@ module.exports = {
         "fluent-exit": "var(--transition-fluent-exit)",
       },
       animation: {
-        "fade-in-up": "fadeInUp var(--transition-medium) var(--transition-fluent-entrance) forwards",
-        "fade-in-down": "fadeInDown var(--transition-medium) var(--transition-fluent-entrance) forwards",
-        "scale-in": "scaleIn var(--transition-medium) var(--transition-fluent-entrance) forwards",
+        "fade-in-up":
+          "fadeInUp var(--transition-medium) var(--transition-fluent-entrance) forwards",
+        "fade-in-down":
+          "fadeInDown var(--transition-medium) var(--transition-fluent-entrance) forwards",
+        "scale-in":
+          "scaleIn var(--transition-medium) var(--transition-fluent-entrance) forwards",
         "terminal-caret": "blink 1s infinite",
+        fadeIn: "fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        fadeOut: "fadeOut 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards",
       },
       keyframes: {
+        fadeIn: {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        fadeOut: {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
         fadeInUp: {
           "0%": { opacity: "0", transform: "translateY(16px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
@@ -143,14 +159,14 @@ module.exports = {
         180: "1.8",
       },
       zIndex: {
-        dropdown: "1000",
-        sticky: "1020",
-        fixed: "1030",
-        "modal-backdrop": "1040",
-        "modal-content": "1050",
-        popover: "1060",
-        tooltip: "1070",
-        notification: "1080",
+        dropdown: "50",
+        sticky: "60",
+        fixed: "70",
+        "modal-backdrop": "80",
+        "modal-content": "90",
+        popover: "100",
+        tooltip: "110",
+        notification: "120",
       },
     },
   },

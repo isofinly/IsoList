@@ -22,26 +22,26 @@ const SelectTrigger = React.forwardRef<
       "flex h-10 w-full items-center justify-between rounded-md px-3 py-2",
       "border border-border-subtle bg-bg-layer-1 text-sm text-text-primary",
       "transition-all duration-short ease-fluent-standard",
-      
+
       // Hover and focus states
       "hover:border-border-interactive hover:bg-bg-layer-2",
       "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-0",
       "focus:border-accent-primary focus:bg-bg-layer-1",
-      
+
       // Disabled state
       "disabled:cursor-not-allowed disabled:opacity-50",
       "disabled:bg-bg-layer-1 disabled:border-border-subtle",
-      
+
       // Placeholder styling
       "placeholder:text-text-muted",
-      
+
       // Subtle inner shadow for depth
       "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
       "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
-      
+
       // Reveal effect
       "reveal-hover relative overflow-hidden",
-      
+
       className
     )}
     {...props}
@@ -90,7 +90,8 @@ const SelectScrollDownButton = React.forwardRef<
     <ChevronDown className="h-4 w-4" />
   </SelectPrimitive.ScrollDownButton>
 ));
-SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName;
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
@@ -100,30 +101,27 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        // Positioning
-        "relative z-dropdown min-w-[8rem] overflow-hidden",
-        
-        // Fluent Design styling
-        "fluent-glass rounded-lg border border-border-subtle",
+        // Fixed positioning to prevent layout shifts
+        "z-dropdown min-w-[8rem] overflow-hidden",
+
+        // Fluent Design styling without backdrop filter
+        "bg-bg-layer-1 rounded-lg border border-border-subtle",
         "shadow-fluent-popup",
-        
+
         // Typography
         "text-text-primary",
-        
+
         // Animations with Fluent timing
         "data-[state=open]:animate-fadeIn",
         "data-[state=closed]:animate-fadeOut",
-        
-        // Popper positioning adjustments
-        position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
-        
+
         // Scroll styling
         "fluent-scroll",
-        
+
         className
       )}
       position={position}
+      sideOffset={4}
       {...props}
     >
       <SelectScrollUpButton />
@@ -166,23 +164,23 @@ const SelectItem = React.forwardRef<
     className={cn(
       // Layout
       "relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2",
-      
+
       // Typography
       "text-sm outline-none",
-      
+
       // States with Fluent Design principles
       "text-text-primary",
       "hover:bg-accent-primary-soft hover:text-accent-primary",
       "focus:bg-accent-primary-soft focus:text-accent-primary",
       "data-[state=checked]:bg-accent-primary-soft data-[state=checked]:text-accent-primary",
       "data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-      
+
       // Transitions
       "transition-all duration-short ease-fluent-standard",
-      
+
       // Reveal effect
       "reveal-hover",
-      
+
       className
     )}
     {...props}
@@ -223,23 +221,23 @@ const SimpleSelect = React.forwardRef<
           "flex h-10 w-full appearance-none items-center justify-between rounded-md px-3 py-2",
           "border border-border-subtle bg-bg-layer-1 text-sm text-text-primary",
           "transition-all duration-short ease-fluent-standard",
-          
+
           // Hover and focus states
           "hover:border-border-interactive hover:bg-bg-layer-2",
           "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-0",
           "focus:border-accent-primary focus:bg-bg-layer-1",
-          
+
           // Disabled state
           "disabled:cursor-not-allowed disabled:opacity-50",
           "disabled:bg-bg-layer-1 disabled:border-border-subtle",
-          
+
           // Subtle inner shadow for depth
           "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
           "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
-          
+
           // Reveal effect
           "reveal-hover relative overflow-hidden",
-          
+
           className
         )}
         ref={ref}

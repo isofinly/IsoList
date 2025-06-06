@@ -215,6 +215,44 @@ export default function CalendarPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Calendar Stats moved here */}
+          <Card className="fluent-surface reveal-hover elevation-fluent-card border-theme-border/50">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-base flex items-center text-theme-foreground">
+                <CalendarDays size={18} className="mr-2 text-theme-accent" />
+                Calendar Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-2 px-3 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
+                  <span className="text-sm text-theme-muted-foreground">
+                    This Month
+                  </span>
+                  <span className="text-lg font-mono font-bold text-theme-accent">
+                    {releasesInCurrentMonth.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2 px-3 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
+                  <span className="text-sm text-theme-muted-foreground">
+                    Upcoming Total
+                  </span>
+                  <span className="text-lg font-mono font-bold text-theme-secondary">
+                    {upcomingReleases.length}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-2 px-3 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
+                  <span className="text-sm text-theme-muted-foreground">
+                    TBD Releases
+                  </span>
+                  <span className="text-lg font-mono font-bold text-color-highlight-yellow">
+                    {tbdReleases.length}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </aside>
 
         {/* Main Calendar View (Right Column) */}
@@ -355,34 +393,6 @@ export default function CalendarPage() {
                     )}
                   </div>
                 ))}
-              </div>
-
-              {/* Calendar Stats */}
-              <div className="mt-6 flex flex-wrap justify-center gap-4 text-center">
-                <div className="px-4 py-2 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
-                  <div className="text-lg font-mono font-bold text-theme-accent">
-                    {releasesInCurrentMonth.length}
-                  </div>
-                  <div className="text-xs text-theme-muted-foreground">
-                    Releases This Month
-                  </div>
-                </div>
-                <div className="px-4 py-2 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
-                  <div className="text-lg font-mono font-bold text-theme-secondary">
-                    {upcomingReleases.length}
-                  </div>
-                  <div className="text-xs text-theme-muted-foreground">
-                    Upcoming Total
-                  </div>
-                </div>
-                <div className="px-4 py-2 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
-                  <div className="text-lg font-mono font-bold text-color-highlight-yellow">
-                    {tbdReleases.length}
-                  </div>
-                  <div className="text-xs text-theme-muted-foreground">
-                    TBD Releases
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>

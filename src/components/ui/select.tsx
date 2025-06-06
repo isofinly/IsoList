@@ -48,7 +48,7 @@ const SelectTrigger = React.forwardRef<
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50 transition-transform duration-short data-[state=open]:rotate-180" />
+      <ChevronDown className="h-4 w-4 opacity-50 transition-transform duration-short data-[state=open]:rotate-180 shrink-0" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ));
@@ -90,7 +90,8 @@ const SelectScrollDownButton = React.forwardRef<
     <ChevronDown className="h-4 w-4" />
   </SelectPrimitive.ScrollDownButton>
 ));
-SelectScrollDownButton.displayName = SelectPrimitive.ScrollDownButton.displayName;
+SelectScrollDownButton.displayName =
+  SelectPrimitive.ScrollDownButton.displayName;
 
 const SelectContent = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Content>,
@@ -101,7 +102,7 @@ const SelectContent = React.forwardRef<
       ref={ref}
       className={cn(
         // Positioning
-        "relative z-dropdown min-w-[8rem] overflow-hidden",
+        "relative z-50 min-w-[8rem] overflow-hidden",
 
         // Fluent Design styling
         "fluent-glass rounded-lg border border-border-subtle",

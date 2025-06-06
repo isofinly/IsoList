@@ -147,7 +147,6 @@ h6 {
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.2;
-    margin: 0;
 }
 
 h1 {
@@ -407,32 +406,32 @@ a:focus-visible {
 }
 
 .animate-scale-in {
-  animation: scaleIn var(--transition-medium) var(--transition-fluent-entrance) forwards;
+    animation: scaleIn var(--transition-medium) var(--transition-fluent-entrance) forwards;
 }
 
 .animate-dialog-content-show {
-  animation: dialogContentShow var(--transition-medium) var(--transition-fluent-entrance) forwards;
+    animation: dialogContentShow var(--transition-medium) var(--transition-fluent-entrance) forwards;
 }
 
 .animate-dialog-content-hide {
-  animation: dialogContentHide var(--transition-short) var(--transition-fluent-exit) forwards;
+    animation: dialogContentHide var(--transition-short) var(--transition-fluent-exit) forwards;
 }
 
 .animate-dialog-overlay-show {
-  animation: dialogOverlayShow var(--transition-medium) ease-out forwards;
+    animation: dialogOverlayShow var(--transition-medium) ease-out forwards;
 }
 
 .animate-dialog-overlay-hide {
-  animation: dialogOverlayHide var(--transition-short) ease-in forwards;
+    animation: dialogOverlayHide var(--transition-short) ease-in forwards;
 }
 
 .terminal-caret {
-  display: inline-block;
-  width: 0.5rem;
-  height: 1rem;
-  background-color: var(--color-accent-primary);
-  margin-left: 0.25rem;
-  animation: blink 1s infinite;
+    display: inline-block;
+    width: 0.5rem;
+    height: 1rem;
+    background-color: var(--color-accent-primary);
+    margin-left: 0.25rem;
+    animation: blink 1s infinite;
 }
 
 /* Responsive Design */

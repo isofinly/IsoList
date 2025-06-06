@@ -132,31 +132,28 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         }
       }
 
-      // If no local data, use initial items
       if (localItems.length === 0) {
         localItems = initialMediaItems;
         // Save initial items to localStorage
         localStorage.setItem('mediaItems', JSON.stringify(localItems));
         localStorage.setItem('localTimestamp', new Date().toISOString());
-        // Don't set hasLocalChanges for initial data
       }
 
       set({ mediaItems: localItems });
 
-      // If authenticated, try intelligent sync
+      // If authenticated, try to ensure valid token and sync
       if (authService.isAuthenticated()) {
-        const user = authService.getUser();
-        if (user?.accessToken) {
-          await authService.getDriveService().initialize(user.accessToken);
+        console.log('🔐 Checking authentication status...');
 
+        const hasValidToken = await authService.ensureValidToken();
+
+        if (hasValidToken) {
           console.log('🧠 Starting intelligent sync...');
           const syncResult = await syncManager.intelligentSync(localItems);
 
           if (syncResult.success) {
             console.log('✅ Intelligent sync completed:', syncResult.action);
             set({ mediaItems: syncResult.items });
-
-            // Ensure changes flag is cleared after successful sync
             localStorage.removeItem('hasLocalChanges');
             localStorage.setItem('lastSync', new Date().toISOString());
           } else if (syncResult.action === 'requires-user-resolution') {
@@ -166,6 +163,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
               set({ conflict, showConflictDialog: true });
             }
           }
+        } else {
+          console.log('❌ Token validation failed, switching to offline mode');
+          // Don't clear the user data immediately - they might want to re-auth
+          // Just show that sync is unavailable
         }
       }
 

@@ -146,15 +146,18 @@ export default function LoginPage() {
 
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-4 text-xs text-text-muted">
-            <a href="#" className="hover:text-accent-primary transition-colors duration-short">
+            <a href="/privacy" className="hover:text-accent-primary transition-colors duration-short">
               Privacy Policy
             </a>
             <span>•</span>
-            <a href="#" className="hover:text-accent-primary transition-colors duration-short">
+            <a href="/terms" className="hover:text-accent-primary transition-colors duration-short">
               Terms of Service
             </a>
             <span>•</span>
-            <a href="#" className="hover:text-accent-primary transition-colors duration-short">
+            <a
+              href="https://x.com/solunedev"
+              className="hover:text-accent-primary transition-colors duration-short"
+            >
               Support
             </a>
           </div>

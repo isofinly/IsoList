@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useMediaStore } from "@/lib/store";
 import { AuthService } from "@/lib/auth";
+import { StorageUsageInfo } from "./StorageUsageInfo";
 
 export function SyncStatusIndicator() {
   const { syncStatus, manualSync, forceRefresh, isLoading } = useMediaStore();
@@ -93,7 +94,7 @@ export function SyncStatusIndicator() {
       {/* Detailed status tooltip */}
       {showDetails && (
         <div className="absolute bottom-full right-0 mb-2 p-3 fluent-glass rounded-lg shadow-fluent-popup min-w-[200px] text-xs">
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-text-muted">Status:</span>
               <span className="text-text-primary">{getStatusText()}</span>
@@ -111,6 +112,9 @@ export function SyncStatusIndicator() {
               <span className="text-text-primary">
                 {authService.getUser()?.email?.split("@")[0] || "Unknown"}
               </span>
+            </div>
+            <div className="border-t border-border-divider pt-2">
+              <StorageUsageInfo />
             </div>
           </div>
         </div>

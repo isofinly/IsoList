@@ -25,15 +25,7 @@ export const metadata: Metadata = {
   title: "IsoList - Your Personal Media Tracker",
   description:
     "Track movies, series, and anime you've watched or want to watch with beautiful Fluent Design and cloud sync.",
-  keywords: [
-    "media tracker",
-    "movies",
-    "tv series",
-    "anime",
-    "ratings",
-    "watchlist",
-    "cloud sync",
-  ],
+  keywords: ["media tracker", "movies", "tv series", "anime", "ratings", "watchlist", "cloud sync"],
   authors: [{ name: "IsoList Team" }],
   creator: "IsoList",
   publisher: "IsoList",
@@ -77,20 +69,14 @@ export default function RootLayout({
 
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
         {/* Preconnect to Google APIs */}
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://www.googleapis.com" />
       </head>
 
-      <body
-        className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}
-      >
+      <body className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}>
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
@@ -136,12 +122,6 @@ export default function RootLayout({
                       >
                         Terms
                       </a>
-                      <a
-                        href="/about"
-                        className="hover:text-text-primary transition-colors duration-short"
-                      >
-                        About
-                      </a>
                     </div>
                   </div>
                 </footer>
@@ -158,15 +138,13 @@ export default function RootLayout({
           <div
             className="absolute -top-[40vh] -right-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.02] rounded-full blur-3xl"
             style={{
-              background:
-                "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
+              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
             }}
           />
           <div
             className="absolute -bottom-[40vh] -left-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.01] rounded-full blur-3xl"
             style={{
-              background:
-                "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
+              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
             }}
           />
         </div>

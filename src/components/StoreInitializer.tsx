@@ -46,7 +46,7 @@ export function StoreInitializer({ children }: StoreInitializerProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <div className="w-8 h-8 border-2 border-accent-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-text-secondary">Loading your media library...</p>
+          <p className="text-text-secondary">Loading...</p>
         </div>
       </div>
     );

@@ -6,21 +6,26 @@ interface GoogleUser {
   name: string;
   picture: string;
   accessToken: string;
+  refreshToken?: string;
+  tokenExpiry?: number;
 }
 
 export class AuthService {
   private static instance: AuthService;
   private user: GoogleUser | null = null;
-  private driveService: GoogleDriveService;
+  private driveService: GoogleDriveService | null = null;
   private codeVerifier: string = "";
 
   private constructor() {
-    this.driveService = new GoogleDriveService();
+    // Initialize driveService later to prevent circular dependency
   }
 
   static getInstance(): AuthService {
     if (!AuthService.instance) {
       AuthService.instance = new AuthService();
+      // Import GoogleDriveService here to avoid circular dependency at module load time
+      const { GoogleDriveService } = require('./google-drive');
+      AuthService.instance.setDriveService(new GoogleDriveService(AuthService.instance));
     }
     return AuthService.instance;
   }
@@ -29,19 +34,19 @@ export class AuthService {
   private generateCodeVerifier(): string {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    // Fix for TypeScript: convert to regular array first
-    const charArray = Array.from(array).map((byte) => String.fromCharCode(byte));
-    return btoa(charArray.join("")).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    // Use a more URL-safe approach for Base64 encoding
+    const base64String = btoa(String.fromCharCode.apply(null, Array.from(array)));
+    return base64String.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   }
 
   private async generateCodeChallenge(verifier: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
     const digest = await crypto.subtle.digest("SHA-256", data);
-    // Fix for TypeScript: convert to regular array first
-    const digestArray = Array.from(new Uint8Array(digest));
-    const charArray = digestArray.map((byte) => String.fromCharCode(byte));
-    return btoa(charArray.join("")).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    // Use a more URL-safe approach for Base64 encoding
+    const digestArray = new Uint8Array(digest);
+    const base64String = btoa(String.fromCharCode.apply(null, Array.from(digestArray)));
+    return base64String.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
   }
 
   async initializeGoogleOAuth(): Promise<void> {
@@ -102,6 +107,10 @@ export class AuthService {
   }
 
   async signInWithGoogle(): Promise<void> {
+    // Clear any existing auth state
+    this.clearAuthData();
+    sessionStorage.removeItem("code_verifier");
+
     // Generate PKCE parameters
     this.codeVerifier = this.generateCodeVerifier();
     const codeChallenge = await this.generateCodeChallenge(this.codeVerifier);
@@ -116,9 +125,16 @@ export class AuthService {
       response_type: "code",
       scope: 'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
       access_type: "offline",
+      prompt: "consent", // Force consent to ensure refresh token
       // PKCE parameters
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
+    });
+
+    console.log("🔗 Redirecting to OAuth with params:", {
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+      redirect_uri: `${window.location.origin}/auth/callback`,
+      hasCodeChallenge: !!codeChallenge
     });
 
     window.location.href = `${oauth2Endpoint}?${params}`;
@@ -126,34 +142,68 @@ export class AuthService {
 
   async handleOAuthCallback(code: string): Promise<boolean> {
     try {
-      const codeVerifier = sessionStorage.getItem("code_verifier");
-      if (!codeVerifier) throw new Error("Missing code verifier");
+      const codeVerifier = sessionStorage.getItem('code_verifier');
+      if (!codeVerifier) {
+        console.error('❌ Missing code verifier in session storage');
+        throw new Error('Missing code verifier');
+      }
 
-      // Exchange code for tokens using PKCE
-      const response = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      console.log('🔐 Handling OAuth callback with code:', {
+        hasCode: !!code,
+        hasCodeVerifier: !!codeVerifier,
+        origin: window.location.origin
+      });
+
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, codeVerifier }),
       });
 
-      if (!response.ok) throw new Error("Token exchange failed");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        console.error('❌ API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+        throw new Error(`Token exchange failed: ${errorData.details || errorData.error || response.statusText}`);
+      }
 
-      const { user, accessToken } = await response.json();
+      const { user, accessToken, refreshToken, expiresIn } = await response.json();
 
-      this.user = { ...user, accessToken };
-      localStorage.setItem("user", JSON.stringify(this.user));
+      console.log('✅ Token exchange successful:', {
+        hasUser: !!user,
+        hasAccessToken: !!accessToken,
+        hasRefreshToken: !!refreshToken,
+        expiresIn
+      });
 
-      // Clean up
-      sessionStorage.removeItem("code_verifier");
+      this.user = {
+        ...user,
+        accessToken,
+        refreshToken,
+        tokenExpiry: Date.now() + (expiresIn * 1000),
+      };
+      localStorage.setItem('user', JSON.stringify(this.user));
 
-      // Initialize Drive service
-      await this.driveService.initialize(accessToken);
+      sessionStorage.removeItem('code_verifier');
 
+      await this.driveService?.initialize(accessToken);
+
+      console.log('🎉 OAuth callback completed successfully');
       return true;
     } catch (error) {
-      console.error("OAuth callback failed:", error);
+      console.error('💥 OAuth callback failed:', error);
+      // Clear any partial auth state
+      sessionStorage.removeItem('code_verifier');
+      localStorage.removeItem('user');
       return false;
     }
+  }
+
+  setDriveService(driveService: GoogleDriveService): void {
+    this.driveService = driveService;
   }
 
   getUser(): GoogleUser | null {
@@ -178,6 +228,7 @@ export class AuthService {
       localStorage.removeItem("mediaItems");
       localStorage.removeItem("lastSync");
       localStorage.removeItem("hasLocalChanges");
+      localStorage.removeItem("isolist-folder-id"); // Clear cached folder ID
     }
     window.location.href = "/login";
   }
@@ -187,6 +238,92 @@ export class AuthService {
   }
 
   getDriveService(): GoogleDriveService {
+    if (!this.driveService) {
+      throw new Error("GoogleDriveService not initialized");
+    }
     return this.driveService;
+  }
+
+  // Check if access token is expired or will expire soon
+  isTokenExpired(): boolean {
+    const user = this.getUser();
+    if (!user?.tokenExpiry) return true;
+
+    // Consider token expired if it expires within 5 minutes
+    const fiveMinutesFromNow = Date.now() + (5 * 60 * 1000);
+    return user.tokenExpiry < fiveMinutesFromNow;
+  }
+
+  // Refresh access token using refresh token
+  async refreshAccessToken(): Promise<boolean> {
+    const user = this.getUser();
+    if (!user?.refreshToken) {
+      console.log('🔄 No refresh token available, need to re-authenticate');
+      return false;
+    }
+
+    try {
+      console.log('🔄 Refreshing access token...');
+
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: user.refreshToken }),
+      });
+
+      if (!response.ok) {
+        console.error('❌ Token refresh failed:', response.status);
+        return false;
+      }
+
+      const { accessToken, expiresIn } = await response.json();
+
+      // Update user with new access token
+      this.user = {
+        ...user,
+        accessToken,
+        tokenExpiry: Date.now() + (expiresIn * 1000),
+      };
+
+      localStorage.setItem('user', JSON.stringify(this.user));
+
+      // Re-initialize Drive service with new token
+      await this.driveService?.initialize(accessToken);
+
+      console.log('✅ Access token refreshed successfully');
+      return true;
+    } catch (error) {
+      console.error('❌ Token refresh error:', error);
+      return false;
+    }
+  }
+
+  // Enhanced authentication check with auto-refresh
+  async ensureValidToken(): Promise<boolean> {
+    if (!this.isAuthenticated()) {
+      return false;
+    }
+
+    if (this.isTokenExpired()) {
+      console.log('🔄 Token expired, attempting refresh...');
+      const refreshed = await this.refreshAccessToken();
+
+      if (!refreshed) {
+        console.log('❌ Token refresh failed, clearing invalid auth');
+        this.clearAuthData();
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private clearAuthData(): void {
+    this.user = null;
+    localStorage.removeItem('user');
+    localStorage.removeItem('mediaItems');
+    localStorage.removeItem('lastSync');
+    localStorage.removeItem('hasLocalChanges');
+    localStorage.removeItem('isolist-folder-id'); // Clear cached folder ID
   }
 }

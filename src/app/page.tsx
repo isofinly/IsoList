@@ -1,9 +1,35 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardGlass } from "@/components/ui/card";
+import { useMediaStore } from "@/lib/store";
 import { LogIn, Play, Star, TrendingUp, Users, Zap } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
 
 export default function HomePage() {
+  const { mediaItems } = useMediaStore();
+
+  const statistics = useMemo(() => {
+    const itemsTracked = mediaItems.length;
+
+    // Calculate average rating
+    const ratedItems = mediaItems.filter((item) => item.rating !== undefined);
+    const averageRating =
+      ratedItems.length > 0
+        ? ratedItems.reduce((sum, item) => sum + (item.rating || 0), 0) /
+          ratedItems.length
+        : 0;
+
+    // Count items with ratings
+    const ratingsGiven = ratedItems.length;
+
+    return {
+      itemsTracked,
+      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
+      ratingsGiven,
+    };
+  }, [mediaItems]);
+
   return (
     <div className="w-full bg-gradient-to-br from-bg-base via-bg-layer-1 to-bg-base relative">
       {/* Global decorative background elements */}
@@ -36,8 +62,9 @@ export default function HomePage() {
                 </span>
               </h1>
               <p className="text-lg sm:text-xl text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-                Your personal, bloat-free tracker for movies, series, and anime. Experience entertainment
-                tracking with beautiful design and seamless performance.
+                Your personal, bloat-free tracker for movies, series, and anime.
+                Experience entertainment tracking with beautiful design and
+                seamless performance.
               </p>
             </div>
 
@@ -70,9 +97,12 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-accent-primary-soft rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Star className="w-6 h-6 text-accent-primary" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-text-primary">Smart Ratings</h3>
+                <h3 className="text-lg font-semibold mb-2 text-text-primary">
+                  Smart Ratings
+                </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">
-                  Track and rate your favorite content with intelligent recommendations.
+                  Track and rate your favorite content with intelligent
+                  recommendations.
                 </p>
               </CardGlass>
 
@@ -80,7 +110,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-success-soft rounded-xl flex items-center justify-center mx-auto mb-4">
                   <TrendingUp className="w-6 h-6 text-success" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-text-primary">Progress Tracking</h3>
+                <h3 className="text-lg font-semibold mb-2 text-text-primary">
+                  Progress Tracking
+                </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">
                   Monitor your watching progress and discover viewing patterns.
                 </p>
@@ -90,7 +122,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-info-soft rounded-xl flex items-center justify-center mx-auto mb-4">
                   <Zap className="w-6 h-6 text-info" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2 text-text-primary">Lightning Fast</h3>
+                <h3 className="text-lg font-semibold mb-2 text-text-primary">
+                  Lightning Fast
+                </h3>
                 <p className="text-sm text-text-secondary leading-relaxed">
                   Optimized performance with modern design principles.
                 </p>
@@ -106,22 +140,38 @@ export default function HomePage() {
           <Card className="max-w-6xl mx-auto fluent-surface-hover">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-text-primary mb-2">Your Entertainment Journey</h2>
-                <p className="text-text-secondary">Start tracking your media consumption today</p>
+                <h2 className="text-2xl font-bold text-text-primary mb-2">
+                  Your Entertainment Journey
+                </h2>
+                <p className="text-text-secondary">
+                  Start tracking your media consumption today
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-accent-primary mb-2">0</div>
-                  <div className="text-sm text-text-secondary">Items Tracked</div>
+                  <div className="text-3xl font-bold text-accent-primary mb-2">
+                    {statistics.itemsTracked}
+                  </div>
+                  <div className="text-sm text-text-secondary">
+                    Items Tracked
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-success mb-2">0</div>
-                  <div className="text-sm text-text-secondary">Hours Watched</div>
+                  <div className="text-3xl font-bold text-success mb-2">
+                    {statistics.averageRating || "—"}
+                  </div>
+                  <div className="text-sm text-text-secondary">
+                    Average Rating
+                  </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-warning mb-2">0</div>
-                  <div className="text-sm text-text-secondary">Ratings Given</div>
+                  <div className="text-3xl font-bold text-warning mb-2">
+                    {statistics.ratingsGiven}
+                  </div>
+                  <div className="text-sm text-text-secondary">
+                    Ratings Given
+                  </div>
                 </div>
               </div>
             </CardContent>
@@ -158,8 +208,12 @@ export default function HomePage() {
       <section className="py-16 relative w-full">
         <div className="w-full px-4 relative">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-text-primary mb-2">Quick Navigation</h2>
-            <p className="text-text-secondary">Jump to your favorite sections</p>
+            <h2 className="text-2xl font-bold text-text-primary mb-2">
+              Quick Navigation
+            </h2>
+            <p className="text-text-secondary">
+              Jump to your favorite sections
+            </p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">

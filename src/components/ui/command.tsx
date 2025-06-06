@@ -382,7 +382,7 @@ const CommandMenu = ({
 
         <CommandSeparator />
 
-        <CommandGroup heading="Recent">
+        {/* <CommandGroup heading="Recent">
           <CommandItem
             value="The Matrix (1999)"
             icon={<Film className="w-4 h-4" />}
@@ -413,7 +413,7 @@ const CommandMenu = ({
           >
             Interstellar (2014)
           </CommandItem>
-        </CommandGroup>
+        </CommandGroup> */}
       </CommandList>
 
       <div className="border-t border-border-subtle p-3">

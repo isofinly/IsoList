@@ -129,11 +129,26 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
 
   useEffect(() => {
     if (item) {
+      // Ensure status is always valid
+      const validStatus =
+        item.status &&
+        ["completed", "watching", "planned", "on-hold", "dropped"].includes(
+          item.status
+        )
+          ? item.status
+          : "planned";
+
+      // Ensure type is always valid
+      const validType =
+        item.type && ["movie", "series", "anime"].includes(item.type)
+          ? item.type
+          : "movie";
+
       setFormData({
         id: item.id,
         title: item.title || "",
-        type: item.type || "movie",
-        status: item.status || "planned",
+        type: validType,
+        status: validStatus,
         imageUrl: item.imageUrl || "",
         rating: item.rating !== undefined ? String(item.rating) : "",
         notes: item.notes || "",
@@ -311,12 +326,17 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                   </Label>
                   <Select
                     value={formData.type}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        type: value as MediaType,
-                      }))
-                    }
+                    onValueChange={(value) => {
+                      if (
+                        value &&
+                        ["movie", "series", "anime"].includes(value)
+                      ) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          type: value as MediaType,
+                        }));
+                      }
+                    }}
                   >
                     <SelectTrigger className="h-11">
                       <SelectValue />
@@ -352,12 +372,23 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                   </Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        status: value as MediaStatus,
-                      }))
-                    }
+                    onValueChange={(value) => {
+                      if (
+                        value &&
+                        [
+                          "completed",
+                          "watching",
+                          "planned",
+                          "on-hold",
+                          "dropped",
+                        ].includes(value)
+                      ) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          status: value as MediaStatus,
+                        }));
+                      }
+                    }}
                   >
                     <SelectTrigger className="h-11">
                       <SelectValue />

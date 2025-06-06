@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     console.log("📋 Request details:", {
       hasCode: !!code,
       hasCodeVerifier: !!codeVerifier,
-      origin: request.nextUrl.origin
+      origin: request.nextUrl.origin,
     });
 
     // Build token request with client secret
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
       code,
       grant_type: "authorization_code",
-      redirect_uri: `${request.nextUrl.origin}/auth/callback`,
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
     });
 
     // Add PKCE if provided (optional extra security)
@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
     console.log("🌐 Making token request to Google...");
     console.log("📋 Token request params:", {
       client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      redirect_uri: `${request.nextUrl.origin}/auth/callback`,
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
       hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-      hasCodeVerifier: !!codeVerifier
+      hasCodeVerifier: !!codeVerifier,
     });
 
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       console.error("❌ Google token error:", {
         status: tokenResponse.status,
         response: tokenData,
-        requestParams: Object.fromEntries(tokenRequestBody.entries())
+        requestParams: Object.fromEntries(tokenRequestBody.entries()),
       });
       return NextResponse.json(
         {
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       hasAccessToken: !!tokens.access_token,
       hasRefreshToken: !!tokens.refresh_token,
       expiresIn: tokens.expires_in,
-      tokenType: tokens.token_type
+      tokenType: tokens.token_type,
     });
 
     // Get user info

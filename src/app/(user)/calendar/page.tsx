@@ -8,9 +8,9 @@ import {
   AlertTriangle,
   CalendarClock,
   CalendarDays,
-  CalendarPlus,
   ChevronsLeft,
   ChevronsRight,
+  CircleHelp,
 } from "lucide-react";
 import Link from "next/link";
 import React, { useMemo } from "react";
@@ -97,10 +97,14 @@ export default function CalendarPage() {
     1
   ).getDay(); // 0 (Sun) - 6 (Sat)
 
+  // Adjust for Monday start: convert Sunday (0) to 6, others subtract 1
+  const firstDayOfMonthAdjusted =
+    firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+
   const calendarGrid = useMemo(() => {
     const grid = [];
     // Add empty cells for days before the first of the month
-    for (let i = 0; i < firstDayOfMonth; i++) {
+    for (let i = 0; i < firstDayOfMonthAdjusted; i++) {
       grid.push({ key: `empty-${i}`, isEmpty: true });
     }
     // Add cells for each day of the month
@@ -122,7 +126,12 @@ export default function CalendarPage() {
       });
     }
     return grid;
-  }, [daysInMonth, firstDayOfMonth, currentMonthDate, releasesInCurrentMonth]);
+  }, [
+    daysInMonth,
+    firstDayOfMonthAdjusted,
+    currentMonthDate,
+    releasesInCurrentMonth,
+  ]);
 
   const changeMonth = (offset: number) => {
     setCurrentMonthDate(
@@ -179,7 +188,7 @@ export default function CalendarPage() {
           <Card className="fluent-surface reveal-hover elevation-fluent-card border-theme-border/50">
             <CardHeader className="pb-4">
               <CardTitle className="text-base flex items-center text-theme-foreground">
-                <AlertTriangle
+                <CircleHelp
                   size={18}
                   className="mr-2 text-color-highlight-yellow"
                 />
@@ -243,13 +252,13 @@ export default function CalendarPage() {
               {/* Day Headers */}
               <div className="grid grid-cols-7 gap-3 mb-4">
                 {[
-                  "Sunday",
                   "Monday",
                   "Tuesday",
                   "Wednesday",
                   "Thursday",
                   "Friday",
                   "Saturday",
+                  "Sunday",
                 ].map((day, index) => (
                   <div
                     key={day}
@@ -257,7 +266,7 @@ export default function CalendarPage() {
                   >
                     <span className="hidden sm:inline">{day}</span>
                     <span className="sm:hidden">
-                      {["S", "M", "T", "W", "T", "F", "S"][index]}
+                      {["M", "T", "W", "T", "F", "S", "S"][index]}
                     </span>
                   </div>
                 ))}

@@ -106,7 +106,7 @@ export default function RootLayout({
                     <div className="flex items-center gap-2">
                       <span>© {new Date().getFullYear()} IsoList</span>
                       <span>•</span>
-                      <span>Built with Fluent Design</span>
+                      <span>Built with ❤️</span>
                     </div>
 
                     <div className="flex items-center gap-4">

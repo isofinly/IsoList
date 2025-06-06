@@ -11,15 +11,8 @@ interface ConflictDialogProps {
   onClose: () => void;
 }
 
-export function ConflictDialog({
-  isOpen,
-  conflict,
-  onResolve,
-  onClose,
-}: ConflictDialogProps) {
-  const [selectedChoice, setSelectedChoice] = useState<
-    "local" | "cloud" | "merge" | null
-  >(null);
+export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: ConflictDialogProps) {
+  const [selectedChoice, setSelectedChoice] = useState<"local" | "cloud" | "merge" | null>(null);
   const [isResolving, setIsResolving] = useState(false);
 
   if (!isOpen || !conflict) return null;
@@ -67,9 +60,7 @@ export function ConflictDialog({
         <div className="p-6 border-b border-border-divider">
           <div className="flex items-center gap-3">
             <AlertTriangle className="text-warning" size={24} />
-            <h2 className="text-xl font-semibold text-text-primary">
-              Data Sync Conflict
-            </h2>
+            <h2 className="text-xl font-semibold text-text-primary">Data Sync Conflict</h2>
             <button
               onClick={handleCancel}
               className="ml-auto p-1 hover:bg-bg-layer-1 rounded transition-colors"
@@ -83,9 +74,7 @@ export function ConflictDialog({
         <div className="p-6 overflow-y-auto max-h-[60vh]">
           {/* Description */}
           <div className="bg-warning-soft/20 border border-warning-soft rounded-lg p-4 mb-6">
-            <p className="text-sm text-text-secondary">
-              {getConflictDescription()}
-            </p>
+            <p className="text-sm text-text-secondary">{getConflictDescription()}</p>
           </div>
 
           {conflict.conflictedItems.length > 0 && (
@@ -95,14 +84,9 @@ export function ConflictDialog({
               </h4>
               <div className="space-y-2 max-h-32 overflow-y-auto">
                 {conflict.conflictedItems.map((item, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between text-sm"
-                  >
+                  <div key={index} className="flex items-center justify-between text-sm">
                     <span className="font-medium">{item.title}</span>
-                    <span className="text-xs px-2 py-1 bg-error-soft rounded">
-                      {item.conflictType}
-                    </span>
+                    <span className="text-xs px-2 py-1 bg-error-soft rounded">{item.conflictType}</span>
                   </div>
                 ))}
               </div>
@@ -116,18 +100,13 @@ export function ConflictDialog({
               <div className="flex items-center gap-2 mb-3">
                 <HardDrive size={16} className="text-text-secondary" />
                 <span className="font-medium">Local Data</span>
-                <span className="ml-auto text-sm text-text-muted">
-                  {conflict.local.count} items
-                </span>
+                <span className="ml-auto text-sm text-text-muted">{conflict.local.count} items</span>
               </div>
 
               {conflict.local.items.length > 0 ? (
                 <div className="space-y-1 max-h-24 overflow-y-auto">
                   {conflict.local.items.slice(0, 3).map((item, index) => (
-                    <div
-                      key={index}
-                      className="text-sm text-text-secondary truncate"
-                    >
+                    <div key={index} className="text-sm text-text-secondary truncate">
                       • {item.title}
                     </div>
                   ))}
@@ -138,9 +117,7 @@ export function ConflictDialog({
                   )}
                 </div>
               ) : (
-                <div className="text-sm text-text-muted italic">
-                  No local data
-                </div>
+                <div className="text-sm text-text-muted italic">No local data</div>
               )}
             </div>
 
@@ -149,18 +126,13 @@ export function ConflictDialog({
               <div className="flex items-center gap-2 mb-3">
                 <Cloud size={16} className="text-info" />
                 <span className="font-medium">Cloud Data</span>
-                <span className="ml-auto text-sm text-text-muted">
-                  {conflict.cloud.count} items
-                </span>
+                <span className="ml-auto text-sm text-text-muted">{conflict.cloud.count} items</span>
               </div>
 
               {conflict.cloud.items.length > 0 ? (
                 <div className="space-y-1 max-h-24 overflow-y-auto">
                   {conflict.cloud.items.slice(0, 3).map((item, index) => (
-                    <div
-                      key={index}
-                      className="text-sm text-text-secondary truncate"
-                    >
+                    <div key={index} className="text-sm text-text-secondary truncate">
                       • {item.title}
                     </div>
                   ))}
@@ -171,18 +143,14 @@ export function ConflictDialog({
                   )}
                 </div>
               ) : (
-                <div className="text-sm text-text-muted italic">
-                  No cloud data
-                </div>
+                <div className="text-sm text-text-muted italic">No cloud data</div>
               )}
             </div>
           </div>
 
           {/* Resolution Options */}
           <div className="space-y-3">
-            <h3 className="font-medium text-text-primary">
-              Choose resolution:
-            </h3>
+            <h3 className="font-medium text-text-primary">Choose resolution:</h3>
 
             {/* Use Local */}
             {conflict.local.count > 0 && (
@@ -201,7 +169,7 @@ export function ConflictDialog({
                     Use Local Data
                   </div>
                   <p className="text-sm text-text-secondary mt-1">
-                    Keep local data and upload to Google Drive
+                    Keep local data (from your browser) and upload to Google Drive
                   </p>
                 </div>
               </label>
@@ -230,8 +198,8 @@ export function ConflictDialog({
               </label>
             )}
 
-            {/* Merge */}
-            {conflict.local.count > 0 && conflict.cloud.count > 0 && (
+            {/* TODO: Verify algorithm for merging */}
+            {/* {conflict.local.count > 0 && conflict.cloud.count > 0 && (
               <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-bg-layer-1 transition-colors">
                 <input
                   type="radio"
@@ -251,7 +219,7 @@ export function ConflictDialog({
                   </p>
                 </div>
               </label>
-            )}
+            )} */}
           </div>
         </div>
 

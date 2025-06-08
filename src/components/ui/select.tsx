@@ -133,7 +133,7 @@ const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className }) => 
 };
 
 const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, children, ...props }) => {
+  ({ className, children, ...props }, ref) => {
     const { open, setOpen } = useSelectContext();
     const contentRef = React.useRef<HTMLDivElement>(null);
 

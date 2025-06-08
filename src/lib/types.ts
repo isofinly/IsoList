@@ -15,9 +15,9 @@ export interface MediaItem {
   episodesWatched?: number;
   totalEpisodes?: number;
   releaseDateTBD?: boolean;
-  genres?: string[]; // Optional: e.g., ["Sci-Fi", "Adventure"]
+  genres?: string[]; // Optional
   director?: string; // Optional
-  platform?: string; // Optional: e.g., "Netflix", "Cinema"
+  platform?: string; // Optional
 }
 
 declare global {
@@ -34,4 +34,4 @@ declare global {
   }
 }
 
-export { };
+export {};

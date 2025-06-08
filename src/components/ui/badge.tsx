@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
+import * as React from "react";
 
 const badgeVariants = cva(
   "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-all duration-short ease-fluent-standard focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2",
@@ -17,26 +17,19 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-text-on-destructive hover:bg-destructive-hover shadow-sm",
         outline:
           "border-border-subtle text-text-primary hover:bg-accent-primary-soft hover:text-accent-primary hover:border-accent-primary/50",
-        success:
-          "border-transparent bg-success text-text-on-accent hover:bg-success/90 shadow-sm",
-        warning:
-          "border-transparent bg-warning text-black hover:bg-warning/90 shadow-sm",
-        info:
-          "border-transparent bg-info text-text-on-accent hover:bg-info/90 shadow-sm",
+        success: "border-transparent bg-success text-text-on-accent hover:bg-success/90 shadow-sm",
+        warning: "border-transparent bg-warning text-black hover:bg-warning/90 shadow-sm",
+        info: "border-transparent bg-info text-text-on-accent hover:bg-info/90 shadow-sm",
         accent:
           "border-transparent bg-gradient-to-r from-accent-primary to-accent-primary-hover text-text-on-accent hover:from-accent-primary-hover hover:to-accent-primary-active shadow-md",
         ghost:
           "border-transparent text-text-muted hover:bg-accent-primary-soft hover:text-accent-primary",
-        soft:
-          "border-accent-primary/20 bg-accent-primary-soft text-accent-primary hover:bg-accent-primary-soft-hover",
+        soft: "border-accent-primary/20 bg-accent-primary-soft text-accent-primary hover:bg-accent-primary-soft-hover",
         "soft-destructive":
           "border-destructive/20 bg-destructive-soft text-destructive hover:bg-destructive-soft/80",
-        "soft-success":
-          "border-success/20 bg-success-soft text-success hover:bg-success-soft/80",
-        "soft-warning":
-          "border-warning/20 bg-warning-soft text-warning hover:bg-warning-soft/80",
-        "soft-info":
-          "border-info/20 bg-info-soft text-info hover:bg-info-soft/80",
+        "soft-success": "border-success/20 bg-success-soft text-success hover:bg-success-soft/80",
+        "soft-warning": "border-warning/20 bg-warning-soft text-warning hover:bg-warning-soft/80",
+        "soft-info": "border-info/20 bg-info-soft text-info hover:bg-info-soft/80",
       },
       size: {
         sm: "px-2 py-0.5 text-xs rounded-md",
@@ -49,7 +42,7 @@ const badgeVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 export interface BadgeProps
@@ -68,40 +61,37 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         ref={ref}
         className={cn(
           badgeVariants({ variant, size }),
-          // Add reveal effect for interactive badges
           (removable || props.onClick) && "reveal-hover cursor-pointer",
-          // Add subtle animation
           "animate-fade-in-up",
-          className
+          className,
         )}
         {...props}
       >
-        {/* Status dot indicator */}
         {dot && (
-          <div className={cn(
-            "w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse",
-            variant === "success" && "bg-success",
-            variant === "destructive" && "bg-destructive",
-            variant === "warning" && "bg-warning",
-            variant === "info" && "bg-info",
-            variant === "default" && "bg-accent-primary",
-            (!variant || variant === "secondary" || variant === "outline" || variant === "ghost") && "bg-current"
-          )} />
+          <div
+            className={cn(
+              "w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse",
+              variant === "success" && "bg-success",
+              variant === "destructive" && "bg-destructive",
+              variant === "warning" && "bg-warning",
+              variant === "info" && "bg-info",
+              variant === "default" && "bg-accent-primary",
+              (!variant || variant === "secondary" || variant === "outline" || variant === "ghost") &&
+                "bg-current",
+            )}
+          />
         )}
 
-        {/* Icon */}
         {icon && (
           <div className="mr-1.5 flex-shrink-0">
             {React.cloneElement(icon as React.ReactElement, {
-              className: cn("w-3 h-3", (icon as React.ReactElement).props?.className)
+              className: cn("w-3 h-3", (icon as React.ReactElement).props?.className),
             })}
           </div>
         )}
 
-        {/* Content */}
         <span className="truncate">{children}</span>
 
-        {/* Remove button */}
         {removable && (
           <button
             type="button"
@@ -114,7 +104,7 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
               "hover:bg-black/10 hover:text-current",
               "focus:outline-none focus:ring-1 focus:ring-current focus:ring-offset-1",
               "transition-all duration-short ease-fluent-standard",
-              "dark:hover:bg-white/10"
+              "dark:hover:bg-white/10",
             )}
             aria-label="Remove badge"
           >
@@ -131,45 +121,41 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         )}
       </div>
     );
-  }
+  },
 );
 
 Badge.displayName = "Badge";
 
 // Status-specific badge components for convenience
-const StatusBadge = React.forwardRef<HTMLDivElement, 
-  Omit<BadgeProps, 'variant'> & { 
-    status: 'completed' | 'watching' | 'planned' | 'on-hold' | 'dropped' | 'cancelled' | 'upcoming'
+const StatusBadge = React.forwardRef<
+  HTMLDivElement,
+  Omit<BadgeProps, "variant"> & {
+    status: "completed" | "watching" | "planned" | "on-hold" | "dropped" | "cancelled" | "upcoming";
   }
 >(({ status, ...props }, ref) => {
   const getVariantForStatus = (status: string) => {
     switch (status) {
-      case 'completed':
-        return 'success';
-      case 'watching':
-        return 'info';
-      case 'planned':
-        return 'soft';
-      case 'on-hold':
-        return 'warning';
-      case 'dropped':
-      case 'cancelled':
-        return 'destructive';
-      case 'upcoming':
-        return 'soft-info';
+      case "completed":
+        return "success";
+      case "watching":
+        return "info";
+      case "planned":
+        return "soft";
+      case "on-hold":
+        return "warning";
+      case "dropped":
+      case "cancelled":
+        return "destructive";
+      case "upcoming":
+        return "soft-info";
       default:
-        return 'secondary';
+        return "secondary";
     }
   };
 
   return (
-    <Badge
-      ref={ref}
-      variant={getVariantForStatus(status) as any}
-      dot
-      {...props}
-    >
-      {status.replace('-', ' ')}
+    <Badge ref={ref} variant={getVariantForStatus(status) as any} dot {...props}>
+      {status.replace("-", " ")}
     </Badge>
   );
 });
@@ -177,18 +163,19 @@ const StatusBadge = React.forwardRef<HTMLDivElement,
 StatusBadge.displayName = "StatusBadge";
 
 // Rating badge component
-const RatingBadge = React.forwardRef<HTMLDivElement,
-  Omit<BadgeProps, 'variant' | 'children'> & {
+const RatingBadge = React.forwardRef<
+  HTMLDivElement,
+  Omit<BadgeProps, "variant" | "children"> & {
     rating: number;
     maxRating?: number;
   }
 >(({ rating, maxRating = 10, ...props }, ref) => {
   const getVariantForRating = (rating: number, max: number) => {
     const percentage = (rating / max) * 100;
-    if (percentage >= 80) return 'success';
-    if (percentage >= 60) return 'info';
-    if (percentage >= 40) return 'warning';
-    return 'destructive';
+    if (percentage >= 80) return "success";
+    if (percentage >= 60) return "info";
+    if (percentage >= 40) return "warning";
+    return "destructive";
   };
 
   return (
@@ -210,48 +197,61 @@ const RatingBadge = React.forwardRef<HTMLDivElement,
 RatingBadge.displayName = "RatingBadge";
 
 // Type badge for media types
-const TypeBadge = React.forwardRef<HTMLDivElement,
-  Omit<BadgeProps, 'variant' | 'icon'> & {
-    type: 'movie' | 'series' | 'anime' | 'documentary' | 'short';
+const TypeBadge = React.forwardRef<
+  HTMLDivElement,
+  Omit<BadgeProps, "variant" | "icon"> & {
+    type: "movie" | "series" | "anime" | "documentary" | "short";
   }
 >(({ type, ...props }, ref) => {
   const getConfigForType = (type: string) => {
     switch (type) {
-      case 'movie':
+      case "movie":
         return {
-          variant: 'soft' as const,
+          variant: "soft" as const,
           icon: (
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v2zm1-4V5h-1v2h1zM5 5v2H4V5h1zm0 4H4v2h1V9zm-1 4h1v2H4v-2z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm3 2h6v4H7V5zm8 8v2h1v-2h-1zm-2-2H7v4h6v-4zm2 0h1V9h-1v2zm1-4V5h-1v2h1zM5 5v2H4V5h1zm0 4H4v2h1V9zm-1 4h1v2H4v-2z"
+                clipRule="evenodd"
+              />
             </svg>
-          )
+          ),
         };
-      case 'series':
+      case "series":
         return {
-          variant: 'soft-info' as const,
+          variant: "soft-info" as const,
           icon: (
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
               <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
             </svg>
-          )
+          ),
         };
-      case 'anime':
+      case "anime":
         return {
-          variant: 'soft-warning' as const,
+          variant: "soft-warning" as const,
           icon: (
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                clipRule="evenodd"
+              />
             </svg>
-          )
+          ),
         };
       default:
         return {
-          variant: 'secondary' as const,
+          variant: "secondary" as const,
           icon: (
             <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              <path
+                fillRule="evenodd"
+                d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+                clipRule="evenodd"
+              />
             </svg>
-          )
+          ),
         };
     }
   };
@@ -259,12 +259,7 @@ const TypeBadge = React.forwardRef<HTMLDivElement,
   const config = getConfigForType(type);
 
   return (
-    <Badge
-      ref={ref}
-      variant={config.variant}
-      icon={config.icon}
-      {...props}
-    >
+    <Badge ref={ref} variant={config.variant} icon={config.icon} {...props}>
       {type.charAt(0).toUpperCase() + type.slice(1)}
     </Badge>
   );
@@ -272,4 +267,4 @@ const TypeBadge = React.forwardRef<HTMLDivElement,
 
 TypeBadge.displayName = "TypeBadge";
 
-export { Badge, badgeVariants, StatusBadge, RatingBadge, TypeBadge };
+export { Badge, badgeVariants, RatingBadge, StatusBadge, TypeBadge };

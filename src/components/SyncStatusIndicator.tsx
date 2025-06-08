@@ -1,16 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  Cloud,
-  CloudOff,
-  RotateCcw,
-  Check,
-  AlertCircle,
-  RefreshCw,
-} from "lucide-react";
-import { useMediaStore } from "@/lib/store";
 import { AuthService } from "@/lib/auth";
+import { useMediaStore } from "@/lib/store";
+import { AlertCircle, Check, Cloud, CloudOff, RefreshCw, RotateCcw } from "lucide-react";
+import { useState } from "react";
 import { StorageUsageInfo } from "./StorageUsageInfo";
 
 export function SyncStatusIndicator() {
@@ -27,18 +20,14 @@ export function SyncStatusIndicator() {
   };
 
   const handleForceRefresh = async () => {
-    if (
-      confirm("This will replace your local data with cloud data. Continue?")
-    ) {
+    if (confirm("This will replace your local data with cloud data. Continue?")) {
       await forceRefresh();
     }
   };
 
   const getStatusIcon = () => {
     if (isLoading) {
-      return (
-        <RotateCcw size={16} className="animate-spin text-accent-primary" />
-      );
+      return <RotateCcw size={16} className="animate-spin text-accent-primary" />;
     }
 
     if (!syncStatus.isSync) {
@@ -73,6 +62,7 @@ export function SyncStatusIndicator() {
         <div className="flex gap-1 ml-2">
           {syncStatus.hasLocalChanges && !isLoading && (
             <button
+              type="button"
               onClick={handleManualSync}
               className="p-1 hover:bg-accent-primary-soft/20 rounded transition-colors duration-short"
               title="Sync now"
@@ -82,6 +72,7 @@ export function SyncStatusIndicator() {
           )}
 
           <button
+            type="button"
             onClick={handleForceRefresh}
             className="p-1 hover:bg-info-soft/20 rounded transition-colors duration-short"
             title="Force refresh from cloud"
@@ -102,9 +93,7 @@ export function SyncStatusIndicator() {
             {syncStatus.lastSync && (
               <div className="flex justify-between">
                 <span className="text-text-muted">Last sync:</span>
-                <span className="text-text-primary">
-                  {syncStatus.lastSync.toLocaleTimeString()}
-                </span>
+                <span className="text-text-primary">{syncStatus.lastSync.toLocaleTimeString()}</span>
               </div>
             )}
             <div className="flex justify-between">

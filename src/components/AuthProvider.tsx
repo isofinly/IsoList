@@ -1,24 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import { AuthService } from "@/lib/auth";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-// Define public routes that don't require authentication
-const PUBLIC_ROUTES = [
-  "/login",
-  "/auth/callback",
-  "/about",
-  "/privacy",
-  "/terms",
-  "/help",
-  "/contact",
-  // Add any other public routes here
-];
+const PUBLIC_ROUTES = ["/login", "/auth/callback", "/about", "/privacy", "/terms", "/help", "/contact"];
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -31,18 +21,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const isAuthenticated = authService.isAuthenticated();
       const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
 
-      // Allow access to public routes without authentication
       if (isPublicRoute) {
         setIsCheckingAuth(false);
         return;
       }
 
-      // For private routes, check authentication
       if (!isAuthenticated) {
-        // Redirect to login if not authenticated and not on a public route
         router.push("/login");
       } else if (pathname === "/login") {
-        // Redirect to home if authenticated and on login page
         router.push("/");
       }
 
@@ -52,7 +38,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth();
   }, [pathname, router, authService]);
 
-  // Show loading while checking authentication (only for non-public routes)
   if (isCheckingAuth && !PUBLIC_ROUTES.includes(pathname)) {
     return (
       <div className="min-h-screen flex items-center justify-center">

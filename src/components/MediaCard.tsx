@@ -1,7 +1,8 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MediaItem } from "@/lib/types";
+import type { MediaItem } from "@/lib/types";
 import { cn, formatDate } from "@/lib/utils";
 import {
   Calendar as CalendarIcon,
@@ -28,7 +29,6 @@ interface MediaCardProps {
   onEdit: () => void;
 }
 
-// Enhanced color mapping for better visual hierarchy
 const getTypeColor = (type: MediaItem["type"]): string => {
   switch (type) {
     case "movie":
@@ -42,8 +42,11 @@ const getTypeColor = (type: MediaItem["type"]): string => {
   }
 };
 
-const getTypeIcon = (type: MediaItem["type"], size: number = 16) => {
-  const iconProps = { size, className: "transition-all duration-short ease-fluent-standard" };
+const getTypeIcon = (type: MediaItem["type"], size = 16) => {
+  const iconProps = {
+    size,
+    className: "transition-all duration-short ease-fluent-standard",
+  };
 
   switch (type) {
     case "movie":
@@ -84,23 +87,17 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
   return (
     <Card
       className={cn(
-        // Enhanced Fluent Design card
         "group relative overflow-hidden transition-all duration-medium ease-fluent-standard",
         "hover:shadow-fluent-dialog hover:scale-[1.01] hover:border-border-interactive",
         "reveal-hover fluent-surface-hover",
-
-        // Expanded state styling
         isExpanded && [
           "shadow-fluent-dialog scale-[1.01] border-border-interactive",
           "bg-gradient-to-br from-bg-layer-1 to-bg-layer-2",
         ],
-
-        // Enhanced depth
         "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50",
       )}
     >
       <div className="flex flex-col lg:flex-row h-full">
-        {/* Enhanced Image Section */}
         <div
           className={cn(
             "relative flex-shrink-0 aspect-[3/4] lg:aspect-auto lg:w-48",
@@ -125,17 +122,12 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
                 onError={() => setImageError(true)}
                 priority={item.id < "3"}
               />
-
-              {/* Loading shimmer */}
               {!imageLoaded && (
                 <div className="absolute inset-0 bg-gradient-to-r from-bg-layer-2 via-bg-layer-1 to-bg-layer-2 animate-pulse" />
               )}
-
-              {/* Subtle overlay for better text contrast */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
             </>
           ) : (
-            // Enhanced placeholder
             <div className="text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-text-on-accent/10 flex items-center justify-center">
                 {getTypeIcon(item.type, 24)}
@@ -146,13 +138,11 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
             </div>
           )}
 
-          {/* Type badge */}
           <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-bg-base/80 backdrop-blur-sm border border-border-subtle/50 text-xs font-medium text-text-primary">
             {getTypeIcon(item.type, 12)}
             <span className="capitalize">{item.type}</span>
           </div>
 
-          {/* Rating badge for completed items */}
           {item.rating && item.status === "completed" && (
             <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full bg-warning/90 backdrop-blur-sm text-xs font-medium text-black">
               <Star size={12} className="fill-current" />
@@ -161,7 +151,6 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
           )}
         </div>
 
-        {/* Enhanced Content Section */}
         <div className="flex flex-col flex-grow p-5 lg:p-6">
           {/* Header */}
           <div className="flex justify-between items-start mb-3">
@@ -170,7 +159,6 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
                 {item.title}
               </h2>
 
-              {/* Enhanced status badge */}
               <div
                 className={cn(
                   "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-short",
@@ -222,7 +210,6 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
             )}
           </div>
 
-          {/* Expanded content */}
           {isExpanded && (
             <div className="space-y-4 animate-fade-in-up">
               {/* Notes */}
@@ -235,7 +222,6 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
                 </div>
               )}
 
-              {/* Detailed information grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 {item.premiereDate && (
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-bg-layer-2/30">

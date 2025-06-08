@@ -1,8 +1,8 @@
 "use client";
 
+import type { SyncConflict } from "@/lib/sync-manager";
+import { AlertTriangle, Cloud, GitMerge, HardDrive, X } from "lucide-react";
 import { useState } from "react";
-import { SyncConflict } from "@/lib/sync-manager";
-import { AlertTriangle, Cloud, HardDrive, GitMerge, X } from "lucide-react";
 
 interface ConflictDialogProps {
   isOpen: boolean;
@@ -20,17 +20,15 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
   const handleResolve = async () => {
     if (!selectedChoice) return;
 
-    console.log("🔧 Resolving conflict with choice:", selectedChoice);
     setIsResolving(true);
 
     try {
-      await onResolve(selectedChoice);
-      console.log("✅ Conflict resolution completed");
+      onResolve(selectedChoice);
       setSelectedChoice(null);
       onClose();
     } catch (error) {
-      console.error("❌ Conflict resolution failed:", error);
-      alert("Failed to resolve conflict: " + error);
+      console.error("Conflict resolution failed:", error);
+      alert(`Failed to resolve conflict: ${error}`);
     } finally {
       setIsResolving(false);
     }
@@ -48,9 +46,8 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
     if (conflict.type === "real-conflict") {
       const conflictCount = conflict.conflictedItems.length;
       return `Found ${conflictCount} item(s) that have been modified differently in local storage and cloud. These need manual resolution.`;
-    } else {
-      return `Some items have been deleted in one location but modified in another. Please choose how to handle these conflicts.`;
     }
+    return "Some items have been deleted in one location but modified in another. Please choose how to handle these conflicts.";
   };
 
   return (
@@ -62,6 +59,7 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
             <AlertTriangle className="text-warning" size={24} />
             <h2 className="text-xl font-semibold text-text-primary">Data Sync Conflict</h2>
             <button
+              type="button"
               onClick={handleCancel}
               className="ml-auto p-1 hover:bg-bg-layer-1 rounded transition-colors"
             >
@@ -72,7 +70,6 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[60vh]">
-          {/* Description */}
           <div className="bg-warning-soft/20 border border-warning-soft rounded-lg p-4 mb-6">
             <p className="text-sm text-text-secondary">{getConflictDescription()}</p>
           </div>
@@ -95,7 +92,6 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
 
           {/* Data Comparison */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {/* Local Data */}
             <div className="border border-border-interactive rounded-lg p-4">
               <div className="flex items-center gap-2 mb-3">
                 <HardDrive size={16} className="text-text-secondary" />
@@ -151,7 +147,6 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
           {/* Resolution Options */}
           <div className="space-y-3">
             <h3 className="font-medium text-text-primary">Choose resolution:</h3>
-
             {/* Use Local */}
             {conflict.local.count > 0 && (
               <label className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-bg-layer-1 transition-colors">
@@ -227,6 +222,7 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
         <div className="p-6 border-t border-border-divider bg-bg-layer-1">
           <div className="flex justify-between gap-3">
             <button
+              type="button"
               onClick={handleCancel}
               disabled={isResolving}
               className="px-4 py-2 border border-border-interactive rounded-lg hover:bg-bg-layer-2 transition-colors disabled:opacity-50"
@@ -235,6 +231,7 @@ export function ConflictDialog({ isOpen, conflict, onResolve, onClose }: Conflic
             </button>
 
             <button
+              type="button"
               onClick={handleResolve}
               disabled={!selectedChoice || isResolving}
               className="px-6 py-2 bg-accent-primary hover:bg-accent-primary-hover text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"

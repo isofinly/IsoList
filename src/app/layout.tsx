@@ -1,11 +1,11 @@
-import Navbar from "@/components/Navbar";
 import { AuthProvider } from "@/components/AuthProvider";
+import { ConflictProvider } from "@/components/ConflictProvider";
+import Navbar from "@/components/Navbar";
 import { StoreInitializer } from "@/components/StoreInitializer";
 import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fira_Code } from "next/font/google";
 import "./globals.css";
-import { ConflictProvider } from "@/components/ConflictProvider";
 
 const figtree = Figtree({
   subsets: ["latin"],
@@ -63,21 +63,17 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0066ff" />
         <meta name="msapplication-tap-highlight" content="no" />
 
-        {/* Favicon and app icons */}
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-        {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
-        {/* Preconnect to Google APIs */}
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://www.googleapis.com" />
       </head>
 
       <body className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}>
-        {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only fixed top-4 left-4 z-[9999] px-4 py-2 bg-accent-primary text-text-on-accent rounded-md transition-all duration-short focus:ring-2 focus:ring-accent-primary-hover focus:ring-offset-2 focus:ring-offset-bg-base"
@@ -85,28 +81,25 @@ export default function RootLayout({
           Skip to main content
         </a>
 
-        {/* Wrap everything in providers */}
         <AuthProvider>
           <StoreInitializer>
             <ConflictProvider>
-              {/* Navigation */}
               <Navbar />
 
-              {/* Main content area */}
               <main
                 id="main-content"
                 className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
               >
-                {/* Content wrapper with Fluent Design animations */}
                 <div className="flex-grow">{children}</div>
 
-                {/* Footer */}
                 <footer className="mt-16 pt-8 border-t border-border-divider/30">
                   <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
                     <div className="flex items-center gap-2">
                       <span>© {new Date().getFullYear()} IsoList</span>
                       <span>•</span>
                       <span>Built with ❤️</span>
+                      <span>•</span>
+                      <span>Apache License 2.0</span>
                     </div>
 
                     <div className="flex items-center gap-4">
@@ -127,13 +120,11 @@ export default function RootLayout({
                 </footer>
               </main>
 
-              {/* Sync status indicator */}
               <SyncStatusIndicator />
             </ConflictProvider>
           </StoreInitializer>
         </AuthProvider>
 
-        {/* Background decorative elements */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
           <div
             className="absolute -top-[40vh] -right-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.02] rounded-full blur-3xl"
@@ -149,15 +140,12 @@ export default function RootLayout({
           />
         </div>
 
-        {/* Toast notifications container */}
         <div
           id="toast-container"
           className="fixed top-20 right-4 z-notification flex flex-col gap-2 pointer-events-none"
           aria-live="polite"
           aria-label="Notifications"
-        >
-          {/* Toast notifications will be dynamically inserted here */}
-        </div>
+        />
       </body>
     </html>
   );

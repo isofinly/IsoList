@@ -9,7 +9,7 @@ export function formatDate(dateString?: string): string {
   if (!dateString) return "N/A";
   try {
     const date = new Date(dateString + "T00:00:00"); // Ensure correct parsing as local date
-    if (isNaN(date.getTime())) return "Invalid Date";
+    if (Number.isNaN(date.getTime())) return "Invalid Date";
     return date.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
   } catch (e) {
     return "Invalid Date";

@@ -1,10 +1,9 @@
-import { FileText, AlertCircle, Scale, Shield, Users, Zap } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertCircle, FileText, Scale, Shield, Users, Zap } from "lucide-react";
 
 export default function TermsPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <Scale className="text-accent-primary" size={32} />
@@ -19,7 +18,6 @@ export default function TermsPage() {
         </div>
       </div>
 
-      {/* Quick Summary */}
       <Card className="bg-accent-primary-soft/10 border-accent-primary-soft">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -61,7 +59,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* Acceptance */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -82,7 +79,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* Service Description */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -107,7 +103,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* User Responsibilities */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -152,7 +147,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* Privacy & Data */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -181,7 +175,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* Service Availability */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -209,7 +202,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* Disclaimers */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -243,7 +235,6 @@ export default function TermsPage() {
         </CardContent>
       </Card>
 
-      {/* Termination */}
       <Card>
         <CardHeader>
           <CardTitle>Termination</CardTitle>

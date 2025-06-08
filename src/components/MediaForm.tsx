@@ -1,62 +1,37 @@
-// src/components/MediaForm.tsx
 "use client";
+
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem, MediaStatus, MediaType } from "@/lib/types";
+import { Calendar, FileText, Film, Monitor, Plus, Star, Tag, Tv, User, X, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import type React from "react";
 import { useEffect, useState } from "react";
-import {
-  Calendar,
-  Star,
-  Tag,
-  User,
-  Monitor,
-  FileText,
-  Plus,
-  X,
-  Film,
-  Tv,
-  Zap,
-} from "lucide-react";
 
 interface MediaFormProps {
   item?: MediaItem;
   onFormSubmit?: () => void;
 }
 
-// Define a type for form data, storing numbers as strings for input compatibility
 interface MediaFormData {
   id?: string;
   title: string;
   type: MediaType;
   status: MediaStatus;
   imageUrl: string;
-  rating: string; // Stored as string for input
+  rating: string;
   notes: string;
   premiereDate: string; // YYYY-MM-DD
   startDate: string; // YYYY-MM-DD
   completionDate: string; // YYYY-MM-DD
-  episodesWatched: string; // Stored as string for input
-  totalEpisodes: string; // Stored as string for input
+  episodesWatched: string;
+  totalEpisodes: string;
   releaseDateTBD: boolean;
   genres: string[];
   director: string;
@@ -68,13 +43,13 @@ const initialFormState: MediaFormData = {
   type: "movie",
   status: "planned",
   imageUrl: "",
-  rating: "", // Initialize as empty string
+  rating: "",
   notes: "",
   premiereDate: "",
   startDate: "",
   completionDate: "",
-  episodesWatched: "", // Initialize as empty string
-  totalEpisodes: "", // Initialize as empty string
+  episodesWatched: "",
+  totalEpisodes: "",
   releaseDateTBD: false,
   genres: [],
   director: "",
@@ -82,13 +57,7 @@ const initialFormState: MediaFormData = {
 };
 
 const mediaTypes: MediaType[] = ["movie", "series", "anime"];
-const mediaStatuses: MediaStatus[] = [
-  "completed",
-  "watching",
-  "planned",
-  "on-hold",
-  "dropped",
-];
+const mediaStatuses: MediaStatus[] = ["completed", "watching", "planned", "on-hold", "dropped"];
 
 const getTypeIcon = (type: MediaType) => {
   switch (type) {
@@ -127,22 +96,16 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
   const [currentGenre, setCurrentGenre] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // TODO: Improve this section
   useEffect(() => {
     if (item) {
-      // Ensure status is always valid
       const validStatus =
-        item.status &&
-        ["completed", "watching", "planned", "on-hold", "dropped"].includes(
-          item.status
-        )
+        item.status && ["completed", "watching", "planned", "on-hold", "dropped"].includes(item.status)
           ? item.status
           : "planned";
 
-      // Ensure type is always valid
       const validType =
-        item.type && ["movie", "series", "anime"].includes(item.type)
-          ? item.type
-          : "movie";
+        item.type && ["movie", "series", "anime"].includes(item.type) ? item.type : "movie";
 
       setFormData({
         id: item.id,
@@ -154,15 +117,9 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
         notes: item.notes || "",
         premiereDate: item.premiereDate ? item.premiereDate.split("T")[0] : "",
         startDate: item.startDate ? item.startDate.split("T")[0] : "",
-        completionDate: item.completionDate
-          ? item.completionDate.split("T")[0]
-          : "",
-        episodesWatched:
-          item.episodesWatched !== undefined
-            ? String(item.episodesWatched)
-            : "",
-        totalEpisodes:
-          item.totalEpisodes !== undefined ? String(item.totalEpisodes) : "",
+        completionDate: item.completionDate ? item.completionDate.split("T")[0] : "",
+        episodesWatched: item.episodesWatched !== undefined ? String(item.episodesWatched) : "",
+        totalEpisodes: item.totalEpisodes !== undefined ? String(item.totalEpisodes) : "",
         releaseDateTBD: !!item.releaseDateTBD,
         genres: item.genres || [],
         director: item.director || "",
@@ -174,9 +131,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
   }, [item]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
   ) => {
     const { name, value, type } = e.target;
 
@@ -220,39 +175,25 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Convert string numbers back to number | undefined for MediaItem structure
       const itemToStore: Omit<MediaItem, "id"> & { id?: string } = {
         ...formData,
-        // Ensure correct parsing for numbers, or undefined if empty
-        rating:
-          formData.rating.trim() === ""
-            ? undefined
-            : Number.parseFloat(formData.rating),
+        rating: formData.rating.trim() === "" ? undefined : Number.parseFloat(formData.rating),
         episodesWatched:
           formData.episodesWatched.trim() === ""
             ? undefined
             : Number.parseInt(formData.episodesWatched, 10),
         totalEpisodes:
-          formData.totalEpisodes.trim() === ""
-            ? undefined
-            : Number.parseInt(formData.totalEpisodes, 10),
+          formData.totalEpisodes.trim() === "" ? undefined : Number.parseInt(formData.totalEpisodes, 10),
         // Dates are already YYYY-MM-DD strings, which is fine for MediaItem type
         // Ensure booleans are correct
         releaseDateTBD: !!formData.releaseDateTBD,
       };
 
-      // Validate parsed numbers if necessary (e.g., check for NaN)
-      if (formData.rating.trim() !== "" && isNaN(itemToStore.rating!))
+      if (formData.rating.trim() !== "" && Number.isNaN(itemToStore.rating!))
         itemToStore.rating = undefined;
-      if (
-        formData.episodesWatched.trim() !== "" &&
-        isNaN(itemToStore.episodesWatched!)
-      )
+      if (formData.episodesWatched.trim() !== "" && Number.isNaN(itemToStore.episodesWatched!))
         itemToStore.episodesWatched = undefined;
-      if (
-        formData.totalEpisodes.trim() !== "" &&
-        isNaN(itemToStore.totalEpisodes!)
-      )
+      if (formData.totalEpisodes.trim() !== "" && Number.isNaN(itemToStore.totalEpisodes!))
         itemToStore.totalEpisodes = undefined;
 
       if (itemToStore.id) {
@@ -260,9 +201,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
       } else {
         const { id, ...newItemData } = itemToStore;
         addMediaItem(newItemData as Omit<MediaItem, "id">);
-        router.push(
-          formData.status === "completed" ? "/ratings" : "/watchlist"
-        );
+        router.push(formData.status === "completed" ? "/ratings" : "/watchlist");
       }
       if (onFormSubmit) onFormSubmit();
     } finally {
@@ -287,21 +226,15 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
 
         <CardContent className="space-y-8">
           <form onSubmit={handleSubmit} className="space-y-8">
-            {/* Basic Information Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-border-divider/30">
                 <Film size={20} className="text-accent-primary" />
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Basic Information
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Basic Information</h3>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="title"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="title" className="text-sm font-medium flex items-center gap-2">
                     <FileText size={16} className="text-text-muted" />
                     Title <span className="text-destructive">*</span>
                   </Label>
@@ -317,20 +250,14 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="type"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="type" className="text-sm font-medium flex items-center gap-2">
                     {getTypeIcon(formData.type)}
                     Type
                   </Label>
                   <Select
                     value={formData.type}
                     onValueChange={(value) => {
-                      if (
-                        value &&
-                        ["movie", "series", "anime"].includes(value)
-                      ) {
+                      if (value && ["movie", "series", "anime"].includes(value)) {
                         setFormData((prev) => ({
                           ...prev,
                           type: value as MediaType,
@@ -343,11 +270,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                     </SelectTrigger>
                     <SelectContent>
                       {mediaTypes.map((t) => (
-                        <SelectItem
-                          key={t}
-                          value={t}
-                          className="flex items-center gap-2"
-                        >
+                        <SelectItem key={t} value={t} className="flex items-center gap-2">
                           <div className="flex items-center gap-2">
                             {getTypeIcon(t)}
                             {t.charAt(0).toUpperCase() + t.slice(1)}
@@ -359,14 +282,12 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="status"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="status" className="text-sm font-medium flex items-center gap-2">
                     <div
-                      className={`w-2 h-2 rounded-full ${getStatusColor(
-                        formData.status
-                      ).replace("text-", "bg-")}`}
+                      className={`w-2 h-2 rounded-full ${getStatusColor(formData.status).replace(
+                        "text-",
+                        "bg-",
+                      )}`}
                     />
                     Status
                   </Label>
@@ -375,13 +296,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                     onValueChange={(value) => {
                       if (
                         value &&
-                        [
-                          "completed",
-                          "watching",
-                          "planned",
-                          "on-hold",
-                          "dropped",
-                        ].includes(value)
+                        ["completed", "watching", "planned", "on-hold", "dropped"].includes(value)
                       ) {
                         setFormData((prev) => ({
                           ...prev,
@@ -398,12 +313,12 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                         <SelectItem key={s} value={s}>
                           <div className="flex items-center gap-2">
                             <div
-                              className={`w-2 h-2 rounded-full ${getStatusColor(
-                                s
-                              ).replace("text-", "bg-")}`}
+                              className={`w-2 h-2 rounded-full ${getStatusColor(s).replace(
+                                "text-",
+                                "bg-",
+                              )}`}
                             />
-                            {s.charAt(0).toUpperCase() +
-                              s.slice(1).replace("-", " ")}
+                            {s.charAt(0).toUpperCase() + s.slice(1).replace("-", " ")}
                           </div>
                         </SelectItem>
                       ))}
@@ -412,10 +327,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="imageUrl"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="imageUrl" className="text-sm font-medium flex items-center gap-2">
                     <Monitor size={16} className="text-text-muted" />
                     Image URL
                   </Label>
@@ -435,17 +347,12 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-border-divider/30">
                 <Star size={20} className="text-accent-primary" />
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Rating & Details
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Rating & Details</h3>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="rating"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="rating" className="text-sm font-medium flex items-center gap-2">
                     <Star size={16} className="text-warning" />
                     Rating (0.5 - 10.0)
                   </Label>
@@ -464,10 +371,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="platform"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="platform" className="text-sm font-medium flex items-center gap-2">
                     <Monitor size={16} className="text-text-muted" />
                     Platform/Service
                   </Label>
@@ -482,10 +386,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="director"
-                    className="text-sm font-medium flex items-center gap-2"
-                  >
+                  <Label htmlFor="director" className="text-sm font-medium flex items-center gap-2">
                     <User size={16} className="text-text-muted" />
                     Director/Creator
                   </Label>
@@ -524,17 +425,12 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
               <div className="space-y-6">
                 <div className="flex items-center gap-2 pb-2 border-b border-border-divider/30">
                   <Tv size={20} className="text-accent-primary" />
-                  <h3 className="text-lg font-semibold text-text-primary">
-                    Episode Progress
-                  </h3>
+                  <h3 className="text-lg font-semibold text-text-primary">Episode Progress</h3>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="episodesWatched"
-                      className="text-sm font-medium"
-                    >
+                    <Label htmlFor="episodesWatched" className="text-sm font-medium">
                       Episodes Watched
                     </Label>
                     <Input
@@ -550,10 +446,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label
-                      htmlFor="totalEpisodes"
-                      className="text-sm font-medium"
-                    >
+                    <Label htmlFor="totalEpisodes" className="text-sm font-medium">
                       Total Episodes
                     </Label>
                     <Input
@@ -575,9 +468,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-border-divider/30">
                 <Calendar size={20} className="text-accent-primary" />
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Important Dates
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Important Dates</h3>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -610,10 +501,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="completionDate"
-                    className="text-sm font-medium"
-                  >
+                  <Label htmlFor="completionDate" className="text-sm font-medium">
                     Completion Date
                   </Label>
                   <Input
@@ -632,9 +520,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-border-divider/30">
                 <Tag size={20} className="text-accent-primary" />
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Genres
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Genres</h3>
               </div>
 
               <div className="space-y-4">
@@ -687,9 +573,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
             <div className="space-y-6">
               <div className="flex items-center gap-2 pb-2 border-b border-border-divider/30">
                 <FileText size={20} className="text-accent-primary" />
-                <h3 className="text-lg font-semibold text-text-primary">
-                  Notes
-                </h3>
+                <h3 className="text-lg font-semibold text-text-primary">Notes</h3>
               </div>
 
               <div className="space-y-2">
@@ -732,8 +616,8 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                     ? "Saving Changes..."
                     : "Adding Media..."
                   : item
-                  ? "Save Changes"
-                  : "Add Media"}
+                    ? "Save Changes"
+                    : "Add Media"}
               </Button>
             </div>
           </form>

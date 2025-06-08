@@ -1,24 +1,24 @@
 import { create } from "zustand";
-import type { MediaItem } from "./types";
-import { SyncManager, SyncConflict } from "./sync-manager";
 import { AuthService } from "./auth";
 import { PersistenceService } from "./persistence";
+import { SyncManager, type SyncConflict } from "./sync-manager";
+import type { MediaItem } from "./types";
 
 interface MediaState {
   mediaItems: MediaItem[];
   isLoading: boolean;
-  syncStatus: { isSync: boolean; lastSync: Date | null; hasLocalChanges: boolean };
+  syncStatus: {
+    isSync: boolean;
+    lastSync: Date | null;
+    hasLocalChanges: boolean;
+  };
   conflict: SyncConflict | null;
   showConflictDialog: boolean;
-
-  // Actions
   addMediaItem: (item: Omit<MediaItem, "id">) => void;
   updateMediaItem: (item: MediaItem) => void;
   deleteMediaItem: (id: string) => void;
-
-  // Safe sync actions
   initializeStore: () => Promise<void>;
-  resolveConflict: (choice: 'local' | 'cloud' | 'merge' | 'cancel') => Promise<void>;
+  resolveConflict: (choice: "local" | "cloud" | "merge" | "cancel") => Promise<void>;
   setConflictDialog: (show: boolean) => void;
   manualSync: () => Promise<void>;
   updateSyncStatus: () => void;
@@ -28,7 +28,6 @@ interface MediaState {
 const syncManager = SyncManager.getInstance();
 const authService = AuthService.getInstance();
 const persistenceService = PersistenceService.getInstance();
-
 
 const initialMediaItems: MediaItem[] = [
   {
@@ -69,11 +68,11 @@ const initialMediaItems: MediaItem[] = [
     imageUrl: "https://placehold.co/300x450/D4AF37/000000.png?text=Arcane&font=mono",
     rating: undefined,
     notes: "Season 2 hype!",
-    premiereDate: "2021-11-06", // S1
-    startDate: "2024-06-01", // Rewatching or S2 prep
+    premiereDate: "2021-11-06",
+    startDate: "2024-06-01",
     episodesWatched: 3,
-    totalEpisodes: 9, // S1
-    releaseDateTBD: false, // S2 might be TBD but this is S1 for now
+    totalEpisodes: 9,
+    releaseDateTBD: false,
     genres: ["Animation", "Action", "Fantasy"],
     platform: "Netflix",
   },
@@ -93,7 +92,7 @@ const initialMediaItems: MediaItem[] = [
     type: "movie",
     status: "planned",
     imageUrl: "https://placehold.co/300x450/708090/FFFFFF.png?text=Project+Hail+Mary&font=mono",
-    premiereDate: "2026-03-20", // Example future date
+    premiereDate: "2026-03-20",
     releaseDateTBD: false,
     genres: ["Sci-Fi", "Adventure"],
   },
@@ -103,7 +102,7 @@ const initialMediaItems: MediaItem[] = [
     type: "series",
     status: "planned",
     imageUrl: "https://placehold.co/300x450/404040/FFFFFF.png?text=Series+X+TBD&font=mono",
-    releaseDateTBD: true, // This one is TBD
+    releaseDateTBD: true,
     genres: ["Cyberpunk", "Mystery"],
   },
 ];
@@ -119,52 +118,44 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      // Load from localStorage first
-      const stored = localStorage.getItem('mediaItems');
+      const stored = localStorage.getItem("mediaItems");
       let localItems: MediaItem[] = [];
 
       if (stored) {
         try {
           localItems = JSON.parse(stored);
         } catch (error) {
-          console.error('Failed to parse stored items:', error);
+          console.error("Failed to parse stored items:", error);
           localItems = [];
         }
       }
 
       if (localItems.length === 0) {
         localItems = initialMediaItems;
-        // Save initial items to localStorage
-        localStorage.setItem('mediaItems', JSON.stringify(localItems));
-        localStorage.setItem('localTimestamp', new Date().toISOString());
+        localStorage.setItem("mediaItems", JSON.stringify(localItems));
+        localStorage.setItem("localTimestamp", new Date().toISOString());
       }
 
       set({ mediaItems: localItems });
 
-      // If authenticated, try to ensure valid token and sync
       if (authService.isAuthenticated()) {
-        console.log('🔐 Checking authentication status...');
-
         const hasValidToken = await authService.ensureValidToken();
 
         if (hasValidToken) {
-          console.log('🧠 Starting intelligent sync...');
           const syncResult = await syncManager.intelligentSync(localItems);
 
           if (syncResult.success) {
-            console.log('✅ Intelligent sync completed:', syncResult.action);
             set({ mediaItems: syncResult.items });
-            localStorage.removeItem('hasLocalChanges');
-            localStorage.setItem('lastSync', new Date().toISOString());
-          } else if (syncResult.action === 'requires-user-resolution') {
+            localStorage.removeItem("hasLocalChanges");
+            localStorage.setItem("lastSync", new Date().toISOString());
+          } else if (syncResult.action === "requires-user-resolution") {
             const conflict = await syncManager.detectConflict(localItems);
             if (conflict) {
-              console.log('⚠️ Real conflicts detected, showing resolution dialog');
               set({ conflict, showConflictDialog: true });
             }
           }
         } else {
-          console.log('❌ Token validation failed, switching to offline mode');
+          console.error("Token validation failed, switching to offline mode");
           // Don't clear the user data immediately - they might want to re-auth
           // Just show that sync is unavailable
         }
@@ -172,22 +163,20 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
       get().updateSyncStatus();
     } catch (error) {
-      console.error('Failed to initialize store:', error);
+      console.error("Failed to initialize store:", error);
     } finally {
       set({ isLoading: false });
     }
   },
 
-  resolveConflict: async (choice: 'local' | 'cloud' | 'merge' | 'cancel') => {
-    console.log('📱 Store: Starting conflict resolution with choice:', choice);
-
+  resolveConflict: async (choice: "local" | "cloud" | "merge" | "cancel") => {
     const { conflict } = get();
     if (!conflict) {
-      console.error('❌ No conflict to resolve');
+      console.error("No conflict to resolve");
       return;
     }
 
-    if (choice === 'cancel') {
+    if (choice === "cancel") {
       set({ conflict: null, showConflictDialog: false });
       return;
     }
@@ -195,14 +184,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      console.log('🔄 Executing safeSyncWithUserChoice...');
-
-      const resolvedItems = await syncManager.safeSyncWithUserChoice(
-        conflict.local.items,
-        choice
-      );
-
-      console.log('✅ Sync completed, resolved items count:', resolvedItems.length);
+      const resolvedItems = await syncManager.safeSyncWithUserChoice(conflict.local.items, choice);
 
       set({
         mediaItems: resolvedItems,
@@ -210,17 +192,15 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         showConflictDialog: false,
       });
 
-      // Properly clear all sync-related flags
-      localStorage.setItem('mediaItems', JSON.stringify(resolvedItems));
-      localStorage.setItem('localTimestamp', new Date().toISOString());
-      localStorage.setItem('lastSync', new Date().toISOString());
-      localStorage.removeItem('hasLocalChanges'); // Clear this!
+      localStorage.setItem("mediaItems", JSON.stringify(resolvedItems));
+      localStorage.setItem("localTimestamp", new Date().toISOString());
+      localStorage.setItem("lastSync", new Date().toISOString());
+      localStorage.removeItem("hasLocalChanges");
 
       get().updateSyncStatus();
-      console.log('🎉 Conflict resolved successfully, all flags cleared');
     } catch (error) {
-      console.error('💥 Failed to resolve conflict:', error);
-      alert('Failed to resolve conflict: ' + (error as Error).message);
+      console.error("Failed to resolve conflict:", error);
+      alert(`Failed to resolve conflict: ${error}`);
     } finally {
       set({ isLoading: false });
     }
@@ -238,13 +218,11 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     set({ mediaItems: updatedItems });
 
-    // Only set changes flag if authenticated (no point if not syncing)
-    localStorage.setItem('mediaItems', JSON.stringify(updatedItems));
-    localStorage.setItem('localTimestamp', new Date().toISOString());
+    localStorage.setItem("mediaItems", JSON.stringify(updatedItems));
+    localStorage.setItem("localTimestamp", new Date().toISOString());
 
     if (authService.isAuthenticated()) {
-      localStorage.setItem('hasLocalChanges', 'true');
-      console.log('📝 Item added, changes flag set');
+      localStorage.setItem("hasLocalChanges", "true");
     }
 
     get().updateSyncStatus();
@@ -252,17 +230,16 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
   updateMediaItem: (updatedItem) => {
     const updatedItems = get().mediaItems.map((item) =>
-      item.id === updatedItem.id ? updatedItem : item
+      item.id === updatedItem.id ? updatedItem : item,
     );
 
     set({ mediaItems: updatedItems });
 
-    localStorage.setItem('mediaItems', JSON.stringify(updatedItems));
-    localStorage.setItem('localTimestamp', new Date().toISOString());
+    localStorage.setItem("mediaItems", JSON.stringify(updatedItems));
+    localStorage.setItem("localTimestamp", new Date().toISOString());
 
     if (authService.isAuthenticated()) {
-      localStorage.setItem('hasLocalChanges', 'true');
-      console.log('✏️ Item updated, changes flag set');
+      localStorage.setItem("hasLocalChanges", "true");
     }
 
     get().updateSyncStatus();
@@ -273,12 +250,11 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     set({ mediaItems: updatedItems });
 
-    localStorage.setItem('mediaItems', JSON.stringify(updatedItems));
-    localStorage.setItem('localTimestamp', new Date().toISOString());
+    localStorage.setItem("mediaItems", JSON.stringify(updatedItems));
+    localStorage.setItem("localTimestamp", new Date().toISOString());
 
     if (authService.isAuthenticated()) {
-      localStorage.setItem('hasLocalChanges', 'true');
-      console.log('🗑️ Item deleted, changes flag set');
+      localStorage.setItem("hasLocalChanges", "true");
     }
 
     get().updateSyncStatus();
@@ -290,20 +266,15 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ isLoading: true });
     try {
       const currentItems = get().mediaItems;
-      console.log('🔄 Starting manual intelligent sync...');
 
       const syncResult = await syncManager.intelligentSync(currentItems);
 
       if (syncResult.success) {
-        console.log('✅ Manual sync completed:', syncResult.action);
         set({ mediaItems: syncResult.items });
 
-        // Clear the changes flag after successful manual sync
-        localStorage.removeItem('hasLocalChanges');
-        localStorage.setItem('lastSync', new Date().toISOString());
-
-        console.log('🎉 Manual sync successful, changes flag cleared');
-      } else if (syncResult.action === 'requires-user-resolution') {
+        localStorage.removeItem("hasLocalChanges");
+        localStorage.setItem("lastSync", new Date().toISOString());
+      } else if (syncResult.action === "requires-user-resolution") {
         const conflict = await syncManager.detectConflict(currentItems);
         if (conflict) {
           set({ conflict, showConflictDialog: true });
@@ -312,15 +283,15 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
       get().updateSyncStatus();
     } catch (error) {
-      console.error('Manual sync failed:', error);
+      console.error("Manual sync failed:", error);
     } finally {
       set({ isLoading: false });
     }
   },
 
   updateSyncStatus: () => {
-    const lastSyncStr = localStorage.getItem('lastSync');
-    const hasLocalChanges = localStorage.getItem('hasLocalChanges') === 'true';
+    const lastSyncStr = localStorage.getItem("lastSync");
+    const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
 
     set({
       syncStatus: {
@@ -340,13 +311,11 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       if (cloudItems) {
         set({ mediaItems: cloudItems });
         get().updateSyncStatus();
-        console.log('🔄 Force refreshed from cloud');
       }
     } catch (error) {
-      console.error('Force refresh failed:', error);
+      console.error("Force refresh failed:", error);
     } finally {
       set({ isLoading: false });
     }
   },
-
 }));

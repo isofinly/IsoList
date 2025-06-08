@@ -1,11 +1,9 @@
 @import "tailwindcss";
 
 @theme inline {
-    /* Fonts */
     --font-sans: var(--font-figtree), system-ui, sans-serif;
     --font-mono: var(--font-fira-code), ui-monospace, monospace;
 
-    /* Backgrounds & Surfaces */
     --color-bg-base: oklch(12% 0.003 240);
     --color-bg-layer-1: oklch(16% 0.005 240);
     --color-bg-layer-2: oklch(20% 0.006 240);
@@ -14,7 +12,6 @@
     --color-bg-acrylic-navbar: oklch(from var(--color-bg-layer-1) l c h / 0.6);
     --color-bg-acrylic-light: oklch(from var(--color-bg-layer-1) l c h / 0.5);
 
-    /* Text */
     --color-text-primary: oklch(92% 0.002 240);
     --color-text-secondary: oklch(70% 0.004 240);
     --color-text-muted: oklch(55% 0.005 240);
@@ -22,20 +19,17 @@
     --color-text-on-accent: oklch(98% 0 0);
     --color-text-on-destructive: oklch(98% 0 0);
 
-    /* Accent */
     --color-accent-primary: oklch(60% 0.22 255);
     --color-accent-primary-hover: oklch(65% 0.23 255);
     --color-accent-primary-active: oklch(55% 0.21 255);
     --color-accent-primary-soft: oklch(from var(--color-accent-primary) l c h / 0.15);
     --color-accent-primary-soft-hover: oklch(from var(--color-accent-primary) l c h / 0.25);
 
-    /* Borders */
     --color-border-subtle: oklch(25% 0.005 240);
     --color-border-interactive: oklch(35% 0.008 240);
     --color-border-focus: var(--color-accent-primary);
     --color-border-divider: oklch(22% 0.004 240);
 
-    /* Status Colors */
     --color-destructive: oklch(55% 0.24 25);
     --color-destructive-hover: oklch(60% 0.25 25);
     --color-destructive-active: oklch(50% 0.23 25);
@@ -47,7 +41,6 @@
     --color-info: var(--color-accent-primary);
     --color-info-soft: oklch(from var(--color-info) l c h / 0.15);
 
-    /* Shadows */
     --shadow-sm:
         0 1px 2px oklch(from var(--color-bg-base) l c h / 0.1),
         0 1px 3px oklch(from var(--color-bg-base) l c h / 0.08);
@@ -70,14 +63,12 @@
     --shadow-fluent-flyout:
         0 8px 16px 0 oklch(from black l c h / 0.14), 0 2px 4px 0 oklch(from black l c h / 0.12);
 
-    /* Radius */
     --radius-sm: 0.25rem;
     --radius-md: 0.375rem;
     --radius-lg: 0.5rem;
     --radius-xl: 0.75rem;
     --radius-2xl: 1rem;
 
-    /* Transitions */
     --transition-short: 150ms;
     --transition-medium: 250ms;
     --transition-long: 400ms;
@@ -87,10 +78,8 @@
     --transition-fluent-entrance: cubic-bezier(0.1, 0.9, 0.2, 1);
     --transition-fluent-exit: cubic-bezier(0.7, 0, 0.84, 0);
 
-    /* Layout */
     --navbar-height: 4rem;
 
-    /* Tailwind v4 Core Color Mappings */
     --color-background: var(--color-bg-base);
     --color-foreground: var(--color-text-primary);
     --color-card: var(--color-bg-layer-1);
@@ -112,7 +101,6 @@
     --color-ring: var(--color-border-focus);
 }
 
-/* Base Styles */
 *,
 *::before,
 *::after {
@@ -135,7 +123,6 @@ body {
     text-rendering: optimizeLegibility;
 }
 
-/* Typography System */
 h1,
 h2,
 h3,
@@ -211,7 +198,6 @@ a:focus-visible {
     outline-offset: 2px;
 }
 
-/* Custom Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -237,13 +223,11 @@ a:focus-visible {
     background: var(--color-bg-base);
 }
 
-/* Selection */
 ::selection {
     background-color: var(--color-accent-primary);
     color: var(--color-text-on-accent);
 }
 
-/* Focus System */
 *:focus-visible {
     outline: 2px solid var(--color-border-focus);
     outline-offset: 2px;
@@ -254,7 +238,6 @@ a:focus-visible {
     outline: none;
 }
 
-/* Utility Classes */
 .clip-path-\[inset\(50\%\)\] {
     clip-path: inset(50%);
 }
@@ -312,7 +295,6 @@ a:focus-visible {
     border: 1px solid oklch(from white l c h / 0.1);
 }
 
-/* Animations */
 @keyframes fadeInUp {
     0% {
         opacity: 0;
@@ -434,7 +416,6 @@ a:focus-visible {
     animation: blink 1s infinite;
 }
 
-/* Responsive Design */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

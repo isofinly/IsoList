@@ -1,10 +1,9 @@
 "use client";
 
-import * as React from "react";
-import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Check, ChevronDown } from "lucide-react";
+import * as React from "react";
 
-// Custom Select Implementation
 interface SelectContextType {
   value: string;
   onValueChange: (value: string) => void;
@@ -14,9 +13,7 @@ interface SelectContextType {
   setDisplayText: (value: string, displayText: string) => void;
 }
 
-const SelectContext = React.createContext<SelectContextType | undefined>(
-  undefined
-);
+const SelectContext = React.createContext<SelectContextType | undefined>(undefined);
 
 interface SelectProps {
   value?: string;
@@ -24,24 +21,17 @@ interface SelectProps {
   children: React.ReactNode;
 }
 
-const Select: React.FC<SelectProps> = ({
-  value = "",
-  onValueChange,
-  children,
-}) => {
+const Select: React.FC<SelectProps> = ({ value = "", onValueChange, children }) => {
   const [open, setOpen] = React.useState(false);
   const [displayMap, setDisplayMap] = React.useState(new Map<string, string>());
 
-  const setDisplayText = React.useCallback(
-    (value: string, displayText: string) => {
-      setDisplayMap((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(value, displayText);
-        return newMap;
-      });
-    },
-    []
-  );
+  const setDisplayText = React.useCallback((value: string, displayText: string) => {
+    setDisplayMap((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(value, displayText);
+      return newMap;
+    });
+  }, []);
 
   return (
     <SelectContext.Provider
@@ -67,56 +57,43 @@ const useSelectContext = () => {
   return context;
 };
 
-const SelectTrigger = React.forwardRef<
-  HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, children, ...props }, ref) => {
-  const { open, setOpen } = useSelectContext();
+const SelectTrigger = React.forwardRef<HTMLButtonElement, React.ButtonHTMLAttributes<HTMLButtonElement>>(
+  ({ className, children, ...props }, ref) => {
+    const { open, setOpen } = useSelectContext();
 
-  return (
-    <button
-      ref={ref}
-      type="button"
-      onClick={() => setOpen(!open)}
-      className={cn(
-        // Base styles with Fluent Design principles
-        "flex h-10 w-full items-center justify-between rounded-md px-3 py-2",
-        "border border-border-subtle bg-bg-layer-1 text-sm text-text-primary",
-        "transition-all duration-short ease-fluent-standard",
-
-        // Hover and focus states
-        "hover:border-border-interactive hover:bg-bg-layer-2",
-        "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-0",
-        "focus:border-accent-primary focus:bg-bg-layer-1",
-
-        // Disabled state
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        "disabled:bg-bg-layer-1 disabled:border-border-subtle",
-
-        // Placeholder styling
-        "placeholder:text-text-muted",
-
-        // Subtle inner shadow for depth
-        "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
-        "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
-
-        // Reveal effect
-        "reveal-hover relative overflow-hidden",
-
-        className
-      )}
-      {...props}
-    >
-      {children}
-      <ChevronDown
+    return (
+      <button
+        ref={ref}
+        type="button"
+        onClick={() => setOpen(!open)}
         className={cn(
-          "h-4 w-4 opacity-50 transition-transform duration-short shrink-0",
-          open && "rotate-180"
+          "flex h-10 w-full items-center justify-between rounded-md px-3 py-2",
+          "border border-border-subtle bg-bg-layer-1 text-sm text-text-primary",
+          "transition-all duration-short ease-fluent-standard",
+          "hover:border-border-interactive hover:bg-bg-layer-2",
+          "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-0",
+          "focus:border-accent-primary focus:bg-bg-layer-1",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          "disabled:bg-bg-layer-1 disabled:border-border-subtle",
+          "placeholder:text-text-muted",
+          "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
+          "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
+          "reveal-hover relative overflow-hidden",
+          className,
         )}
-      />
-    </button>
-  );
-});
+        {...props}
+      >
+        {children}
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 opacity-50 transition-transform duration-short shrink-0",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+    );
+  },
+);
 SelectTrigger.displayName = "SelectTrigger";
 
 interface SelectValueProps {
@@ -124,10 +101,8 @@ interface SelectValueProps {
   className?: string;
 }
 
-const SelectValue: React.FC<SelectValueProps> = ({
-  placeholder,
-  className,
-}) => {
+// TODO: Improve implementation
+const SelectValue: React.FC<SelectValueProps> = ({ placeholder, className }) => {
   const { value, displayMap } = useSelectContext();
 
   // Force component to re-render when displayMap changes
@@ -143,7 +118,6 @@ const SelectValue: React.FC<SelectValueProps> = ({
     const mappedText = displayMap.get(value);
     if (mappedText) return mappedText;
 
-    // Fallback: try to create a human-readable version of the value
     if (value === "all") return "All Watchlist";
     if (value === "watching") return "Watching";
     if (value === "planned") return "Planned";
@@ -152,89 +126,67 @@ const SelectValue: React.FC<SelectValueProps> = ({
     if (value === "title") return "Title";
     if (value === "status") return "Status";
 
-    // Last resort: capitalize the value
-    return (
-      value.charAt(0).toUpperCase() + value.slice(1).replace(/([A-Z])/g, " $1")
-    );
+    return value.charAt(0).toUpperCase() + value.slice(1).replace(/([A-Z])/g, " $1");
   }, [value, displayMap]);
 
-  return (
-    <span className={cn("truncate", className)}>
-      {displayText || placeholder}
-    </span>
-  );
+  return <span className={cn("truncate", className)}>{displayText || placeholder}</span>;
 };
 
-const SelectContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, children, ...props }, ref) => {
-  const { open, setOpen } = useSelectContext();
-  const contentRef = React.useRef<HTMLDivElement>(null);
+const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className, children, ...props }) => {
+    const { open, setOpen } = useSelectContext();
+    const contentRef = React.useRef<HTMLDivElement>(null);
 
-  // Close on outside click
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        contentRef.current &&
-        !contentRef.current.contains(event.target as Node)
-      ) {
-        setOpen(false);
+    // Close on outside click
+    React.useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (contentRef.current && !contentRef.current.contains(event.target as Node)) {
+          setOpen(false);
+        }
+      };
+
+      if (open) {
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
       }
-    };
+    }, [open, setOpen]);
 
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside);
-      return () =>
-        document.removeEventListener("mousedown", handleClickOutside);
-    }
-  }, [open, setOpen]);
+    // Close on escape
+    React.useEffect(() => {
+      const handleEscape = (event: KeyboardEvent) => {
+        if (event.key === "Escape") {
+          setOpen(false);
+        }
+      };
 
-  // Close on escape
-  React.useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setOpen(false);
+      if (open) {
+        document.addEventListener("keydown", handleEscape);
+        return () => document.removeEventListener("keydown", handleEscape);
       }
-    };
+    }, [open, setOpen]);
 
-    if (open) {
-      document.addEventListener("keydown", handleEscape);
-      return () => document.removeEventListener("keydown", handleEscape);
-    }
-  }, [open, setOpen]);
+    if (!open) return null;
 
-  if (!open) return null;
-
-  return (
-    <div
-      ref={contentRef}
-      className={cn(
-        // Positioning - absolute to prevent layout shifts
-        "absolute top-full left-0 z-50 mt-1 w-full",
-        "min-w-[8rem] overflow-hidden",
-
-        // Fluent Design styling
-        "fluent-glass rounded-lg border border-border-subtle",
-        "shadow-fluent-popup",
-
-        // Typography
-        "text-text-primary",
-
-        // Animation
-        "animate-fadeIn",
-
-        // Scroll styling
-        "fluent-scroll max-h-60",
-
-        className
-      )}
-      {...props}
-    >
-      <div className="p-1">{children}</div>
-    </div>
-  );
-});
+    return (
+      <div
+        ref={contentRef}
+        className={cn(
+          "absolute top-full left-0 z-50 mt-1 w-full",
+          "min-w-[8rem] overflow-hidden",
+          "fluent-glass rounded-lg border border-border-subtle",
+          "shadow-fluent-popup",
+          "text-text-primary",
+          "animate-fadeIn",
+          "fluent-scroll max-h-60",
+          className,
+        )}
+        {...props}
+      >
+        <div className="p-1">{children}</div>
+      </div>
+    );
+  },
+);
 SelectContent.displayName = "SelectContent";
 
 const SelectItem = React.forwardRef<
@@ -244,12 +196,7 @@ const SelectItem = React.forwardRef<
     children: React.ReactNode;
   }
 >(({ className, children, value, ...props }, ref) => {
-  const {
-    value: selectedValue,
-    onValueChange,
-    setOpen,
-    setDisplayText,
-  } = useSelectContext();
+  const { value: selectedValue, onValueChange, setOpen, setDisplayText } = useSelectContext();
   const isSelected = value === selectedValue;
 
   // Register the display text for this value using useLayoutEffect for immediate registration
@@ -284,25 +231,15 @@ const SelectItem = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        // Layout
         "relative flex w-full cursor-default select-none items-center rounded-md py-1.5 pl-8 pr-2",
-
-        // Typography
         "text-sm outline-none",
-
-        // States with Fluent Design principles
         "text-text-primary",
         "hover:bg-accent-primary-soft hover:text-accent-primary cursor-pointer",
         "focus:bg-accent-primary-soft focus:text-accent-primary",
         isSelected && "bg-accent-primary-soft text-accent-primary",
-
-        // Transitions
         "transition-all duration-short ease-fluent-standard",
-
-        // Reveal effect
         "reveal-hover",
-
-        className
+        className,
       )}
       onClick={handleClick}
       {...props}
@@ -316,66 +253,54 @@ const SelectItem = React.forwardRef<
 });
 SelectItem.displayName = "SelectItem";
 
-// Keeping legacy exports for backward compatibility
 const SelectGroup = React.Fragment;
 const SelectLabel = React.Fragment;
 const SelectSeparator = React.Fragment;
 const SelectScrollUpButton = React.Fragment;
 const SelectScrollDownButton = React.Fragment;
 
-// Simple select for basic use cases (keeping existing implementation)
-const SimpleSelect = React.forwardRef<
-  HTMLSelectElement,
-  React.SelectHTMLAttributes<HTMLSelectElement>
->(({ className, children, ...props }, ref) => {
-  return (
-    <div className="relative">
-      <select
-        className={cn(
-          // Base styles with Fluent Design principles
-          "flex h-10 w-full appearance-none items-center justify-between rounded-md px-3 py-2",
-          "border border-border-subtle bg-bg-layer-1 text-sm text-text-primary",
-          "transition-all duration-short ease-fluent-standard",
+const SimpleSelect = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<HTMLSelectElement>>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <div className="relative">
+        <select
+          className={cn(
+            "flex h-10 w-full appearance-none items-center justify-between rounded-md px-3 py-2",
+            "border border-border-subtle bg-bg-layer-1 text-sm text-text-primary",
+            "transition-all duration-short ease-fluent-standard",
+            "hover:border-border-interactive hover:bg-bg-layer-2",
+            "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-0",
+            "focus:border-accent-primary focus:bg-bg-layer-1",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            "disabled:bg-bg-layer-1 disabled:border-border-subtle",
+            "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
+            "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
+            "reveal-hover relative overflow-hidden",
 
-          // Hover and focus states
-          "hover:border-border-interactive hover:bg-bg-layer-2",
-          "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-0",
-          "focus:border-accent-primary focus:bg-bg-layer-1",
-
-          // Disabled state
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          "disabled:bg-bg-layer-1 disabled:border-border-subtle",
-
-          // Subtle inner shadow for depth
-          "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
-          "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
-
-          // Reveal effect
-          "reveal-hover relative overflow-hidden",
-
-          className
-        )}
-        ref={ref}
-        {...props}
-      >
-        {children}
-      </select>
-      <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted pointer-events-none" />
-    </div>
-  );
-});
+            className,
+          )}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </select>
+        <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted pointer-events-none" />
+      </div>
+    );
+  },
+);
 SimpleSelect.displayName = "SimpleSelect";
 
 export {
   Select,
-  SelectGroup,
-  SelectValue,
-  SelectTrigger,
   SelectContent,
-  SelectLabel,
+  SelectGroup,
   SelectItem,
-  SelectSeparator,
-  SelectScrollUpButton,
+  SelectLabel,
   SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
   SimpleSelect,
 };

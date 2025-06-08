@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { cn } from "@/lib/utils";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
 
 const Dialog = DialogPrimitive.Root;
 
@@ -20,13 +20,10 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      // Fluent Design overlay with backdrop blur
       "fixed inset-0 z-modal-backdrop",
       "bg-bg-base/60 backdrop-blur-md",
-      // Smooth animations
       "data-[state=open]:animate-dialog-overlay-show",
       "data-[state=closed]:animate-dialog-overlay-hide",
-      // Better backdrop for accessibility
       "backdrop-saturate-150",
       className,
     )}
@@ -51,33 +48,18 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        // Positioning
         "fixed left-[50%] top-[50%] z-modal-content",
         "translate-x-[-50%] translate-y-[-50%]",
-
-        // Layout
         "grid w-full max-w-lg gap-4 p-6",
-
-        // Fluent Design styling
         "fluent-glass rounded-xl border border-border-subtle",
         "shadow-fluent-dialog",
-
-        // Typography
         "text-text-primary",
-
-        // Animations with Fluent timing
         "data-[state=open]:animate-dialog-content-show",
         "data-[state=closed]:animate-dialog-content-hide",
-
-        // Focus management
         "focus:outline-none",
-
-        // Responsive design
         "sm:rounded-xl max-h-[85vh] overflow-auto",
-
-        // Scroll styling
         "fluent-scroll",
-        
+
         className,
       )}
       {...props}
@@ -85,26 +67,15 @@ const DialogContent = React.forwardRef<
       {children}
       <DialogPrimitive.Close
         className={cn(
-          // Positioning
           "absolute right-4 top-4",
-
-          // Fluent button styling
           "inline-flex h-8 w-8 items-center justify-center",
           "rounded-md border border-transparent",
           "bg-transparent text-text-muted",
-
-          // Hover and focus states
           "hover:bg-bg-layer-2 hover:text-text-primary",
           "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2",
           "focus:ring-offset-bg-base",
-
-          // Transitions
           "transition-all duration-short ease-fluent-standard",
-
-          // Disabled state
           "disabled:pointer-events-none disabled:opacity-50",
-
-          // Reveal effect
           "reveal-hover",
         )}
       >
@@ -120,7 +91,6 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
   <div
     className={cn(
       "flex flex-col space-y-2 text-center sm:text-left",
-      // Add some bottom spacing for better hierarchy
       "pb-2 border-b border-border-divider/30",
       className,
     )}
@@ -133,9 +103,7 @@ const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
-      // Add some top spacing and subtle separator
       "pt-4 border-t border-border-divider/30",
-      // Better gap management
       "gap-2 sm:gap-0",
       className,
     )}
@@ -151,10 +119,8 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      // Typography following Fluent Design
       "text-xl font-semibold leading-tight tracking-tight",
       "text-text-primary",
-      // Better spacing
       "mb-1",
       className,
     )}
@@ -169,18 +135,11 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn(
-      "text-sm text-text-secondary leading-relaxed",
-      // Better line height for readability
-      "max-w-prose",
-      className,
-    )}
+    className={cn("text-sm text-text-secondary leading-relaxed", "max-w-prose", className)}
     {...props}
   />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
-
-// Additional dialog variants for specific use cases
 
 const DialogConfirm = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
@@ -285,15 +244,15 @@ DialogForm.displayName = "DialogForm";
 
 export {
   Dialog,
-  DialogPortal,
-  DialogOverlay,
   DialogClose,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
-  DialogFooter,
-  DialogTitle,
-  DialogDescription,
   DialogConfirm,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogForm,
+  DialogHeader,
+  DialogOverlay,
+  DialogPortal,
+  DialogTitle,
+  DialogTrigger,
 };

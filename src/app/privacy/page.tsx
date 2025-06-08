@@ -1,11 +1,10 @@
-import { Shield, Eye, Database, Cloud, Lock, UserCheck, Download, Trash2 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StorageUsageInfo } from "@/components/StorageUsageInfo";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Cloud, Database, Download, Eye, Lock, Shield, Trash2, UserCheck } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <Shield className="text-accent-primary" size={32} />
@@ -20,7 +19,6 @@ export default function PrivacyPage() {
         </div>
       </div>
 
-      {/* Data Collection */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -53,7 +51,6 @@ export default function PrivacyPage() {
         </CardContent>
       </Card>
 
-      {/* How We Use Data */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -96,7 +93,6 @@ export default function PrivacyPage() {
         </CardContent>
       </Card>
 
-      {/* Data Security */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -135,7 +131,6 @@ export default function PrivacyPage() {
         </CardContent>
       </Card>
 
-      {/* Your Rights */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -181,6 +176,7 @@ export default function PrivacyPage() {
                       <a
                         href="https://drive.google.com"
                         target="_blank"
+                        rel="noreferrer"
                         className="text-accent-primary hover:underline"
                       >
                         drive.google.com
@@ -203,6 +199,7 @@ export default function PrivacyPage() {
                       <a
                         href="https://myaccount.google.com/permissions"
                         target="_blank"
+                        rel="noreferrer"
                         className="text-accent-primary hover:underline"
                       >
                         myaccount.google.com/permissions
@@ -231,7 +228,6 @@ export default function PrivacyPage() {
         </CardContent>
       </Card>
 
-      {/* Google Drive Permissions */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

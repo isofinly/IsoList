@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardGlass } from "@/components/ui/card";
-import { Chrome, Shield, LogIn, Sparkles, TrendingUp, Cloud } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardGlass, CardHeader, CardTitle } from "@/components/ui/card";
 import { AuthService } from "@/lib/auth";
+import { Chrome, Cloud, LogIn, Shield, Sparkles, TrendingUp } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-var(--navbar-height))] flex items-center justify-center p-4 bg-gradient-to-br from-bg-base via-bg-layer-1 to-bg-layer-2 relative overflow-hidden z-0">
-      {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-accent-primary-soft rounded-full blur-xl opacity-30 animate-pulse" />
         <div

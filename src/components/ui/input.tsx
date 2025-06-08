@@ -1,5 +1,5 @@
-import React from "react";
 import { cn } from "@/lib/utils";
+import React from "react";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
@@ -13,82 +13,66 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         <div className="relative">
-          {/* Start adornment */}
           {startAdornment && (
             <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 text-text-muted">
               {startAdornment}
             </div>
           )}
-          
+
           <input
             type={type}
             className={cn(
-              // Base styles with Fluent Design principles
               "flex h-10 w-full rounded-md border text-sm text-text-primary",
               "bg-bg-layer-1 transition-all duration-short ease-fluent-standard",
               "file:border-0 file:bg-transparent file:text-sm file:font-medium",
               "placeholder:text-text-muted",
-              
-              // Border states
               "border-border-subtle",
               "hover:border-border-interactive hover:bg-bg-layer-2",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary focus-visible:ring-offset-0",
               "focus-visible:border-accent-primary focus-visible:bg-bg-layer-1",
-              
-              // Disabled state
               "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-bg-layer-1",
               "disabled:border-border-subtle disabled:text-text-disabled",
-              
-              // Error state
               error && [
                 "border-destructive focus-visible:ring-destructive",
-                "focus-visible:border-destructive"
+                "focus-visible:border-destructive",
               ],
-              
-              // Padding adjustments for adornments
               startAdornment ? "pl-10" : "px-3",
               endAdornment ? "pr-10" : "px-3",
               "py-2",
-              
-              // Subtle inner shadow for depth
               "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
               "focus-visible:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
-              
-              // Reveal effect
               "reveal-hover",
-              
               className,
             )}
             ref={ref}
             {...props}
           />
-          
-          {/* End adornment */}
+
           {endAdornment && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-text-muted">
               {endAdornment}
             </div>
           )}
         </div>
-        
-        {/* Helper text */}
+
         {helperText && (
-          <p className={cn(
-            "mt-1.5 text-xs leading-relaxed",
-            error ? "text-destructive" : "text-text-muted"
-          )}>
+          <p
+            className={cn(
+              "mt-1.5 text-xs leading-relaxed",
+              error ? "text-destructive" : "text-text-muted",
+            )}
+          >
             {helperText}
           </p>
         )}
       </div>
     );
-  }
+  },
 );
 
 Input.displayName = "Input";
 
-// Specialized input variants
-const InputSearch = React.forwardRef<HTMLInputElement, Omit<InputProps, 'type' | 'startAdornment'>>(
+const InputSearch = React.forwardRef<HTMLInputElement, Omit<InputProps, "type" | "startAdornment">>(
   ({ className, placeholder = "Search...", ...props }, ref) => {
     return (
       <Input
@@ -113,19 +97,19 @@ const InputSearch = React.forwardRef<HTMLInputElement, Omit<InputProps, 'type' |
         className={cn(
           "bg-bg-layer-2 border-border-subtle",
           "hover:bg-bg-layer-1 focus-visible:bg-bg-layer-1",
-          className
+          className,
         )}
         {...props}
       />
     );
-  }
+  },
 );
 InputSearch.displayName = "InputSearch";
 
-const InputPassword = React.forwardRef<HTMLInputElement, Omit<InputProps, 'type' | 'endAdornment'>>(
+const InputPassword = React.forwardRef<HTMLInputElement, Omit<InputProps, "type" | "endAdornment">>(
   ({ className, ...props }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
-    
+
     return (
       <Input
         ref={ref}
@@ -167,8 +151,8 @@ const InputPassword = React.forwardRef<HTMLInputElement, Omit<InputProps, 'type'
         {...props}
       />
     );
-  }
+  },
 );
 InputPassword.displayName = "InputPassword";
 
-export { Input, InputSearch, InputPassword };
+export { Input, InputPassword, InputSearch };

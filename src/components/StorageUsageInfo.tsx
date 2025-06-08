@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { HardDrive, Cloud } from "lucide-react";
 import { useMediaStore } from "@/lib/store";
+import { Cloud, HardDrive } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export function StorageUsageInfo() {
   const [localSize, setLocalSize] = useState<number>(0);
@@ -10,7 +10,6 @@ export function StorageUsageInfo() {
   const { mediaItems } = useMediaStore();
 
   useEffect(() => {
-    // Calculate local storage usage
     const mediaItemsStr = localStorage.getItem("mediaItems") || "[]";
     const allLocalData = {
       mediaItems: JSON.parse(mediaItemsStr),

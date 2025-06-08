@@ -2,20 +2,9 @@
 import MediaCard from "@/components/MediaCard";
 import MediaForm from "@/components/MediaForm";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem } from "@/lib/types";
 import { SortAsc, SortDesc, Star } from "lucide-react";
@@ -37,7 +26,8 @@ export default function RatingsPage() {
     let items = mediaItems.filter((item) => item.status === "completed");
 
     items = items.sort((a, b) => {
-      let valA: any, valB: any;
+      let valA: string | number | Date;
+      let valB: string | number | Date;
       switch (sortKey) {
         case "title":
           valA = a.title.toLowerCase();
@@ -57,6 +47,7 @@ export default function RatingsPage() {
 
       if (valA < valB) return sortOrder === "asc" ? -1 : 1;
       if (valA > valB) return sortOrder === "asc" ? 1 : -1;
+
       // Secondary sort by title if primary values are equal
       return a.title.toLowerCase() < b.title.toLowerCase() ? -1 : 1;
     });
@@ -85,17 +76,9 @@ export default function RatingsPage() {
   if (!completedItems.length) {
     return (
       <div className="text-center py-10 text-theme-muted-foreground">
-        <Star
-          size={48}
-          className="mx-auto mb-4 text-theme-primary opacity-50"
-        />
-        <h2 className="text-2xl font-mono mb-2 text-theme-foreground">
-          No Rated Items Yet
-        </h2>
-        <p>
-          You haven't marked any movies, series, or anime as 'completed' with a
-          rating!
-        </p>
+        <Star size={48} className="mx-auto mb-4 text-theme-primary opacity-50" />
+        <h2 className="text-2xl font-mono mb-2 text-theme-foreground">No Rated Items Yet</h2>
+        <p>You haven't marked any movies, series, or anime as 'completed' with a rating!</p>
       </div>
     );
   }
@@ -113,10 +96,7 @@ export default function RatingsPage() {
           >
             Sort by:
           </Label>
-          <Select
-            value={sortKey}
-            onValueChange={(value) => setSortKey(value as SortKey)}
-          >
+          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
             <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
               <SelectValue />
             </SelectTrigger>
@@ -130,15 +110,9 @@ export default function RatingsPage() {
             variant="ghost"
             size="icon"
             onClick={toggleSortOrder}
-            aria-label={`Sort ${
-              sortOrder === "asc" ? "descending" : "ascending"
-            }`}
+            aria-label={`Sort ${sortOrder === "asc" ? "descending" : "ascending"}`}
           >
-            {sortOrder === "asc" ? (
-              <SortAsc size={20} />
-            ) : (
-              <SortDesc size={20} />
-            )}
+            {sortOrder === "asc" ? <SortAsc size={20} /> : <SortDesc size={20} />}
           </Button>
         </div>
       </div>

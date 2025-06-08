@@ -2,433 +2,154 @@
 
 ## Overview
 
-IsoList has been completely redesigned using Microsoft's Fluent Design System principles, creating a modern, beautiful, and highly interactive media tracking application. This document outlines all the enhancements and design principles implemented.
+IsoList implements Microsoft's Fluent Design System principles to create a modern media tracking application. The design system leverages OKLCH color spaces, acrylic materials, reveal effects, and fluid animations to provide a cohesive user experience across desktop and mobile devices.
 
-## 🎨 Design System Features
+## Design System Features
 
 ### Core Fluent Design Principles
 
-1. **Light** - Illuminates relationships and creates hierarchy
-2. **Depth** - Uses shadows and layering for spatial relationships
-3. **Motion** - Provides feedback and guides user interactions
-4. **Material** - Creates tactile surfaces with realistic textures
-5. **Scale** - Adapts seamlessly across different devices and contexts
+The implementation focuses on Light, Depth, Motion, Material, and Scale principles. Light creates visual hierarchy through strategic use of accent colors and gradients. Depth is achieved through layered backgrounds and elevation shadows. Motion provides feedback through transitions and hover states. Material textures are simulated with backdrop filters and glass effects. Scale ensures responsive behavior across different screen sizes.
 
-## 🌈 Color System
+## Color System
 
-### Enhanced Color Palette
+### Background Architecture
 
-- **Background Layers**: Multi-layer background system with `bg-base`, `bg-layer-1`, `bg-layer-2`, `bg-layer-3`
-- **Semantic Colors**: Success, warning, info, destructive with soft variants
-- **Interactive States**: Hover, active, and focus states for all interactive elements
-- **Accent Colors**: Primary accent with hover and active variations
-
-### CSS Variables
-
-```css
---color-accent-primary: oklch(60% 0.22 255) --color-accent-primary-hover: oklch(65% 0.23 255)
-  --color-accent-primary-active: oklch(55% 0.21 255)
-  --color-accent-primary-soft: oklch(from var(--color-accent-primary) l c h / 0.15);
-```
-
-## 🎭 Visual Effects
+The color system uses a layered approach with four distinct background levels. The base layer (`--color-bg-base`) serves as the primary canvas using `oklch(12% 0.003 240)`. Layer 1 through 3 progressively lighten to create depth, with Layer 1 at `oklch(16% 0.005 240)`, Layer 2 at `oklch(20% 0.006 240)`, and Layer 3 at `oklch(24% 0.007 240)`.
 
 ### Acrylic Materials
 
-- **Navbar Acrylic**: Translucent navigation with backdrop blur
-- **Card Acrylic**: Glass-morphism effects on content cards
-- **Dialog Acrylic**: Enhanced modal backgrounds
+Three acrylic variants provide different levels of transparency and blur. The base acrylic uses 75% opacity with 16px blur and 1.8x saturation. The navbar variant reduces opacity to 60% with 24px blur for stronger backdrop separation. The light variant at 50% opacity with 12px blur offers subtle material effects.
 
-### Reveal Effects
-
-- **Hover Reveal**: Subtle highlight effects that follow cursor position
-- **Border Reveal**: Animated border highlights on interaction
-- **Focus Reveal**: Enhanced focus indicators with smooth transitions
+### Typography and Text Colors
 
-### Shadows & Elevation
+Text colors follow a hierarchy from primary (`oklch(92% 0.002 240)`) for headings and important content, to secondary (`oklch(70% 0.004 240)`) for body text, muted (`oklch(55% 0.005 240)`) for supporting information, and disabled (`oklch(40% 0.005 240)`) for inactive elements.
 
-- **Fluent Card Shadow**: `0 1.6px 3.6px 0 oklch(from black l c h / 0.11)`
-- **Fluent Dialog Shadow**: `0 6.4px 14.4px 0 oklch(from black l c h / 0.13)`
-- **Fluent Popup Shadow**: `0 3.2px 7.2px 0 oklch(from black l c h / 0.12)`
-- **Fluent Flyout Shadow**: `0 8px 16px 0 oklch(from black l c h / 0.14)`
+### Accent and Interactive Colors
 
-## 🎬 Animation System
+The primary accent color `oklch(60% 0.22 255)` provides the main interactive color, with hover state at `oklch(65% 0.23 255)` and active state at `oklch(55% 0.21 255)`. Soft variants use 15% opacity for backgrounds and 25% for hover states.
 
-### Fluent Motion Curves
+### Status Color Palette
 
-- **Accelerate**: `cubic-bezier(0.7, 0, 1, 0.5)` - Fast out
-- **Decelerate**: `cubic-bezier(0, 0.5, 0.3, 1)` - Slow out
-- **Standard**: `cubic-bezier(0.4, 0, 0.2, 1)` - Balanced
-- **Entrance**: `cubic-bezier(0.1, 0.9, 0.2, 1)` - Bouncy entrance
-- **Exit**: `cubic-bezier(0.7, 0, 0.84, 0)` - Quick exit
+Status colors include destructive (`oklch(55% 0.24 25)`) for error states, success (`oklch(65% 0.2 150)`) for positive actions, warning (`oklch(75% 0.18 85)`) for caution, and info using the primary accent color. Each status color includes soft variants at 15% opacity for background usage.
 
-### Animation Library
+## Visual Effects
 
-- `fadeIn` / `fadeOut`
-- `slideInUp` / `slideInDown` / `slideInLeft` / `slideInRight`
-- `scaleIn` / `scaleOut`
-- `revealHighlight`
-- Custom dialog animations with scale and fade
+### Material System
 
-## 🧩 Enhanced Components
+The material system creates depth through elevation shadows and surface treatments. Fluent surfaces use `var(--shadow-fluent-card)` with values `0 1.6px 3.6px 0 oklch(from black l c h / 0.11), 0 0.3px 0.9px 0 oklch(from black l c h / 0.09)` for standard cards. Dialog surfaces receive enhanced shadows with `0 6.4px 14.4px 0 oklch(from black l c h / 0.13), 0 1.2px 3.6px 0 oklch(from black l c h / 0.11)` for greater prominence.
 
-### Button System
+### Glass Morphism Implementation
 
-```tsx
-<Button variant="primary">Primary Action</Button>
-<Button variant="accent">Gradient Accent</Button>
-<Button variant="subtle">Subtle Interaction</Button>
-<Button variant="outline">Outlined Style</Button>
-<Button variant="ghost">Minimal Style</Button>
-```
+Glass effects combine background blur with translucent overlays. The implementation uses `backdrop-filter: blur(20px) saturate(1.5)` alongside gradient backgrounds from `oklch(from var(--color-bg-layer-1) l c h / 0.8)` to `oklch(from var(--color-bg-layer-1) l c h / 0.6)` with subtle white borders at 10% opacity.
 
-#### Features:
+### Surface Hover States
 
-- Loading states with spinners
-- Icon support with proper spacing
-- Reveal hover effects
-- Active state scaling (98% on press)
-- Focus ring management
+Interactive surfaces implement reveal effects through the `.fluent-surface-hover` class. Hover states transition border colors to `var(--color-border-interactive)`, upgrade shadows to popup level, and apply subtle upward translation with `transform: translateY(-1px)`.
 
-### Card System
+## Animation System
 
-```tsx
-<Card>Standard card with hover effects</Card>
-<CardGlass>Glass morphism card</CardGlass>
-<CardInteractive>Clickable card with press states</CardInteractive>
-<CardElevated elevation={3}>Card with custom elevation</CardElevated>
-```
+### Motion Curves and Timing
 
-#### Features:
+The animation system defines four primary easing curves. The accelerate curve `cubic-bezier(0.7, 0, 1, 0.5)` provides fast exits from the screen. The decelerate curve `cubic-bezier(0, 0.5, 0.3, 1)` creates smooth entries. The entrance curve `cubic-bezier(0.1, 0.9, 0.2, 1)` adds subtle bounce for engaging interactions. The exit curve `cubic-bezier(0.7, 0, 0.84, 0)` ensures quick disappearances.
 
-- Multiple elevation levels
-- Glass morphism variants
-- Interactive states with scaling
-- Subtle gradient backgrounds
-- Reveal hover effects
+### Keyframe Animations
 
-### Input System
+Core animations include fadeInUp and fadeInDown with 16px vertical displacement, scaleIn with 95% initial scale, and dialog-specific animations for content and overlay. The terminal caret animation provides a continuous blink effect for code displays. All animations respect `prefers-reduced-motion` preferences by reducing duration to 0.01ms.
 
-```tsx
-<Input placeholder="Standard input" />
-<InputSearch placeholder="Search..." />
-<InputPassword />
-```
+### Transition Duration Standards
 
-#### Features:
+Three duration tiers organize animation timing. Short transitions at 150ms handle immediate feedback like hover states. Medium transitions at 250ms manage content changes and modal appearances. Long transitions at 400ms accommodate complex state changes requiring more visual time.
 
-- Start/end adornments
-- Error states with validation
-- Helper text support
-- Reveal hover effects
-- Focus ring animations
+## Component Architecture
 
-### Dialog System
+### Layout Foundation
 
-```tsx
-<Dialog>
-  <DialogContent>Enhanced modal with blur backdrop</DialogContent>
-</Dialog>
+The layout system uses CSS Grid and Flexbox for responsive positioning. The main container applies `padding-top: var(--navbar-height)` to account for the fixed navigation. Grid layouts adapt from single column on mobile to two columns on large screens with `grid-cols-1 lg:grid-cols-2` classes.
 
-<DialogConfirm
-  title="Confirm Action"
-  description="Are you sure?"
-  variant="destructive"
-/>
+### Card Components
 
-<DialogForm title="Edit Item">
-  <MediaForm />
-</DialogForm>
-```
+Cards implement the fluent surface system with base classes `fluent-surface reveal-hover elevation-fluent-card border-theme-border/50`. Hover states provide visual feedback through border color transitions and shadow elevation changes. Interactive cards include press states with scale transformations and subtle background color shifts.
 
-#### Features:
+### Button Variants
 
-- Glass morphism backgrounds
-- Smooth scale and fade animations
-- Backdrop blur effects
-- Keyboard navigation
-- Accessible focus management
+The button system supports multiple variants through Tailwind utility combinations. Primary buttons use accent colors with white text, while outline variants apply transparent backgrounds with colored borders. Ghost buttons remove borders entirely for minimal interfaces. All buttons implement focus rings using `ring-2 ring-theme-accent/50` classes.
 
-### Toast Notifications
+### Form Controls
 
-```tsx
-const { toast } = useToast();
+Input components extend the base fluent surface styling with border treatments and focus states. Error states apply destructive color variants, while helper text uses muted color classes. Select components integrate with the same visual language through consistent border radius and shadow treatments.
 
-toast.success("Item saved successfully!");
-toast.error("Something went wrong");
-toast.warning("Please review your changes");
-toast.info("New feature available");
-```
+### Navigation Elements
 
-#### Features:
+The navbar implements acrylic materials through `fluent-acrylic-navbar` classes combined with `backdrop-filter: blur(24px)`. Active navigation states use accent colors to indicate current page location. Mobile navigation adapts through responsive grid changes and touch-friendly sizing.
 
-- Type-specific icons and colors
-- Slide-in animations from right
-- Auto-dismiss timers
-- Action buttons support
-- Swipe to dismiss
+## Page Implementation Examples
 
-### Command Palette
+### Calendar Page Architecture
 
-```tsx
-<CommandMenu open={isOpen} onOpenChange={setIsOpen} placeholder="Search or command..." />
-```
+The calendar page demonstrates comprehensive Fluent Design implementation through its grid-based layout and interactive elements. The main container uses `flex flex-col lg:flex-row gap-8` for responsive column arrangement. The calendar grid applies Monday-first week starting logic with `firstDayOfMonthAdjusted` calculations and renders empty cells for proper date alignment.
 
-#### Features:
+Individual calendar cells implement hover states with `hover:bg-white/10 border border-white/10 hover:border-white/20 shadow-sm hover:shadow-md backdrop-blur-sm hover:scale-[1.02]` classes. Today highlighting uses `ring-2 ring-theme-accent/50 bg-theme-accent/8 border-theme-accent/30` for visual prominence. Release indicators appear as small numbered badges with `bg-theme-accent/20 text-theme-accent` styling.
 
-- Keyboard shortcut (⌘K)
-- Fuzzy search
-- Grouped commands
-- Recent items
-- Navigation shortcuts
+### Watchlist Page Structure
 
-### Badge System
+The watchlist page employs conditional rendering for future releases versus available content. Sorting functionality operates through `useMemo` hooks that process items by premiere date, title, or status. The separation toggle allows unified or categorized viewing based on release timeline.
 
-```tsx
-<Badge variant="success">Completed</Badge>
-<StatusBadge status="watching" />
-<RatingBadge rating={8.5} />
-<TypeBadge type="movie" />
-```
+Filter controls integrate Select components with consistent styling through `bg-theme-surface-alt border-theme-border` classes. Sort direction indicators use Lucide icons with proper ARIA labeling for accessibility. Empty states provide contextual messaging through centered layouts with muted text colors.
 
-#### Features:
+## Utility Class Implementation
 
-- Status indicators with dots
-- Rating badges with stars
-- Type-specific icons
-- Removable variants
-- Soft color variants
+### Fluent Surface System
 
-## 🎯 Component Enhancements
+The fluent surface classes combine multiple visual properties. The base `.fluent-surface` applies background color `var(--color-bg-layer-1)`, border `1px solid var(--color-border-subtle)`, border radius `var(--radius-md)`, and shadow `var(--shadow-fluent-card)`. The hover variant `.fluent-surface-hover` adds transition properties and transforms border color, shadow elevation, and vertical position on interaction.
 
-### Navbar
+### Acrylic Material Classes
 
-- **Acrylic Background**: Translucent with backdrop blur
-- **Dynamic Scrolling**: Changes appearance on scroll
-- **Mobile-First**: Responsive grid layout for mobile
-- **Command Integration**: Search/command button with keyboard shortcuts
-- **Active States**: Visual indicators for current page
+Three acrylic variants provide different opacity and blur levels. The `.fluent-acrylic` class uses `var(--color-bg-acrylic-base)` background with `backdrop-filter: blur(16px) saturate(1.8)`. The navbar variant increases blur to 24px for stronger separation, while the light variant reduces opacity for subtle effects.
 
-### MediaCard
+### Typography and Text Effects
 
-- **Glass Effects**: Enhanced visual hierarchy
-- **Image Loading**: Skeleton states and error handling
-- **Expandable Content**: Smooth animations for detailed view
-- **Status Badges**: Color-coded status indicators
-- **Type Icons**: Visual type identification
-- **Hover Effects**: Scale and shadow transitions
+The `.text-gradient-primary` class creates gradient text through `background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-primary-hover))` with `background-clip: text` and `-webkit-text-fill-color: transparent`. This provides dynamic text effects while maintaining readability.
 
-### Home Page
+## Performance and Accessibility Integration
 
-- **Hero Section**: Gradient backgrounds with floating elements
-- **Feature Grid**: Glass morphism cards with hover effects
-- **Statistics Display**: Real-time counters with animations
-- **Quick Navigation**: Interactive action buttons
-- **Terminal Section**: Retro-styled code display
+### Reduced Motion Support
 
-### Ratings Page
+The CSS includes comprehensive reduced motion handling through `@media (prefers-reduced-motion: reduce)` queries. All animations, transitions, and transforms reduce to 0.01ms duration while maintaining single iteration counts. This ensures accessibility compliance without removing interactive feedback entirely.
 
-- **Search Integration**: Real-time filtering
-- **View Mode Toggle**: Grid/List view options
-- **Statistics Cards**: Overview metrics
-- **Enhanced Controls**: Sort and filter options
-- **Empty States**: Helpful guidance when no content
+### High Contrast Mode
 
-## 🎨 Utility Classes
+High contrast support modifies border colors through `@media (prefers-contrast: high)` queries. Border subtle colors increase to `oklch(40% 0.008 240)` and interactive borders to `oklch(50% 0.01 240)` for improved visibility in accessibility modes.
 
-### Acrylic Materials
+### Print Optimization
 
-```css
-.fluent-acrylic
-.fluent-acrylic-navbar
-.fluent-acrylic-light
-```
-
-### Reveal Effects
-
-```css
-.reveal-hover
-.reveal-border-hover
-```
-
-### Typography
-
-```css
-.text-gradient-primary
-.text-balance
-```
-
-### Surfaces
-
-```css
-.fluent-surface
-.fluent-surface-hover
-.fluent-glass
-```
-
-### Scrollbars
-
-```css
-.fluent-scroll
-```
-
-### Elevation
-
-```css
-.elevation-1
-.elevation-2
-.elevation-3
-.elevation-4
-.elevation-fluent-card
-.elevation-fluent-dialog
-```
-
-## 🚀 Performance Optimizations
-
-### Animation Performance
-
-- Hardware acceleration with `transform3d`
-- Optimized animation curves
-- Reduced motion support with `prefers-reduced-motion`
-- Efficient CSS transitions
-
-### Layout Performance
-
-- CSS Grid for responsive layouts
-- Flexbox for component alignment
-- Container queries for responsive components
-- Optimized re-renders with React hooks
-
-### Asset Optimization
-
-- Preloaded critical fonts
-- Optimized SVG icons
-- Lazy loaded images with skeleton states
-- Service worker for caching
-
-## 📱 Responsive Design
-
-### Breakpoint System
-
-- Mobile-first approach
-- Fluid typography scaling
-- Adaptive component layouts
-- Touch-friendly interactions
-
-### Mobile Enhancements
-
-- Large touch targets (minimum 44px)
-- Swipe gestures for toasts
-- Mobile-optimized navigation
-- Reduced motion on mobile
-
-## ♿ Accessibility Features
-
-### Keyboard Navigation
-
-- Tab order management
-- Arrow key navigation in menus
-- Escape key handling
-- Enter/Space activation
-
-### Screen Reader Support
-
-- Semantic HTML structure
-- ARIA labels and descriptions
-- Live regions for dynamic content
-- Skip navigation links
+Print styles reset background colors to white and text to black while removing backdrop filters and acrylic effects. This ensures proper document rendering in print contexts without design system interference.
 
 ### Focus Management
 
-- Visible focus indicators
-- Focus trapping in modals
-- Logical focus flow
-- Focus restoration
+Focus indicators use consistent `outline: 2px solid var(--color-border-focus)` with `outline-offset: 2px` spacing. The `:focus-visible` pseudo-class ensures keyboard navigation receives proper visual feedback while mouse interactions remain clean.
 
-### Color & Contrast
+## Development Implementation Notes
 
-- High contrast mode support
-- Color-blind friendly palettes
-- Sufficient contrast ratios
-- Alternative text for icons
+### CSS Variable Architecture
 
-## 🛠 Development Guidelines
+The design system leverages CSS custom properties for runtime theme switching capability. Color values use OKLCH space for perceptual uniformity and better interpolation. The `oklch(from var(--color) l c h / alpha)` syntax provides consistent opacity variants across the color palette.
 
-### Component Structure
+### Tailwind Integration
 
-```tsx
-const Component = forwardRef<HTMLElement, ComponentProps>(({ className, variant, ...props }, ref) => {
-  return <element ref={ref} className={cn(baseStyles, variantStyles[variant], className)} {...props} />;
-});
-```
+The Tailwind configuration extends the default theme with design system tokens mapped to CSS variables. This approach maintains consistency while allowing utility-first development patterns. Custom animations integrate with Tailwind's animation utilities through keyframe definitions in the global stylesheet.
 
-### Animation Guidelines
+### Component Class Composition
 
-- Use consistent timing functions
-- Provide reduced motion alternatives
-- Keep animations under 300ms for interactions
-- Use appropriate easing curves
+Components combine utility classes with custom design system classes for optimal flexibility. Base styles apply through utility classes while Fluent-specific effects use dedicated classes like `reveal-hover` and `fluent-surface-hover`. This separation allows easy customization without breaking design system consistency.
 
-### Color Usage
+## Scrollbar Customization
 
-- Use semantic color variables
-- Provide soft variants for backgrounds
-- Ensure proper contrast ratios
-- Support high contrast mode
+Custom scrollbar styling applies webkit-specific properties for consistent appearance. Track backgrounds use `var(--color-bg-base)` while thumbs implement `var(--color-bg-layer-2)` with hover states transitioning to `oklch(30% 0.006 240)`. Border radius matches the design system values for visual consistency.
 
-### Typography
+## Typography System
 
-- Use the Figtree font family
-- Implement proper heading hierarchy
-- Provide readable line heights
-- Support text scaling
+The typography hierarchy uses Figtree as the primary sans-serif font with Fira Code for monospace elements. Heading styles implement progressive font weights from 700 for h1 to 600 for h6, with letter spacing adjustments for optical balance. Body text maintains 1.65 line height for comfortable reading.
 
-## 🎉 Key Improvements Summary
+## Color Space Implementation
 
-1. **Visual Excellence**: Complete Fluent Design System implementation
-2. **Enhanced Interactions**: Reveal effects, hover states, and smooth animations
-3. **Modern Architecture**: Component-based design with TypeScript
-4. **Accessibility**: Full keyboard navigation and screen reader support
-5. **Performance**: Optimized animations and efficient rendering
-6. **Responsive**: Mobile-first design with adaptive layouts
-7. **User Experience**: Intuitive navigation and helpful feedback
-8. **Developer Experience**: Consistent patterns and reusable components
-
-## 📖 Usage Examples
-
-### Basic Card with Fluent Effects
-
-```tsx
-<Card className="reveal-hover fluent-surface-hover">
-  <CardHeader>
-    <CardTitle>Movie Title</CardTitle>
-    <CardDescription>A great film to watch</CardDescription>
-  </CardHeader>
-  <CardContent>
-    <RatingBadge rating={8.5} />
-    <StatusBadge status="completed" />
-  </CardContent>
-</Card>
-```
-
-### Interactive Button with Loading
-
-```tsx
-<Button variant="accent" loading={isLoading} onClick={handleAction}>
-  Save Changes
-</Button>
-```
-
-### Toast Notification
-
-```tsx
-const { toast } = useToast();
-
-const handleSuccess = () => {
-  toast.success("Item saved successfully!", "Your changes have been saved to the database.", {
-    duration: 5000,
-  });
-};
-```
-
-This Fluent Design System implementation transforms IsoList into a modern, beautiful, and highly functional media tracking application that provides an exceptional user experience across all devices and interaction methods.
+The OKLCH color space provides perceptual uniformity across the interface. Base backgrounds start at 12% lightness with minimal chroma, progressively increasing to 24% for layered surfaces. Accent colors use 60% lightness with high chroma for visual prominence while maintaining accessibility compliance.

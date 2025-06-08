@@ -2,14 +2,27 @@
 
 import { AuthService } from "@/lib/auth";
 import { useMediaStore } from "@/lib/store";
-import { AlertCircle, Check, Cloud, CloudOff, RefreshCw, RotateCcw } from "lucide-react";
+import { SyncManager } from "@/lib/sync-manager";
+import {
+  AlertCircle,
+  Check,
+  Cloud,
+  CloudOff,
+  RefreshCw,
+  RotateCcw,
+  Share2,
+  UserPlus,
+} from "lucide-react";
 import { useState } from "react";
+import { ShareDialog } from "./ShareDialog";
 import { StorageUsageInfo } from "./StorageUsageInfo";
 
 export function SyncStatusIndicator() {
   const { syncStatus, manualSync, forceRefresh, isLoading } = useMediaStore();
   const [showDetails, setShowDetails] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const authService = AuthService.getInstance();
+  const syncManager = SyncManager.getInstance();
 
   if (!authService.isAuthenticated()) {
     return null; // Don't show sync status if not authenticated
@@ -20,14 +33,18 @@ export function SyncStatusIndicator() {
   };
 
   const handleForceRefresh = async () => {
-    if (confirm("This will replace your local data with cloud data. Continue?")) {
+    if (
+      confirm("This will replace your local data with cloud data. Continue?")
+    ) {
       await forceRefresh();
     }
   };
 
   const getStatusIcon = () => {
     if (isLoading) {
-      return <RotateCcw size={16} className="animate-spin text-accent-primary" />;
+      return (
+        <RotateCcw size={16} className="animate-spin text-accent-primary" />
+      );
     }
 
     if (!syncStatus.isSync) {
@@ -79,6 +96,15 @@ export function SyncStatusIndicator() {
           >
             <RefreshCw size={14} className="text-info" />
           </button>
+
+          <button
+            type="button"
+            onClick={() => setShowShareDialog(true)}
+            className="p-1 hover:bg-accent-primary-soft/20 rounded transition-colors duration-short"
+            title="Share your lists"
+          >
+            <Share2 size={14} className="text-accent-primary" />
+          </button>
         </div>
       </div>
 
@@ -93,7 +119,9 @@ export function SyncStatusIndicator() {
             {syncStatus.lastSync && (
               <div className="flex justify-between">
                 <span className="text-text-muted">Last sync:</span>
-                <span className="text-text-primary">{syncStatus.lastSync.toLocaleTimeString()}</span>
+                <span className="text-text-primary">
+                  {syncStatus.lastSync.toLocaleTimeString()}
+                </span>
               </div>
             )}
             <div className="flex justify-between">
@@ -108,6 +136,13 @@ export function SyncStatusIndicator() {
           </div>
         </div>
       )}
+
+      {/* Share Dialog */}
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        syncManager={syncManager}
+      />
     </div>
   );
 }

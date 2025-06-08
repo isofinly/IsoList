@@ -373,4 +373,98 @@ export class SyncManager {
 
     return JSON.stringify(sorted1) === JSON.stringify(sorted2);
   }
+
+  // Sharing functionality
+  async createShareableFile(shareData: any): Promise<string> {
+    if (!this.authService.isAuthenticated()) {
+      throw new Error("Must be authenticated to create shareable files");
+    }
+
+    try {
+      const driveService = this.authService.getDriveService();
+
+      // Create the share file
+      const fileName = `isolist-share-${Date.now()}.json`;
+      const fileId = await driveService.saveDataWithFileId(shareData, fileName);
+
+      // Make it shareable with anyone who has the link
+      await driveService.makeFilePublic(fileId);
+
+      return fileId;
+    } catch (error) {
+      console.error("Failed to create shareable file:", error);
+      throw error;
+    }
+  }
+
+  async accessSharedFile(fileId: string): Promise<any> {
+    if (!this.authService.isAuthenticated()) {
+      throw new Error("Must be authenticated to access shared files");
+    }
+
+    try {
+      const driveService = this.authService.getDriveService();
+
+      // Try to access the shared file
+      const shareData = await driveService.loadSharedData(fileId);
+
+      return shareData;
+    } catch (error: any) {
+      console.error("Failed to access shared file:", error);
+
+      // Handle specific error types
+      if (error.status === 404) {
+        const err = new Error(`Shared file not found (deleted by owner): ${fileId}`);
+        (err as any).status = 404;
+        throw err;
+      }
+
+      // Re-throw with status for proper error handling
+      const err = new Error(`Failed to access shared file: ${error.message}`);
+      (err as any).status = error.status || 500;
+      throw err;
+    }
+  }
+
+  async deleteSharedFile(fileId: string): Promise<boolean> {
+    if (!this.authService.isAuthenticated()) {
+      throw new Error("Must be authenticated to delete shared files");
+    }
+
+    try {
+      const driveService = this.authService.getDriveService();
+      return await driveService.deleteFile(fileId);
+    } catch (error) {
+      console.error("Failed to delete shared file:", error);
+      throw error;
+    }
+  }
+
+  async listUserSharedFiles(): Promise<Array<{ id: string, name: string, createdTime: string }>> {
+    if (!this.authService.isAuthenticated()) {
+      throw new Error("Must be authenticated to list shared files");
+    }
+
+    try {
+      const driveService = this.authService.getDriveService();
+      return await driveService.listUserFiles();
+    } catch (error) {
+      console.error("Failed to list user shared files:", error);
+      throw error;
+    }
+  }
+
+  async updateSharedFile(fileId: string, shareData: any): Promise<boolean> {
+    if (!this.authService.isAuthenticated()) {
+      throw new Error("Must be authenticated to update shared files");
+    }
+
+    try {
+      const driveService = this.authService.getDriveService();
+      return await driveService.updateFileById(fileId, shareData);
+    } catch (error) {
+      console.error("Failed to update shared file:", error);
+      throw error;
+    }
+  }
 }

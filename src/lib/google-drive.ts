@@ -143,7 +143,7 @@ export class GoogleDriveService {
   ): Promise<boolean> {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) {
-      console.error("❌ No valid token available for save operation");
+      console.error("No valid token available for save operation");
       return false;
     }
 
@@ -199,7 +199,7 @@ export class GoogleDriveService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error("❌ Failed to create file:", response.status, errorText);
+          console.error("Failed to create file:", response.status, errorText);
           throw new Error(`Failed to create file: ${response.status} ${errorText}`);
         }
 
@@ -408,5 +408,322 @@ export class GoogleDriveService {
     this.appFolderId = null;
     localStorage.removeItem("isolist-folder-id");
     console.log("Cleared cached folder ID");
+  }
+
+  // Sharing functionality
+  async makeFilePublic(fileId: string): Promise<void> {
+    const hasValidToken = await this.ensureValidToken();
+    if (!hasValidToken) {
+      throw new Error("No valid token available");
+    }
+
+    try {
+      // Set permissions to allow anyone with the link to read
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}/permissions`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            role: "reader",
+            type: "anyone",
+            allowFileDiscovery: false, // File won't appear in search results
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to make file public: ${response.status} ${errorText}`);
+      }
+
+      // Verify the permission was set correctly
+      const permissionResult = await response.json();
+      console.log("File made public with permission ID:", permissionResult.id);
+
+    } catch (error) {
+      console.error("Failed to make file public:", error);
+      throw error;
+    }
+  }
+
+  async loadSharedData(fileId: string): Promise<any> {
+    const hasValidToken = await this.ensureValidToken();
+    if (!hasValidToken) {
+      // Still try public access even if not authenticated
+      console.log("Not authenticated, trying public proxy...");
+    }
+
+    try {
+      // Method 1: Try to access the file with authentication first.
+      // This works if the user has direct access to the file.
+      let response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        const text = await response.text();
+        return JSON.parse(text);
+      }
+
+      if (response.status === 404 || response.status === 403) {
+        // Method 2: If authenticated access fails with 403/404,
+        // it's likely a public file we don't have direct permission for.
+        // Use our server-side proxy to bypass CORS.
+        console.log(
+          "Authenticated access failed, trying server-side proxy..."
+        );
+        const proxyResponse = await fetch(`/api/share/proxy?fileId=${fileId}`);
+
+        if (!proxyResponse.ok) {
+          const errorData = await proxyResponse.json();
+          const errorMessage = proxyResponse.status === 404
+            ? "File not found (may have been deleted by owner)"
+            : (errorData.error || `Proxy request failed with status: ${proxyResponse.status}`);
+
+          const error = new Error(errorMessage);
+          (error as any).status = proxyResponse.status;
+          throw error;
+        }
+
+        return await proxyResponse.json();
+
+      } else {
+        // Handle other API errors
+        const errorMessage = response.status === 404
+          ? "File not found (may have been deleted by owner)"
+          : `Google Drive API error: ${response.status}`;
+
+        const error = new Error(errorMessage);
+        (error as any).status = response.status;
+        throw error;
+      }
+    } catch (error: any) {
+      console.error("Failed to load shared data:", error);
+
+      const err = new Error(`Failed to load shared data: ${error.message}`);
+      (err as any).status = error.status || 500;
+      throw err;
+    }
+  }
+
+  async saveDataWithFileId(
+    data: {
+      mediaItems?: any;
+      lastModified?: string;
+      version?: number;
+      type?: string;
+      backup?: BackupInfo;
+    },
+    fileName = "isolist-data.json",
+  ): Promise<string> {
+    const hasValidToken = await this.ensureValidToken();
+    if (!hasValidToken) {
+      throw new Error("No valid token available for save operation");
+    }
+
+    try {
+      const folderId = await this.ensureAppFolder();
+      if (!folderId) {
+        throw new Error("Failed to create or find app folder");
+      }
+
+      const jsonData = JSON.stringify(data, null, 2);
+
+      // For share files, always create a new file instead of updating existing ones
+      if (fileName.includes('share') || data.type === 'isolist-share') {
+        const metadata = {
+          name: fileName,
+          parents: [folderId],
+          description: "IsoList shared data",
+        };
+
+        const form = new FormData();
+        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+        form.append("file", new Blob([jsonData], { type: "application/json" }));
+
+        const response = await fetch(
+          "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+            body: form,
+          },
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to create share file: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result.id;
+      }
+
+      // For main data files, check if existing file should be updated
+      const existingFile = await this.findDataFile();
+
+      if (existingFile) {
+        const response = await fetch(
+          `https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=media`,
+          {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+              "Content-Type": "application/json",
+            },
+            body: jsonData,
+          },
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to update file: ${response.status} ${errorText}`);
+        }
+
+        return existingFile.id;
+      } else {
+        const metadata = {
+          name: fileName,
+          parents: [folderId],
+          description: "IsoList media tracking data",
+        };
+
+        const form = new FormData();
+        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+        form.append("file", new Blob([jsonData], { type: "application/json" }));
+
+        const response = await fetch(
+          "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+            body: form,
+          },
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to create file: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result.id;
+      }
+    } catch (error) {
+      console.error("GoogleDrive save failed:", error);
+      throw error;
+    }
+  }
+
+  // Method to delete a specific file
+  async deleteFile(fileId: string): Promise<boolean> {
+    const hasValidToken = await this.ensureValidToken();
+    if (!hasValidToken) {
+      throw new Error("No valid token available");
+    }
+
+    try {
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to delete file: ${response.status} ${errorText}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      throw error;
+    }
+  }
+
+  // Method to list files created by the user (for managing shares)
+  async listUserFiles(): Promise<Array<{ id: string, name: string, createdTime: string }>> {
+    const hasValidToken = await this.ensureValidToken();
+    if (!hasValidToken) {
+      throw new Error("No valid token available");
+    }
+
+    try {
+      const folderId = await this.ensureAppFolder();
+      if (!folderId) {
+        throw new Error("Failed to find app folder");
+      }
+
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q='${folderId}' in parents and trashed=false and name contains 'isolist-share'&fields=files(id,name,createdTime)&orderBy=createdTime desc`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to list files: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      return data.files || [];
+    } catch (error) {
+      console.error("Failed to list user files:", error);
+      throw error;
+    }
+  }
+
+  // Method to update a file by ID directly (for updating shared files)
+  async updateFileById(fileId: string, data: any): Promise<boolean> {
+    const hasValidToken = await this.ensureValidToken();
+    if (!hasValidToken) {
+      throw new Error("No valid token available");
+    }
+
+    try {
+      const jsonData = JSON.stringify(data, null, 2);
+
+      const response = await fetch(
+        `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: jsonData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update file: ${response.status} ${errorText}`);
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Failed to update file by ID:", error);
+      throw error;
+    }
   }
 }

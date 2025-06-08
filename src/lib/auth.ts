@@ -128,7 +128,7 @@ export class AuthService {
     try {
       const codeVerifier = sessionStorage.getItem("code_verifier");
       if (!codeVerifier) {
-        console.error("❌ Missing code verifier in session storage");
+        console.error("Missing code verifier in session storage");
         throw new Error("Missing code verifier");
       }
 
@@ -140,7 +140,7 @@ export class AuthService {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
-        console.error("❌ API Error:", {
+        console.error("API Error:", {
           status: response.status,
           statusText: response.statusText,
           errorData,

@@ -25,7 +25,15 @@ export const metadata: Metadata = {
   title: "IsoList - Your Personal Media Tracker",
   description:
     "Track movies, series, and anime you've watched or want to watch with beautiful Fluent Design and cloud sync.",
-  keywords: ["media tracker", "movies", "tv series", "anime", "ratings", "watchlist", "cloud sync"],
+  keywords: [
+    "media tracker",
+    "movies",
+    "tv series",
+    "anime",
+    "ratings",
+    "watchlist",
+    "cloud sync",
+  ],
   authors: [{ name: "IsoList Team" }],
   creator: "IsoList",
   publisher: "IsoList",
@@ -67,13 +75,19 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
 
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://www.googleapis.com" />
       </head>
 
-      <body className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}>
+      <body
+        className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}
+      >
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only fixed top-4 left-4 z-[9999] px-4 py-2 bg-accent-primary text-text-on-accent rounded-md transition-all duration-short focus:ring-2 focus:ring-accent-primary-hover focus:ring-offset-2 focus:ring-offset-bg-base"
@@ -115,6 +129,12 @@ export default function RootLayout({
                       >
                         Terms
                       </a>
+                      <a
+                        href="https://github.com/isofinly/isolist"
+                        className="hover:text-text-primary transition-colors duration-short"
+                      >
+                        GitHub
+                      </a>
                     </div>
                   </div>
                 </footer>
@@ -129,13 +149,15 @@ export default function RootLayout({
           <div
             className="absolute -top-[40vh] -right-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.02] rounded-full blur-3xl"
             style={{
-              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
             }}
           />
           <div
             className="absolute -bottom-[40vh] -left-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.01] rounded-full blur-3xl"
             style={{
-              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
             }}
           />
         </div>

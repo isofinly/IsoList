@@ -245,19 +245,19 @@ a:focus-visible {
 .fluent-acrylic {
     background-color: var(--color-bg-acrylic-base);
     backdrop-filter: blur(16px) saturate(1.8);
-    -webkit-backdrop-filter: blur(16px) saturate(1.8);
+    /* -webkit-backdrop-filter: blur(16px) saturate(1.8); */
 }
 
 .fluent-acrylic-navbar {
     background-color: var(--color-bg-acrylic-navbar);
     backdrop-filter: blur(24px) saturate(1.2);
-    -webkit-backdrop-filter: blur(24px) saturate(1.2);
+    /* -webkit-backdrop-filter: blur(24px) saturate(1.2); */
 }
 
 .fluent-acrylic-light {
     background-color: var(--color-bg-acrylic-light);
     backdrop-filter: blur(12px) saturate(1.5);
-    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+    /* -webkit-backdrop-filter: blur(12px) saturate(1.5); */
 }
 
 .text-gradient-primary {

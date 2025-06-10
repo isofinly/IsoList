@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
+import { useGlobalToast } from "@/contexts/ToastContext";
 
 import { useMediaStore } from "@/lib/store";
 import { AuthService } from "@/lib/auth";
@@ -44,9 +46,12 @@ export function ShareDialog({
     Array<{ id: string; name: string; createdTime: string }>
   >([]);
   const [isLoadingShares, setIsLoadingShares] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null);
 
   const authService = AuthService.getInstance();
   const currentUser = authService.getUser();
+  const { toast } = useGlobalToast();
 
   const createShare = async () => {
     if (!currentUser) return;
@@ -73,7 +78,10 @@ export function ShareDialog({
       await loadMySharedFiles();
     } catch (error) {
       console.error("Failed to create share:", error);
-      alert("Failed to create share. Please try again.");
+      toast.error(
+        "Share Creation Failed",
+        "Failed to create share. Please try again."
+      );
     } finally {
       setIsCreatingShare(false);
     }
@@ -81,7 +89,7 @@ export function ShareDialog({
 
   const copyToClipboard = async () => {
     await navigator.clipboard.writeText(shareUrl);
-    alert("Share URL copied to clipboard!");
+    toast.success("Copied!", "Share URL copied to clipboard!");
   };
 
   const joinShare = async () => {
@@ -115,17 +123,21 @@ export function ShareDialog({
 
       addJoinedUser(newUser);
       setJoinShareId("");
-      alert(`Successfully joined ${shareData.sharedBy}'s shared lists!`);
+      toast.success(
+        "Share Joined!",
+        `Successfully joined ${shareData.sharedBy}'s shared lists!`
+      );
     } catch (error: any) {
       console.error("Failed to join share:", error);
       if (error.status === 403 || error.status === 401) {
-        alert(
-          "Access denied. Make sure the share link is correct and you have permission."
+        toast.error(
+          "Access Denied",
+          "Make sure the share link is correct and you have permission."
         );
       } else if (error.status === 404) {
-        alert("Share not found. Please check the link.");
+        toast.error("Share Not Found", "Please check the link.");
       } else {
-        alert("Failed to join share. Please try again.");
+        toast.error("Join Failed", "Failed to join share. Please try again.");
       }
     } finally {
       setIsJoining(false);
@@ -162,14 +174,6 @@ export function ShareDialog({
   };
 
   const deleteSharedFile = async (fileId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this share? People who have joined this share will lose access."
-      )
-    ) {
-      return;
-    }
-
     try {
       await syncManager.deleteSharedFile(fileId);
       setMySharedFiles((prev) => prev.filter((f) => f.id !== fileId));
@@ -177,10 +181,22 @@ export function ShareDialog({
       // Stop tracking this shared file
       removeSharedFileId(fileId);
 
-      alert("Share deleted successfully!");
+      toast.success("Share Deleted", "Share deleted successfully!");
     } catch (error) {
       console.error("Failed to delete shared file:", error);
-      alert("Failed to delete share. Please try again.");
+      toast.error("Delete Failed", "Failed to delete share. Please try again.");
+    }
+  };
+
+  const handleDeleteClick = (fileId: string) => {
+    setFileToDelete(fileId);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (fileToDelete) {
+      deleteSharedFile(fileToDelete);
+      setFileToDelete(null);
     }
   };
 
@@ -298,7 +314,7 @@ export function ShareDialog({
                       <Button
                         size="icon"
                         variant="destructive"
-                        onClick={() => deleteSharedFile(file.id)}
+                        onClick={() => handleDeleteClick(file.id)}
                         title="Delete share"
                       >
                         <Trash2 size={16} />
@@ -362,6 +378,21 @@ export function ShareDialog({
           )}
         </div>
       </DialogContent>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => {
+          setDeleteDialogOpen(false);
+          setFileToDelete(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Share"
+        description="Are you sure you want to delete this share? People who have joined this share will lose access."
+        confirmText="Delete Share"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </Dialog>
   );
 }

@@ -3,6 +3,7 @@ import { ConflictProvider } from "@/components/ConflictProvider";
 import Navbar from "@/components/Navbar";
 import { StoreInitializer } from "@/components/StoreInitializer";
 import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
+import { ToastProvider } from "@/contexts/ToastContext";
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fira_Code } from "next/font/google";
 import "./globals.css";
@@ -97,51 +98,53 @@ export default function RootLayout({
 
         <AuthProvider>
           <StoreInitializer>
-            <ConflictProvider>
-              <Navbar />
+            <ToastProvider>
+              <ConflictProvider>
+                <Navbar />
 
-              <main
-                id="main-content"
-                className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
-              >
-                <div className="flex-grow">{children}</div>
+                <main
+                  id="main-content"
+                  className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
+                >
+                  <div className="flex-grow">{children}</div>
 
-                <footer className="mt-16 pt-8 border-t border-border-divider/30">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
-                    <div className="flex items-center gap-2">
-                      <span>© {new Date().getFullYear()} IsoList</span>
-                      <span>•</span>
-                      <span>Built with ❤️</span>
-                      <span>•</span>
-                      <span>Apache License 2.0</span>
+                  <footer className="mt-16 pt-8 border-t border-border-divider/30">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
+                      <div className="flex items-center gap-2">
+                        <span>© {new Date().getFullYear()} IsoList</span>
+                        <span>•</span>
+                        <span>Built with ❤️</span>
+                        <span>•</span>
+                        <span>Apache License 2.0</span>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <a
+                          href="/privacy"
+                          className="hover:text-text-primary transition-colors duration-short"
+                        >
+                          Privacy
+                        </a>
+                        <a
+                          href="/terms"
+                          className="hover:text-text-primary transition-colors duration-short"
+                        >
+                          Terms
+                        </a>
+                        <a
+                          href="https://github.com/isofinly/isolist"
+                          className="hover:text-text-primary transition-colors duration-short"
+                        >
+                          GitHub
+                        </a>
+                      </div>
                     </div>
+                  </footer>
+                </main>
 
-                    <div className="flex items-center gap-4">
-                      <a
-                        href="/privacy"
-                        className="hover:text-text-primary transition-colors duration-short"
-                      >
-                        Privacy
-                      </a>
-                      <a
-                        href="/terms"
-                        className="hover:text-text-primary transition-colors duration-short"
-                      >
-                        Terms
-                      </a>
-                      <a
-                        href="https://github.com/isofinly/isolist"
-                        className="hover:text-text-primary transition-colors duration-short"
-                      >
-                        GitHub
-                      </a>
-                    </div>
-                  </div>
-                </footer>
-              </main>
-
-              <SyncStatusIndicator />
-            </ConflictProvider>
+                <SyncStatusIndicator />
+              </ConflictProvider>
+            </ToastProvider>
           </StoreInitializer>
         </AuthProvider>
 
@@ -161,13 +164,6 @@ export default function RootLayout({
             }}
           />
         </div>
-
-        <div
-          id="toast-container"
-          className="fixed top-20 right-4 z-notification flex flex-col gap-2 pointer-events-none"
-          aria-live="polite"
-          aria-label="Notifications"
-        />
       </body>
     </html>
   );

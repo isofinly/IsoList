@@ -1,6 +1,5 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { CommandMenu } from "@/components/ui/command";
 import { AuthService } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import {
@@ -275,13 +274,6 @@ export default function Navbar() {
           onKeyDown={() => setIsMobileMenuOpen(false)}
         />
       )}
-
-      {/* Command Palette */}
-      <CommandMenu
-        open={isCommandOpen}
-        onOpenChange={setIsCommandOpen}
-        placeholder="Search media, navigate, or run commands..."
-      />
     </>
   );
 }

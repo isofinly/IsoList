@@ -256,7 +256,8 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       get().updateSyncStatus();
     } catch (error) {
       console.error("Failed to resolve conflict:", error);
-      alert(`Failed to resolve conflict: ${error}`);
+      // Note: Cannot use toast here directly as this is outside React context
+      // This error should be handled by the component that calls resolveConflict
     } finally {
       set({ isLoading: false });
     }

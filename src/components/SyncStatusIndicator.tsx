@@ -16,11 +16,13 @@ import {
 import { useState } from "react";
 import { ShareDialog } from "./ShareDialog";
 import { StorageUsageInfo } from "./StorageUsageInfo";
+import { ConfirmationDialog } from "./ui/confirmation-dialog";
 
 export function SyncStatusIndicator() {
   const { syncStatus, manualSync, forceRefresh, isLoading } = useMediaStore();
   const [showDetails, setShowDetails] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showForceRefreshDialog, setShowForceRefreshDialog] = useState(false);
   const authService = AuthService.getInstance();
   const syncManager = SyncManager.getInstance();
 
@@ -33,11 +35,11 @@ export function SyncStatusIndicator() {
   };
 
   const handleForceRefresh = async () => {
-    if (
-      confirm("This will replace your local data with cloud data. Continue?")
-    ) {
-      await forceRefresh();
-    }
+    await forceRefresh();
+  };
+
+  const handleForceRefreshClick = () => {
+    setShowForceRefreshDialog(true);
   };
 
   const getStatusIcon = () => {
@@ -90,7 +92,7 @@ export function SyncStatusIndicator() {
 
           <button
             type="button"
-            onClick={handleForceRefresh}
+            onClick={handleForceRefreshClick}
             className="p-1 hover:bg-info-soft/20 rounded transition-colors duration-short"
             title="Force refresh from cloud"
           >
@@ -142,6 +144,18 @@ export function SyncStatusIndicator() {
         isOpen={showShareDialog}
         onClose={() => setShowShareDialog(false)}
         syncManager={syncManager}
+      />
+
+      {/* Force Refresh Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={showForceRefreshDialog}
+        onClose={() => setShowForceRefreshDialog(false)}
+        onConfirm={handleForceRefresh}
+        title="Force Refresh from Cloud"
+        description="This will replace your local data with cloud data. Any unsaved local changes will be lost. Are you sure you want to continue?"
+        confirmText="Replace Local Data"
+        cancelText="Cancel"
+        variant="warning"
       />
     </div>
   );

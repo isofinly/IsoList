@@ -3,6 +3,7 @@
 import { SyncManager } from "@/lib/sync-manager";
 import { AuthService } from "@/lib/auth";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MediaItem } from "@/lib/types";
@@ -16,12 +17,10 @@ interface SharedData {
   sharedAt: string;
 }
 
-export default async function SharedPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+export default function SharedPage() {
+  const params = useParams();
+  const id = params.id as string;
+
   const [sharedData, setSharedData] = useState<SharedData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

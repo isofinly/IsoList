@@ -3,6 +3,7 @@ import { ConflictProvider } from "@/components/ConflictProvider";
 import Navbar from "@/components/Navbar";
 import { StoreInitializer } from "@/components/StoreInitializer";
 import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
+import { ToastProvider } from "@/contexts/ToastContext";
 import type { Metadata, Viewport } from "next";
 import { Figtree, Fira_Code } from "next/font/google";
 import "./globals.css";
@@ -25,7 +26,15 @@ export const metadata: Metadata = {
   title: "IsoList - Your Personal Media Tracker",
   description:
     "Track movies, series, and anime you've watched or want to watch with beautiful Fluent Design and cloud sync.",
-  keywords: ["media tracker", "movies", "tv series", "anime", "ratings", "watchlist", "cloud sync"],
+  keywords: [
+    "media tracker",
+    "movies",
+    "tv series",
+    "anime",
+    "ratings",
+    "watchlist",
+    "cloud sync",
+  ],
   authors: [{ name: "IsoList Team" }],
   creator: "IsoList",
   publisher: "IsoList",
@@ -67,13 +76,19 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
 
         <link rel="preconnect" href="https://accounts.google.com" />
         <link rel="preconnect" href="https://www.googleapis.com" />
       </head>
 
-      <body className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}>
+      <body
+        className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}
+      >
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only fixed top-4 left-4 z-[9999] px-4 py-2 bg-accent-primary text-text-on-accent rounded-md transition-all duration-short focus:ring-2 focus:ring-accent-primary-hover focus:ring-offset-2 focus:ring-offset-bg-base"
@@ -83,45 +98,53 @@ export default function RootLayout({
 
         <AuthProvider>
           <StoreInitializer>
-            <ConflictProvider>
-              <Navbar />
+            <ToastProvider>
+              <ConflictProvider>
+                <Navbar />
 
-              <main
-                id="main-content"
-                className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
-              >
-                <div className="flex-grow">{children}</div>
+                <main
+                  id="main-content"
+                  className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
+                >
+                  <div className="flex-grow">{children}</div>
 
-                <footer className="mt-16 pt-8 border-t border-border-divider/30">
-                  <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
-                    <div className="flex items-center gap-2">
-                      <span>© {new Date().getFullYear()} IsoList</span>
-                      <span>•</span>
-                      <span>Built with ❤️</span>
-                      <span>•</span>
-                      <span>Apache License 2.0</span>
+                  <footer className="mt-16 pt-8 border-t border-border-divider/30">
+                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-text-muted">
+                      <div className="flex items-center gap-2">
+                        <span>© {new Date().getFullYear()} IsoList</span>
+                        <span>•</span>
+                        <span>Built with ❤️</span>
+                        <span>•</span>
+                        <span>Apache License 2.0</span>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <a
+                          href="/privacy"
+                          className="hover:text-text-primary transition-colors duration-short"
+                        >
+                          Privacy
+                        </a>
+                        <a
+                          href="/terms"
+                          className="hover:text-text-primary transition-colors duration-short"
+                        >
+                          Terms
+                        </a>
+                        <a
+                          href="https://github.com/isofinly/isolist"
+                          className="hover:text-text-primary transition-colors duration-short"
+                        >
+                          GitHub
+                        </a>
+                      </div>
                     </div>
+                  </footer>
+                </main>
 
-                    <div className="flex items-center gap-4">
-                      <a
-                        href="/privacy"
-                        className="hover:text-text-primary transition-colors duration-short"
-                      >
-                        Privacy
-                      </a>
-                      <a
-                        href="/terms"
-                        className="hover:text-text-primary transition-colors duration-short"
-                      >
-                        Terms
-                      </a>
-                    </div>
-                  </div>
-                </footer>
-              </main>
-
-              <SyncStatusIndicator />
-            </ConflictProvider>
+                <SyncStatusIndicator />
+              </ConflictProvider>
+            </ToastProvider>
           </StoreInitializer>
         </AuthProvider>
 
@@ -129,23 +152,18 @@ export default function RootLayout({
           <div
             className="absolute -top-[40vh] -right-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.02] rounded-full blur-3xl"
             style={{
-              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, oklch(60% 0.22 255 / 0.03) 0%, transparent 70%)",
             }}
           />
           <div
             className="absolute -bottom-[40vh] -left-[40vw] w-[80vw] h-[80vh] bg-accent-primary/[0.01] rounded-full blur-3xl"
             style={{
-              background: "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
+              background:
+                "radial-gradient(circle, oklch(60% 0.22 255 / 0.02) 0%, transparent 70%)",
             }}
           />
         </div>
-
-        <div
-          id="toast-container"
-          className="fixed top-20 right-4 z-notification flex flex-col gap-2 pointer-events-none"
-          aria-live="polite"
-          aria-label="Notifications"
-        />
       </body>
     </html>
   );

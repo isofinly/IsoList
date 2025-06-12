@@ -2,19 +2,33 @@
 import MediaCard from "@/components/MediaCard";
 import MediaForm from "@/components/MediaForm";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem } from "@/lib/types";
 import { SortAsc, SortDesc, Star } from "lucide-react";
 import React, { useMemo, useState } from "react";
+import { UserSelector } from "@/components/UserSelector";
 
 type SortKey = "title" | "rating" | "completionDate";
 type SortOrder = "asc" | "desc";
 
 export default function RatingsPage() {
-  const { mediaItems } = useMediaStore();
+  const { getCurrentUserMediaItems, isViewingOwnData } = useMediaStore();
+  const mediaItems = getCurrentUserMediaItems();
+  const isOwnData = isViewingOwnData();
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,9 +90,17 @@ export default function RatingsPage() {
   if (!completedItems.length) {
     return (
       <div className="text-center py-10 text-theme-muted-foreground">
-        <Star size={48} className="mx-auto mb-4 text-theme-primary opacity-50" />
-        <h2 className="text-2xl font-mono mb-2 text-theme-foreground">No Rated Items Yet</h2>
-        <p>You haven't marked any movies, series, or anime as 'completed' with a rating!</p>
+        <Star
+          size={48}
+          className="mx-auto mb-4 text-theme-primary opacity-50"
+        />
+        <h2 className="text-2xl font-mono mb-2 text-theme-foreground">
+          No Rated Items Yet
+        </h2>
+        <p>
+          You haven't marked any movies, series, or anime as 'completed' with a
+          rating!
+        </p>
       </div>
     );
   }
@@ -90,13 +112,21 @@ export default function RatingsPage() {
           <Star size={28} className="mr-3" /> My Ratings
         </h1>
         <div className="flex flex-wrap items-center gap-2">
+          <UserSelector
+            page="ratings"
+            className="bg-theme-surface-alt border-theme-border"
+          />
+          <div className="h-4 w-px bg-theme-border mx-1" />
           <Label
             htmlFor="sortKey"
             className="text-sm text-theme-muted-foreground sr-only sm:not-sr-only"
           >
             Sort by:
           </Label>
-          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+          <Select
+            value={sortKey}
+            onValueChange={(value) => setSortKey(value as SortKey)}
+          >
             <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
               <SelectValue />
             </SelectTrigger>
@@ -110,9 +140,15 @@ export default function RatingsPage() {
             variant="ghost"
             size="icon"
             onClick={toggleSortOrder}
-            aria-label={`Sort ${sortOrder === "asc" ? "descending" : "ascending"}`}
+            aria-label={`Sort ${
+              sortOrder === "asc" ? "descending" : "ascending"
+            }`}
           >
-            {sortOrder === "asc" ? <SortAsc size={20} /> : <SortDesc size={20} />}
+            {sortOrder === "asc" ? (
+              <SortAsc size={20} />
+            ) : (
+              <SortDesc size={20} />
+            )}
           </Button>
         </div>
       </div>
@@ -125,6 +161,7 @@ export default function RatingsPage() {
             isExpanded={expandedCardId === item.id}
             onToggleExpand={() => handleToggleExpand(item.id)}
             onEdit={() => handleEdit(item)}
+            readOnly={!isOwnData}
           />
         ))}
       </div>

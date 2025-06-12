@@ -3,14 +3,26 @@ import MediaCard from "@/components/MediaCard";
 import MediaForm from "@/components/MediaForm";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem } from "@/lib/types";
 import { Calendar, Clock, SortAsc, SortDesc, Tv } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
+import { UserSelector } from "@/components/UserSelector";
 
 type WatchlistStatus = "watching" | "planned" | "on-hold";
 type SortKey = "title" | "premiereDate" | "status"; // 'startDate' could also be an option
@@ -39,19 +51,26 @@ const isFutureRelease = (item: MediaItem): boolean => {
 };
 
 export default function WatchlistPage() {
-  const { mediaItems } = useMediaStore();
+  const { getCurrentUserMediaItems, isViewingOwnData } = useMediaStore();
+  const mediaItems = getCurrentUserMediaItems();
+  const isOwnData = isViewingOwnData();
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [sortKey, setSortKey] = useState<SortKey>("premiereDate");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [filterStatus, setFilterStatus] = useState<WatchlistStatus | "all">("all");
+  const [filterStatus, setFilterStatus] = useState<WatchlistStatus | "all">(
+    "all"
+  );
   const [enableSeparation, setEnableSeparation] = useState(true);
 
   const { futureReleases, alreadyReleased, allItems } = useMemo(() => {
     let items = mediaItems.filter(
-      (item) => item.status === "watching" || item.status === "planned" || item.status === "on-hold",
+      (item) =>
+        item.status === "watching" ||
+        item.status === "planned" ||
+        item.status === "on-hold"
     );
 
     if (filterStatus !== "all") {
@@ -73,13 +92,13 @@ export default function WatchlistPage() {
             valA = a.premiereDate
               ? new Date(a.premiereDate).getTime()
               : a.startDate
-                ? new Date(a.startDate).getTime()
-                : Number.POSITIVE_INFINITY;
+              ? new Date(a.startDate).getTime()
+              : Number.POSITIVE_INFINITY;
             valB = b.premiereDate
               ? new Date(b.premiereDate).getTime()
               : b.startDate
-                ? new Date(b.startDate).getTime()
-                : Number.POSITIVE_INFINITY;
+              ? new Date(b.startDate).getTime()
+              : Number.POSITIVE_INFINITY;
             break;
           }
           case "status": {
@@ -149,8 +168,13 @@ export default function WatchlistPage() {
     return (
       <div className="text-center py-10 text-theme-muted-foreground">
         <Tv size={48} className="mx-auto mb-4 text-theme-primary opacity-50" />
-        <h2 className="text-2xl font-mono mb-2 text-theme-foreground">Your Watchlist is Empty</h2>
-        <p>Add some movies, series, or anime you plan to watch or are currently watching!</p>
+        <h2 className="text-2xl font-mono mb-2 text-theme-foreground">
+          Your Watchlist is Empty
+        </h2>
+        <p>
+          Add some movies, series, or anime you plan to watch or are currently
+          watching!
+        </p>
       </div>
     );
   }
@@ -159,15 +183,19 @@ export default function WatchlistPage() {
     items: MediaItem[],
     title: string,
     icon: React.ReactNode,
-    emptyMessage: string,
+    emptyMessage: string
   ) => {
     if (items.length === 0) {
       return (
         <div className="mb-8">
           <div className="flex items-center mb-4">
             {icon}
-            <h2 className="text-xl font-mono text-theme-secondary ml-2">{title}</h2>
-            <span className="ml-2 text-sm text-theme-muted-foreground">({items.length})</span>
+            <h2 className="text-xl font-mono text-theme-secondary ml-2">
+              {title}
+            </h2>
+            <span className="ml-2 text-sm text-theme-muted-foreground">
+              ({items.length})
+            </span>
           </div>
           <div className="text-center py-6 text-theme-muted-foreground bg-theme-surface rounded-lg border border-theme-border">
             <p className="text-sm">{emptyMessage}</p>
@@ -180,8 +208,12 @@ export default function WatchlistPage() {
       <div className="mb-8">
         <div className="flex items-center mb-4">
           {icon}
-          <h2 className="text-xl font-mono text-theme-secondary ml-2">{title}</h2>
-          <span className="ml-2 text-sm text-theme-muted-foreground">({items.length})</span>
+          <h2 className="text-xl font-mono text-theme-secondary ml-2">
+            {title}
+          </h2>
+          <span className="ml-2 text-sm text-theme-muted-foreground">
+            ({items.length})
+          </span>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:items-start">
           {items.map((item) => (
@@ -191,6 +223,7 @@ export default function WatchlistPage() {
               isExpanded={expandedCardId === item.id}
               onToggleExpand={() => handleToggleExpand(item.id)}
               onEdit={() => handleEdit(item)}
+              readOnly={!isOwnData}
             />
           ))}
         </div>
@@ -216,6 +249,7 @@ export default function WatchlistPage() {
             isExpanded={expandedCardId === item.id}
             onToggleExpand={() => handleToggleExpand(item.id)}
             onEdit={() => handleEdit(item)}
+            readOnly={!isOwnData}
           />
         ))}
       </div>
@@ -229,6 +263,11 @@ export default function WatchlistPage() {
           <Tv size={28} className="mr-3" /> My Watchlist
         </h1>
         <div className="flex flex-wrap items-center gap-2">
+          <UserSelector
+            page="watchlist"
+            className="bg-theme-surface-alt border-theme-border"
+          />
+          <div className="h-4 w-px bg-theme-border mx-1" />
           <div className="flex items-center space-x-2">
             <Checkbox
               id="enable-separation"
@@ -251,7 +290,9 @@ export default function WatchlistPage() {
           </Label>
           <Select
             value={filterStatus}
-            onValueChange={(value) => setFilterStatus(value as WatchlistStatus | "all")}
+            onValueChange={(value) =>
+              setFilterStatus(value as WatchlistStatus | "all")
+            }
           >
             <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
               <SelectValue />
@@ -269,12 +310,17 @@ export default function WatchlistPage() {
           >
             Sort by:
           </Label>
-          <Select value={sortKey} onValueChange={(value) => setSortKey(value as SortKey)}>
+          <Select
+            value={sortKey}
+            onValueChange={(value) => setSortKey(value as SortKey)}
+          >
             <SelectTrigger className="w-auto bg-theme-surface-alt border-theme-border">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="premiereDate">Date (Premiere/Start)</SelectItem>
+              <SelectItem value="premiereDate">
+                Date (Premiere/Start)
+              </SelectItem>
               <SelectItem value="title">Title</SelectItem>
               <SelectItem value="status">Status</SelectItem>
             </SelectContent>
@@ -283,9 +329,15 @@ export default function WatchlistPage() {
             variant="ghost"
             size="icon"
             onClick={toggleSortOrder}
-            aria-label={`Sort ${sortOrder === "asc" ? "descending" : "ascending"}`}
+            aria-label={`Sort ${
+              sortOrder === "asc" ? "descending" : "ascending"
+            }`}
           >
-            {sortOrder === "asc" ? <SortAsc size={20} /> : <SortDesc size={20} />}
+            {sortOrder === "asc" ? (
+              <SortAsc size={20} />
+            ) : (
+              <SortDesc size={20} />
+            )}
           </Button>
         </div>
       </div>
@@ -298,14 +350,14 @@ export default function WatchlistPage() {
                 futureReleases,
                 "Upcoming Releases",
                 <Calendar size={20} className="text-theme-primary" />,
-                "No upcoming releases match the current filter.",
+                "No upcoming releases match the current filter."
               )}
 
               {renderSection(
                 alreadyReleased,
                 "Available to Watch",
                 <Clock size={20} className="text-theme-accent" />,
-                "No available content matches the current filter.",
+                "No available content matches the current filter."
               )}
             </>
           ) : (

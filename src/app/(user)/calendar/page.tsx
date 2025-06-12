@@ -14,15 +14,21 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import React, { useMemo } from "react";
+import { UserSelector } from "@/components/UserSelector";
 
-const CalendarItemDisplay: React.FC<{ item: MediaItem; simple?: boolean }> = ({ item, simple }) => (
+const CalendarItemDisplay: React.FC<{ item: MediaItem; simple?: boolean }> = ({
+  item,
+  simple,
+}) => (
   <Link
     href={"#"}
     className="block p-3 hover:bg-theme-surface-alt rounded-md transition-all duration-200 reveal-hover fluent-surface-hover border border-transparent hover:border-theme-border"
   >
     <div className="flex justify-between items-center">
       <div className="flex-1 min-w-0">
-        <h4 className="font-mono text-sm text-theme-foreground truncate">{item.title}</h4>
+        <h4 className="font-mono text-sm text-theme-foreground truncate">
+          {item.title}
+        </h4>
         <p className="text-xs text-theme-muted-foreground">
           {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
           {simple ? ` - ${formatDate(item.premiereDate)}` : ""}
@@ -38,12 +44,13 @@ const CalendarItemDisplay: React.FC<{ item: MediaItem; simple?: boolean }> = ({ 
 );
 
 export default function CalendarPage() {
-  const { mediaItems } = useMediaStore();
+  const { getCurrentUserMediaItems } = useMediaStore();
+  const mediaItems = getCurrentUserMediaItems();
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Normalize today for date comparisons
 
   const [currentMonthDate, setCurrentMonthDate] = React.useState(
-    new Date(today.getFullYear(), today.getMonth(), 1),
+    new Date(today.getFullYear(), today.getMonth(), 1)
   );
 
   const upcomingReleases = useMemo(() => {
@@ -52,9 +59,13 @@ export default function CalendarPage() {
         (item) =>
           item.premiereDate &&
           new Date(item.premiereDate + "T00:00:00") >= today &&
-          !item.releaseDateTBD,
+          !item.releaseDateTBD
       )
-      .sort((a, b) => new Date(a.premiereDate!).getTime() - new Date(b.premiereDate!).getTime());
+      .sort(
+        (a, b) =>
+          new Date(a.premiereDate!).getTime() -
+          new Date(b.premiereDate!).getTime()
+      );
   }, [mediaItems, today]);
 
   const tbdReleases = useMemo(() => {
@@ -70,22 +81,27 @@ export default function CalendarPage() {
         const premiere = new Date(item.premiereDate + "T00:00:00");
         return premiere.getFullYear() === year && premiere.getMonth() === month;
       })
-      .sort((a, b) => new Date(a.premiereDate!).getDate() - new Date(b.premiereDate!).getDate());
+      .sort(
+        (a, b) =>
+          new Date(a.premiereDate!).getDate() -
+          new Date(b.premiereDate!).getDate()
+      );
   }, [mediaItems, currentMonthDate]);
 
   const daysInMonth = new Date(
     currentMonthDate.getFullYear(),
     currentMonthDate.getMonth() + 1,
-    0,
+    0
   ).getDate();
   const firstDayOfMonth = new Date(
     currentMonthDate.getFullYear(),
     currentMonthDate.getMonth(),
-    1,
+    1
   ).getDay(); // 0 (Sun) - 6 (Sat)
 
   // Adjust for Monday start: convert Sunday (0) to 6, others subtract 1
-  const firstDayOfMonthAdjusted = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
+  const firstDayOfMonthAdjusted =
+    firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
 
   const calendarGrid = useMemo(() => {
     const grid = [];
@@ -95,9 +111,13 @@ export default function CalendarPage() {
     }
     // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(currentMonthDate.getFullYear(), currentMonthDate.getMonth(), day);
+      const date = new Date(
+        currentMonthDate.getFullYear(),
+        currentMonthDate.getMonth(),
+        day
+      );
       const dayReleases = releasesInCurrentMonth.filter(
-        (item) => new Date(item.premiereDate! + "T00:00:00").getDate() === day,
+        (item) => new Date(item.premiereDate! + "T00:00:00").getDate() === day
       );
       grid.push({
         key: `day-${day}`,
@@ -108,10 +128,17 @@ export default function CalendarPage() {
       });
     }
     return grid;
-  }, [daysInMonth, firstDayOfMonthAdjusted, currentMonthDate, releasesInCurrentMonth]);
+  }, [
+    daysInMonth,
+    firstDayOfMonthAdjusted,
+    currentMonthDate,
+    releasesInCurrentMonth,
+  ]);
 
   const changeMonth = (offset: number) => {
-    setCurrentMonthDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1));
+    setCurrentMonthDate(
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1)
+    );
   };
 
   return (
@@ -120,6 +147,10 @@ export default function CalendarPage() {
         <h1 className="text-3xl font-mono text-theme-accent flex items-center">
           <CalendarDays size={28} className="mr-3" /> Release Calendar
         </h1>
+        <UserSelector
+          page="calendar"
+          className="bg-theme-surface-alt border-theme-border"
+        />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -141,8 +172,13 @@ export default function CalendarPage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
-                  <CalendarClock size={32} className="text-theme-muted-foreground/50 mb-2" />
-                  <p className="text-sm text-theme-muted-foreground">No upcoming releases scheduled.</p>
+                  <CalendarClock
+                    size={32}
+                    className="text-theme-muted-foreground/50 mb-2"
+                  />
+                  <p className="text-sm text-theme-muted-foreground">
+                    No upcoming releases scheduled.
+                  </p>
                 </div>
               )}
               {upcomingReleases.length > 5 && (
@@ -158,7 +194,10 @@ export default function CalendarPage() {
           <Card className="fluent-surface reveal-hover elevation-fluent-card border-theme-border/50">
             <CardHeader className="pb-4">
               <CardTitle className="text-base flex items-center text-theme-foreground">
-                <CircleHelp size={18} className="mr-2 text-color-highlight-yellow" />
+                <CircleHelp
+                  size={18}
+                  className="mr-2 text-color-highlight-yellow"
+                />
                 TBD Releases
               </CardTitle>
             </CardHeader>
@@ -171,8 +210,13 @@ export default function CalendarPage() {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-6 text-center">
-                  <AlertTriangle size={32} className="text-theme-muted-foreground/50 mb-2" />
-                  <p className="text-sm text-theme-muted-foreground">No items with TBD release dates.</p>
+                  <AlertTriangle
+                    size={32}
+                    className="text-theme-muted-foreground/50 mb-2"
+                  />
+                  <p className="text-sm text-theme-muted-foreground">
+                    No items with TBD release dates.
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -188,19 +232,25 @@ export default function CalendarPage() {
             <CardContent className="pt-0">
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-2 px-3 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
-                  <span className="text-sm text-theme-muted-foreground">This Month</span>
+                  <span className="text-sm text-theme-muted-foreground">
+                    This Month
+                  </span>
                   <span className="text-lg font-mono font-bold text-theme-accent">
                     {releasesInCurrentMonth.length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2 px-3 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
-                  <span className="text-sm text-theme-muted-foreground">Upcoming Total</span>
+                  <span className="text-sm text-theme-muted-foreground">
+                    Upcoming Total
+                  </span>
                   <span className="text-lg font-mono font-bold text-theme-secondary">
                     {upcomingReleases.length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-2 px-3 bg-theme-surface-alt/50 rounded-lg border border-theme-border/30">
-                  <span className="text-sm text-theme-muted-foreground">TBD Releases</span>
+                  <span className="text-sm text-theme-muted-foreground">
+                    TBD Releases
+                  </span>
                   <span className="text-lg font-mono font-bold text-color-highlight-yellow">
                     {tbdReleases.length}
                   </span>
@@ -244,17 +294,25 @@ export default function CalendarPage() {
             <CardContent className="pt-0">
               {/* Day Headers */}
               <div className="grid grid-cols-7 gap-3 mb-4">
-                {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(
-                  (day, index) => (
-                    <div
-                      key={day}
-                      className="text-center text-xs font-medium text-theme-muted-foreground uppercase tracking-wider py-2"
-                    >
-                      <span className="hidden sm:inline">{day}</span>
-                      <span className="sm:hidden">{["M", "T", "W", "T", "F", "S", "S"][index]}</span>
-                    </div>
-                  ),
-                )}
+                {[
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                ].map((day, index) => (
+                  <div
+                    key={day}
+                    className="text-center text-xs font-medium text-theme-muted-foreground uppercase tracking-wider py-2"
+                  >
+                    <span className="hidden sm:inline">{day}</span>
+                    <span className="sm:hidden">
+                      {["M", "T", "W", "T", "F", "S", "S"][index]}
+                    </span>
+                  </div>
+                ))}
               </div>
 
               {/* Calendar Grid */}
@@ -282,7 +340,8 @@ export default function CalendarPage() {
                         <div className="flex justify-between items-start mb-2">
                           <span
                             className={`text-sm font-semibold leading-none ${
-                              cell.date && cell.date.getTime() === today.getTime()
+                              cell.date &&
+                              cell.date.getTime() === today.getTime()
                                 ? "text-theme-accent"
                                 : "text-theme-foreground"
                             }`}
@@ -314,7 +373,9 @@ export default function CalendarPage() {
                                 `}
                                 title={`${item.title} (${item.type})`}
                               >
-                                <div className="font-medium truncate">{item.title}</div>
+                                <div className="font-medium truncate">
+                                  {item.title}
+                                </div>
                                 <div className="text-[8px] opacity-75 truncate capitalize">
                                   {item.type}
                                 </div>
@@ -329,9 +390,10 @@ export default function CalendarPage() {
                         )}
 
                         {/* Today's subtle glow */}
-                        {cell.date && cell.date.getTime() === today.getTime() && (
-                          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-theme-accent/5 to-transparent pointer-events-none" />
-                        )}
+                        {cell.date &&
+                          cell.date.getTime() === today.getTime() && (
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-theme-accent/5 to-transparent pointer-events-none" />
+                          )}
                       </div>
                     )}
                   </div>

@@ -27,6 +27,7 @@ interface MediaCardProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onEdit: () => void;
+  readOnly?: boolean;
 }
 
 const getTypeColor = (type: MediaItem["type"]): string => {
@@ -77,7 +78,13 @@ const getStatusColor = (status: MediaItem["status"]) => {
   }
 };
 
-export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: MediaCardProps) {
+export default function MediaCard({
+  item,
+  isExpanded,
+  onToggleExpand,
+  onEdit,
+  readOnly = false,
+}: MediaCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -94,7 +101,7 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
           "shadow-fluent-dialog scale-[1.01] border-border-interactive",
           "bg-gradient-to-br from-bg-layer-1 to-bg-layer-2",
         ],
-        "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50",
+        "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50"
       )}
     >
       <div className="flex flex-col lg:flex-row h-full">
@@ -103,7 +110,7 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
             "relative flex-shrink-0 aspect-[3/4] lg:aspect-auto lg:w-48",
             "overflow-hidden rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none",
             placeholderColor,
-            !item.imageUrl && "flex items-center justify-center p-6",
+            !item.imageUrl && "flex items-center justify-center p-6"
           )}
         >
           {item.imageUrl && !imageError ? (
@@ -116,7 +123,7 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
                 className={cn(
                   "object-cover transition-all duration-medium ease-fluent-standard",
                   "group-hover:scale-105",
-                  imageLoaded ? "opacity-100" : "opacity-0",
+                  imageLoaded ? "opacity-100" : "opacity-0"
                 )}
                 onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
@@ -162,28 +169,36 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
               <div
                 className={cn(
                   "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-short",
-                  statusColorClass,
+                  statusColorClass
                 )}
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                <span className="capitalize font-medium">{item.status.replace("-", " ")}</span>
+                <span className="capitalize font-medium">
+                  {item.status.replace("-", " ")}
+                </span>
               </div>
             </div>
 
             {/* Action menu */}
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onEdit}
-                className="opacity-60 hover:opacity-100 h-8 w-8"
-              >
-                <Edit3 size={14} />
-              </Button>
-              <Button variant="ghost" size="icon" className="opacity-60 hover:opacity-100 h-8 w-8">
-                <MoreHorizontal size={14} />
-              </Button>
-            </div>
+            {!readOnly && (
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onEdit}
+                  className="opacity-60 hover:opacity-100 h-8 w-8"
+                >
+                  <Edit3 size={14} />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="opacity-60 hover:opacity-100 h-8 w-8"
+                >
+                  <MoreHorizontal size={14} />
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Quick info */}
@@ -216,7 +231,9 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
               {item.notes && (
                 <div className="p-4 rounded-lg bg-bg-layer-2/50 border border-border-subtle/50">
                   <p className="text-sm text-text-secondary leading-relaxed">
-                    <span className="font-medium text-text-primary">Notes: </span>
+                    <span className="font-medium text-text-primary">
+                      Notes:{" "}
+                    </span>
                     {item.notes}
                   </p>
                 </div>
@@ -240,7 +257,9 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
                     <Play size={16} className="text-text-muted" />
                     <div>
                       <div className="text-xs text-text-muted">Started</div>
-                      <div className="font-medium text-text-primary">{formatDate(item.startDate)}</div>
+                      <div className="font-medium text-text-primary">
+                        {formatDate(item.startDate)}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -262,7 +281,9 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
                     <Info size={16} className="text-text-muted" />
                     <div>
                       <div className="text-xs text-text-muted">Director</div>
-                      <div className="font-medium text-text-primary">{item.director}</div>
+                      <div className="font-medium text-text-primary">
+                        {item.director}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -315,13 +336,20 @@ export default function MediaCard({ item, isExpanded, onToggleExpand, onEdit }: 
               )}
             </Button>
 
-            <Button variant="outline" size="sm" onClick={onEdit} className="group">
-              <Edit3
-                size={14}
-                className="mr-1.5 group-hover:scale-110 transition-transform duration-short"
-              />
-              Edit
-            </Button>
+            {!readOnly && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onEdit}
+                className="group"
+              >
+                <Edit3
+                  size={14}
+                  className="mr-1.5 group-hover:scale-110 transition-transform duration-short"
+                />
+                Edit
+              </Button>
+            )}
           </div>
         </div>
       </div>

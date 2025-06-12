@@ -4,6 +4,16 @@ import { PersistenceService } from "./persistence";
 import { SyncManager, type SyncConflict } from "./sync-manager";
 import type { MediaItem } from "./types";
 
+export interface JoinedUser {
+  id: string;
+  email: string;
+  shareId: string;
+  lastSync?: Date;
+  status: 'active' | 'error' | 'unauthorized';
+  mediaItems?: MediaItem[];
+  hasRecentUpdate?: boolean;
+}
+
 interface MediaState {
   mediaItems: MediaItem[];
   isLoading: boolean;
@@ -14,6 +24,8 @@ interface MediaState {
   };
   conflict: SyncConflict | null;
   showConflictDialog: boolean;
+  joinedUsers: JoinedUser[];
+  currentViewUserId: string | null; // null means viewing own data
   addMediaItem: (item: Omit<MediaItem, "id">) => void;
   updateMediaItem: (item: MediaItem) => void;
   deleteMediaItem: (id: string) => void;
@@ -23,6 +35,19 @@ interface MediaState {
   manualSync: () => Promise<void>;
   updateSyncStatus: () => void;
   forceRefresh: () => Promise<void>;
+  addJoinedUser: (user: JoinedUser) => void;
+  removeJoinedUser: (userId: string) => void;
+  setCurrentViewUser: (userId: string | null) => void;
+  syncJoinedUserData: (userId: string, isManual?: boolean) => Promise<void>;
+  getCurrentUserMediaItems: () => MediaItem[];
+  isViewingOwnData: () => boolean;
+  startAutoRefresh: () => void;
+  stopAutoRefresh: () => void;
+  addSharedFileId: (fileId: string) => void;
+  removeSharedFileId: (fileId: string) => void;
+  getSharedFileIds: () => string[];
+  updateSharedFiles: () => Promise<void>;
+  refreshAllJoinedUsers: () => Promise<void>;
 }
 
 const syncManager = SyncManager.getInstance();
@@ -113,6 +138,8 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   syncStatus: { isSync: false, lastSync: null, hasLocalChanges: false },
   conflict: null,
   showConflictDialog: false,
+  joinedUsers: [],
+  currentViewUserId: null,
 
   initializeStore: async () => {
     set({ isLoading: true });
@@ -136,7 +163,36 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         localStorage.setItem("localTimestamp", new Date().toISOString());
       }
 
-      set({ mediaItems: localItems });
+      // Load joined users from localStorage
+      const storedJoinedUsers = localStorage.getItem("joinedUsers");
+      let joinedUsers: JoinedUser[] = [];
+      if (storedJoinedUsers) {
+        try {
+          const parsedUsers = JSON.parse(storedJoinedUsers);
+          // Convert lastSync back to Date objects
+          joinedUsers = parsedUsers.map((user: any) => ({
+            ...user,
+            lastSync: user.lastSync ? new Date(user.lastSync) : undefined
+          }));
+        } catch (error) {
+          console.error("Failed to parse joined users:", error);
+        }
+      }
+
+      // Load current view user
+      const storedCurrentViewUserId = localStorage.getItem("currentViewUserId");
+      const currentViewUserId = storedCurrentViewUserId || null;
+
+      set({
+        mediaItems: localItems,
+        joinedUsers,
+        currentViewUserId
+      });
+
+      // Start auto-refresh for joined users
+      if (joinedUsers.length > 0) {
+        get().startAutoRefresh();
+      }
 
       if (authService.isAuthenticated()) {
         const hasValidToken = await authService.ensureValidToken();
@@ -200,7 +256,8 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       get().updateSyncStatus();
     } catch (error) {
       console.error("Failed to resolve conflict:", error);
-      alert(`Failed to resolve conflict: ${error}`);
+      // Note: Cannot use toast here directly as this is outside React context
+      // This error should be handled by the component that calls resolveConflict
     } finally {
       set({ isLoading: false });
     }
@@ -223,6 +280,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     if (authService.isAuthenticated()) {
       localStorage.setItem("hasLocalChanges", "true");
+
+      // Trigger shared file update in background (don't wait for it)
+      get().updateSharedFiles().catch(console.error);
     }
 
     get().updateSyncStatus();
@@ -240,6 +300,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     if (authService.isAuthenticated()) {
       localStorage.setItem("hasLocalChanges", "true");
+
+      // Trigger shared file update in background (don't wait for it)
+      get().updateSharedFiles().catch(console.error);
     }
 
     get().updateSyncStatus();
@@ -255,6 +318,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     if (authService.isAuthenticated()) {
       localStorage.setItem("hasLocalChanges", "true");
+
+      // Trigger shared file update in background (don't wait for it)
+      get().updateSharedFiles().catch(console.error);
     }
 
     get().updateSyncStatus();
@@ -274,6 +340,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
         localStorage.removeItem("hasLocalChanges");
         localStorage.setItem("lastSync", new Date().toISOString());
+
+        // Update shared files after successful sync
+        await get().updateSharedFiles();
       } else if (syncResult.action === "requires-user-resolution") {
         const conflict = await syncManager.detectConflict(currentItems);
         if (conflict) {
@@ -316,6 +385,221 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       console.error("Force refresh failed:", error);
     } finally {
       set({ isLoading: false });
+    }
+  },
+
+  addJoinedUser: (user: JoinedUser) => {
+    const { joinedUsers } = get();
+    const wasEmpty = joinedUsers.length === 0;
+    const updatedUsers = joinedUsers.filter(u => u.id !== user.id);
+    updatedUsers.push(user);
+    set({ joinedUsers: updatedUsers });
+    localStorage.setItem("joinedUsers", JSON.stringify(updatedUsers));
+
+    // Start auto-refresh if this is the first joined user
+    if (wasEmpty && updatedUsers.length > 0) {
+      get().startAutoRefresh();
+    }
+  },
+
+  removeJoinedUser: (userId: string) => {
+    const updatedUsers = get().joinedUsers.filter(u => u.id !== userId);
+    set({ joinedUsers: updatedUsers });
+    localStorage.setItem("joinedUsers", JSON.stringify(updatedUsers));
+
+    // If we're currently viewing this user, switch back to own data
+    if (get().currentViewUserId === userId) {
+      set({ currentViewUserId: null });
+      localStorage.setItem("currentViewUserId", "");
+    }
+
+    // Stop auto-refresh if no joined users left
+    if (updatedUsers.length === 0) {
+      get().stopAutoRefresh();
+    }
+  },
+
+  setCurrentViewUser: (userId: string | null) => {
+    set({ currentViewUserId: userId });
+    localStorage.setItem("currentViewUserId", userId || "");
+  },
+
+  syncJoinedUserData: async (userId: string, isManual: boolean = false) => {
+    const user = get().joinedUsers.find(u => u.id === userId);
+    if (!user) return;
+
+    if (isManual) {
+      console.log(`Manual sync requested for ${user.email}`);
+    }
+
+    try {
+      const shareData = await syncManager.accessSharedFile(user.shareId);
+      const newMediaItems = shareData.mediaItems || [];
+
+      // Check if data actually changed
+      const currentItems = user.mediaItems || [];
+      const hasChanges = JSON.stringify(currentItems) !== JSON.stringify(newMediaItems);
+
+      if (hasChanges) {
+        console.log(`New data found for ${user.email}, updating... (${isManual ? 'manual' : 'auto'} sync)`);
+      }
+
+      // Update the user's data and status
+      const updatedUsers = get().joinedUsers.map(u =>
+        u.id === userId
+          ? {
+            ...u,
+            mediaItems: newMediaItems,
+            lastSync: new Date(),
+            status: 'active' as const,
+            hasRecentUpdate: hasChanges && isManual // Flag for UI feedback
+          }
+          : u
+      );
+
+      set({ joinedUsers: updatedUsers });
+      localStorage.setItem("joinedUsers", JSON.stringify(updatedUsers));
+
+      // If viewing this user and data changed, notify
+      if (hasChanges && get().currentViewUserId === userId) {
+        console.log(`Updated data for currently viewed user ${user.email}`);
+      }
+
+    } catch (error: any) {
+      console.error("Failed to sync joined user data:", error);
+
+      // If file is deleted (404), remove the user entirely
+      if (error.status === 404) {
+        console.log(`Shared file for ${user.email} was deleted, removing user from joined list`);
+        get().removeJoinedUser(userId);
+        return;
+      }
+
+      // Update status based on error type
+      const status: 'unauthorized' | 'error' = error.status === 401 || error.status === 403 ? 'unauthorized' : 'error';
+      const updatedUsers = get().joinedUsers.map(u =>
+        u.id === userId ? { ...u, status } : u
+      );
+
+      set({ joinedUsers: updatedUsers });
+      localStorage.setItem("joinedUsers", JSON.stringify(updatedUsers));
+    }
+  },
+
+  getCurrentUserMediaItems: () => {
+    const { currentViewUserId, joinedUsers, mediaItems } = get();
+
+    if (!currentViewUserId) {
+      return mediaItems; // Return own data
+    }
+
+    const joinedUser = joinedUsers.find(u => u.id === currentViewUserId);
+    return joinedUser?.mediaItems || [];
+  },
+
+  isViewingOwnData: () => {
+    return get().currentViewUserId === null;
+  },
+
+  startAutoRefresh: () => {
+    // Auto-refresh joined users every 2 minutes
+    const interval = setInterval(async () => {
+      const { joinedUsers } = get();
+      if (joinedUsers.length > 0) {
+        console.log(`Auto-refreshing ${joinedUsers.length} joined users...`);
+      }
+      for (const user of joinedUsers) {
+        if (user.status === 'active') {
+          try {
+            await get().syncJoinedUserData(user.id, false); // false = auto-sync
+          } catch (error: any) {
+            console.error(`Failed to auto-sync user ${user.email}:`, error);
+            // Auto-sync errors are expected for deleted files and shouldn't propagate
+          }
+        }
+      }
+    }, 2 * 60 * 1000); // 2 minutes
+
+    // Store interval ID to clear later
+    (window as any).isolistAutoRefreshInterval = interval;
+  },
+
+  stopAutoRefresh: () => {
+    if ((window as any).isolistAutoRefreshInterval) {
+      clearInterval((window as any).isolistAutoRefreshInterval);
+      delete (window as any).isolistAutoRefreshInterval;
+    }
+  },
+
+  addSharedFileId: (fileId: string) => {
+    const currentIds = JSON.parse(localStorage.getItem("sharedFileIds") || "[]");
+    if (!currentIds.includes(fileId)) {
+      currentIds.push(fileId);
+      localStorage.setItem("sharedFileIds", JSON.stringify(currentIds));
+    }
+  },
+
+  removeSharedFileId: (fileId: string) => {
+    const currentIds = JSON.parse(localStorage.getItem("sharedFileIds") || "[]");
+    const filteredIds = currentIds.filter((id: string) => id !== fileId);
+    localStorage.setItem("sharedFileIds", JSON.stringify(filteredIds));
+  },
+
+  getSharedFileIds: () => {
+    return JSON.parse(localStorage.getItem("sharedFileIds") || "[]");
+  },
+
+  updateSharedFiles: async () => {
+    const { mediaItems } = get();
+    const authService = AuthService.getInstance();
+    const currentUser = authService.getUser();
+
+    if (!currentUser) return;
+
+    const sharedFileIds = get().getSharedFileIds();
+    if (sharedFileIds.length === 0) return;
+
+    console.log(`Updating ${sharedFileIds.length} shared files...`);
+
+    for (const fileId of sharedFileIds) {
+      try {
+        // Create updated share data
+        const sharedData = {
+          mediaItems,
+          sharedBy: currentUser.email,
+          sharedAt: new Date().toISOString(),
+          version: 1,
+          type: "isolist-share",
+        };
+
+        // Update the shared file using SyncManager
+        await syncManager.updateSharedFile(fileId, sharedData);
+        console.log(`Successfully updated shared file ${fileId}`);
+      } catch (error: any) {
+        console.error(`Error updating shared file ${fileId}:`, error);
+
+        // If file not found (404), remove it from tracking
+        if (error.message?.includes('404') || error.status === 404) {
+          console.log(`Shared file ${fileId} was deleted, removing from tracking`);
+          get().removeSharedFileId(fileId);
+        }
+      }
+    }
+  },
+
+  refreshAllJoinedUsers: async () => {
+    const { joinedUsers } = get();
+    console.log(`Refreshing ${joinedUsers.length} joined users...`);
+
+    for (const user of joinedUsers) {
+      if (user.status === 'active') {
+        try {
+          await get().syncJoinedUserData(user.id, true); // true = manual sync
+        } catch (error: any) {
+          console.error(`Failed to refresh user ${user.email}:`, error);
+          // Manual sync errors are logged but don't break the refresh flow
+        }
+      }
     }
   },
 }));

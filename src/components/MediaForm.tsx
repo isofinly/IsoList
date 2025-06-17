@@ -30,6 +30,7 @@ import {
   Plus,
   Star,
   Tag,
+  Trash2,
   Tv,
   User,
   X,
@@ -122,10 +123,11 @@ const getStatusColor = (status: MediaStatus) => {
 
 export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
   const router = useRouter();
-  const { addMediaItem, updateMediaItem } = useMediaStore();
+  const { addMediaItem, updateMediaItem, deleteMediaItem } = useMediaStore();
   const [formData, setFormData] = useState<MediaFormData>(initialFormState);
   const [currentGenre, setCurrentGenre] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { toast } = useGlobalToast();
 
   // TODO: Improve this section
@@ -264,6 +266,33 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
       if (onFormSubmit) onFormSubmit();
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!item?.id) return;
+
+    setIsSubmitting(true);
+    try {
+      deleteMediaItem(item.id);
+      toast.success(
+        "Deleted Successfully",
+        `"${item.title}" has been removed from your collection.`
+      );
+
+      if (onFormSubmit) {
+        onFormSubmit();
+      } else {
+        router.push("/watchlist");
+      }
+    } catch (error) {
+      toast.error(
+        "Delete Failed",
+        "Failed to delete the media item. Please try again."
+      );
+    } finally {
+      setIsSubmitting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -451,7 +480,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                     type="number"
                     min="0.5"
                     max="10"
-                    step="0.5"
+                    step="0.01"
                     value={formData.rating}
                     onChange={handleChange}
                     placeholder="8.5"
@@ -705,32 +734,74 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
             </div>
 
             {/* Form Actions */}
-            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-6 border-t border-border-divider/30">
-              {onFormSubmit && (
+            <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t border-border-divider/30">
+              <div className="flex gap-3">
+                {item && (
+                  <>
+                    {!showDeleteConfirm ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 focus:ring-destructive/50"
+                        disabled={isSubmitting}
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Delete
+                      </Button>
+                    ) : (
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowDeleteConfirm(false)}
+                          disabled={isSubmitting}
+                          className="text-text-muted"
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleDelete}
+                          disabled={isSubmitting}
+                          className="bg-destructive hover:bg-destructive/90 text-white border-destructive focus:ring-destructive/50"
+                          size="sm"
+                        >
+                          {isSubmitting ? "Deleting..." : "Confirm Delete"}
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                {onFormSubmit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onFormSubmit}
+                    disabled={isSubmitting || showDeleteConfirm}
+                  >
+                    Cancel
+                  </Button>
+                )}
                 <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onFormSubmit}
-                  className="order-2 sm:order-1"
+                  type="submit"
+                  variant="accent"
+                  disabled={isSubmitting || showDeleteConfirm}
+                  size="lg"
                 >
-                  Cancel
+                  {isSubmitting
+                    ? item
+                      ? "Saving Changes..."
+                      : "Adding Media..."
+                    : item
+                    ? "Save Changes"
+                    : "Add Media"}
                 </Button>
-              )}
-              <Button
-                type="submit"
-                variant="accent"
-                disabled={isSubmitting}
-                className="order-1 sm:order-2"
-                size="lg"
-              >
-                {isSubmitting
-                  ? item
-                    ? "Saving Changes..."
-                    : "Adding Media..."
-                  : item
-                  ? "Save Changes"
-                  : "Add Media"}
-              </Button>
+              </div>
             </div>
           </form>
         </CardContent>

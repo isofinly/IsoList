@@ -158,11 +158,24 @@ export class PersistenceService {
     }
   }
 
-  // Merge local and cloud data (simple strategy)
   private async mergeData(localItems: MediaItem[], cloudItems: MediaItem[]): Promise<MediaItem[]> {
+    const localMap = new Map(localItems.map(item => [item.id, item]));
+
+    const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
+    if (hasLocalChanges && localItems.length < cloudItems.length) {
+      const merged = new Map(localItems.map(item => [item.id, item]));
+
+      cloudItems.forEach(cloudItem => {
+        if (!localMap.has(cloudItem.id)) {
+          merged.set(cloudItem.id, cloudItem);
+        }
+      });
+
+      return Array.from(merged.values());
+    }
+
     const merged = new Map<string, MediaItem>();
 
-    // Add all cloud items first
     cloudItems.forEach((item) => merged.set(item.id, item));
 
     // Add local items, preferring local changes for existing items

@@ -157,7 +157,6 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         }
       } else {
         // Only use initial items if no data has ever been stored
-        // (stored === null means never been set, vs stored === "[]" which means user had data but deleted everything)
         localItems = initialMediaItems;
         localStorage.setItem("mediaItems", JSON.stringify(localItems));
         localStorage.setItem("localTimestamp", new Date().toISOString());

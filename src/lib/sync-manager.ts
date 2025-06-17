@@ -279,6 +279,17 @@ export class SyncManager {
           };
         }
 
+        const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
+        if (hasLocalChanges && localItems.length < cloudItems.length) {
+          await this.uploadToCloud(localItems);
+          this.saveToLocalSafely(localItems);
+          return {
+            success: true,
+            items: localItems,
+            action: "local-deletions-synced",
+          };
+        }
+
         const merged = this.autoMergeAdditions(localItems, cloudItems);
         await this.uploadToCloud(merged);
         this.saveToLocalSafely(merged);
@@ -297,6 +308,21 @@ export class SyncManager {
   }
 
   private autoMergeAdditions(localItems: MediaItem[], cloudItems: MediaItem[]): MediaItem[] {
+    const localMap = new Map(localItems.map(item => [item.id, item]));
+
+    const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
+    if (hasLocalChanges && localItems.length < cloudItems.length) {
+      const merged = new Map(localItems.map(item => [item.id, item]));
+
+      cloudItems.forEach(cloudItem => {
+        if (!localMap.has(cloudItem.id)) {
+          merged.set(cloudItem.id, cloudItem);
+        }
+      });
+
+      return Array.from(merged.values());
+    }
+
     const merged = new Map<string, MediaItem>();
 
     [...cloudItems, ...localItems].forEach((item) => {
@@ -315,9 +341,7 @@ export class SyncManager {
       }
     });
 
-    const result = Array.from(merged.values());
-
-    return result;
+    return Array.from(merged.values());
   }
 
   private getItemCompleteness(item: MediaItem): number {

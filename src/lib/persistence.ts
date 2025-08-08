@@ -142,6 +142,7 @@ export class PersistenceService {
       const driveService = this.authService.getDriveService();
       const success = await driveService.saveData({
         mediaItems: items,
+        placeItems: JSON.parse(localStorage.getItem("placeItems") || "[]"),
         lastModified: new Date().toISOString(),
         version: 1,
       });

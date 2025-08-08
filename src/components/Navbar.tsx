@@ -99,28 +99,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Search/Command Button */}
-          <div className="hidden sm:flex items-center mr-4">
-            <Button
-              variant="ghost"
-              onClick={() => setIsCommandOpen(true)}
-              className={cn(
-                "flex items-center gap-2 px-3 py-2 text-sm text-text-secondary",
-                "hover:text-text-primary hover:bg-bg-layer-1/80",
-                "border border-border-subtle/50 rounded-lg min-w-[200px] justify-start",
-                "transition-all duration-short ease-fluent-standard",
-              )}
-            >
-              <Search size={16} className="text-text-muted" />
-              <span className="text-text-muted">Search or command...</span>
-              <div className="ml-auto flex items-center gap-1">
-                <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-bg-layer-2 px-1.5 font-mono text-[10px] font-medium text-text-muted border-border-subtle">
-                  <Command size={10} />K
-                </kbd>
-              </div>
-            </Button>
-          </div>
-
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
             {navLinks

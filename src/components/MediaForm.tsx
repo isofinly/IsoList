@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useGlobalToast } from "@/contexts/ToastContext";
 import { useMediaStore } from "@/lib/store";
 import type { MediaItem, MediaStatus, MediaType } from "@/lib/types";
@@ -737,56 +738,20 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
             <div className="flex flex-col sm:flex-row justify-between gap-3 pt-6 border-t border-border-divider/30">
               <div className="flex gap-3">
                 {item && (
-                  <>
-                    {!showDeleteConfirm ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 focus:ring-destructive/50"
-                        disabled={isSubmitting}
-                      >
-                        <Trash2 size={16} className="mr-2" />
-                        Delete
-                      </Button>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowDeleteConfirm(false)}
-                          disabled={isSubmitting}
-                          className="text-text-muted"
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={handleDelete}
-                          disabled={isSubmitting}
-                          className="bg-destructive hover:bg-destructive/90 text-white border-destructive focus:ring-destructive/50"
-                          size="sm"
-                        >
-                          {isSubmitting ? "Deleting..." : "Confirm Delete"}
-                        </Button>
-                      </div>
-                    )}
-                  </>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 focus:ring-destructive/50"
+                    disabled={isSubmitting}
+                  >
+                    <Trash2 size={16} className="mr-2" />
+                    Delete
+                  </Button>
                 )}
               </div>
 
               <div className="flex gap-3">
-                {onFormSubmit && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onFormSubmit}
-                    disabled={isSubmitting || showDeleteConfirm}
-                  >
-                    Cancel
-                  </Button>
-                )}
                 <Button
                   type="submit"
                   variant="accent"
@@ -806,6 +771,18 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
           </form>
         </CardContent>
       </Card>
+      <ConfirmationDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={handleDelete}
+        title="Delete item?"
+        description={`This will permanently remove "${
+          item?.title ?? "this item"
+        }" from your collection. This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </div>
   );
 }

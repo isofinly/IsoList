@@ -1,5 +1,5 @@
 import { AuthService } from "./auth";
-import type { MediaItem } from "./types";
+import type { MediaItem, PlaceItem } from "./types";
 
 export interface SyncConflict {
   type: "real-conflict" | "deletion-conflict";
@@ -10,19 +10,30 @@ export interface SyncConflict {
     cloud: MediaItem;
     conflictType: "modified" | "deleted-locally" | "deleted-in-cloud";
   }[];
+  conflictedPlaces?: {
+    id: string;
+    name: string;
+    local: PlaceItem;
+    cloud: PlaceItem;
+    conflictType: "modified" | "deleted-locally" | "deleted-in-cloud";
+  }[];
   local: {
     items: MediaItem[];
+    places?: PlaceItem[];
     count: number;
     timestamp: string;
   };
   cloud: {
     items: MediaItem[];
+    places?: PlaceItem[];
     count: number;
     timestamp: string;
   };
   additionsOnly: {
     localOnly: MediaItem[];
     cloudOnly: MediaItem[];
+    localOnlyPlaces?: PlaceItem[];
+    cloudOnlyPlaces?: PlaceItem[];
   };
 }
 
@@ -109,7 +120,7 @@ export class SyncManager {
     return backup.items;
   }
 
-  async detectConflict(localItems: MediaItem[]): Promise<SyncConflict | null> {
+  async detectConflict(localItems: MediaItem[], localPlaces: PlaceItem[] = []): Promise<SyncConflict | null> {
     if (!this.authService.isAuthenticated()) return null;
 
     try {
@@ -118,11 +129,13 @@ export class SyncManager {
 
       const localTimestamp = localStorage.getItem("localTimestamp") || "";
       const cloudItems = cloudData?.mediaItems || [];
+      const cloudPlaces: PlaceItem[] = cloudData?.placeItems || [];
       const cloudTimestamp = cloudData?.lastModified || "";
 
       const analysis = this.analyzeDataDifferences(localItems, cloudItems);
+      const placeAnalysis = this.analyzePlacesDifferences(localPlaces, cloudPlaces);
 
-      if (analysis.conflicts.length === 0) {
+      if (analysis.conflicts.length === 0 && placeAnalysis.conflicts.length === 0) {
         return null;
       }
 
@@ -131,19 +144,24 @@ export class SyncManager {
           ? "real-conflict"
           : "deletion-conflict",
         conflictedItems: analysis.conflicts,
+        conflictedPlaces: placeAnalysis.conflicts,
         local: {
           items: localItems,
           count: localItems.length,
           timestamp: localTimestamp,
+          places: localPlaces,
         },
         cloud: {
           items: cloudItems,
           count: cloudItems.length,
           timestamp: cloudTimestamp,
+          places: cloudPlaces,
         },
         additionsOnly: {
           localOnly: analysis.localOnly,
           cloudOnly: analysis.cloudOnly,
+          localOnlyPlaces: placeAnalysis.localOnly,
+          cloudOnlyPlaces: placeAnalysis.cloudOnly,
         },
       };
 
@@ -156,6 +174,7 @@ export class SyncManager {
 
   async safeSyncWithUserChoice(
     localItems: MediaItem[],
+    localPlaces: PlaceItem[] = [],
     userChoice: "local" | "cloud" | "merge" | "cancel",
   ): Promise<MediaItem[]> {
     const conflict = await this.detectConflict(localItems);
@@ -167,6 +186,7 @@ export class SyncManager {
       case "local": {
         await this.authService.getDriveService().saveData({
           mediaItems: localItems,
+          placeItems: localPlaces,
           lastModified: new Date().toISOString(),
           version: 1,
         });
@@ -175,18 +195,27 @@ export class SyncManager {
       }
 
       case "cloud": {
-        this.saveToLocalSafely(conflict.cloud.items);
+        // Keep places unchanged locally when choosing cloud media
+        const driveService = this.authService.getDriveService();
+        const cloudData = await driveService.loadData();
+        const cloudPlaces: PlaceItem[] = cloudData?.placeItems || [];
+        this.saveToLocalSafely(conflict.cloud.items, cloudPlaces);
         return conflict.cloud.items;
       }
 
       case "merge": {
         const merged = this.autoMergeAdditions(conflict.local.items, conflict.cloud.items);
+        const driveService = this.authService.getDriveService();
+        const cloudData = await driveService.loadData();
+        const cloudPlaces: PlaceItem[] = cloudData?.placeItems || [];
+        const mergedPlaces = this.autoMergePlacesAdditions(localPlaces, cloudPlaces);
         await this.authService.getDriveService().saveData({
           mediaItems: merged,
+          placeItems: mergedPlaces,
           lastModified: new Date().toISOString(),
           version: 1,
         });
-        this.saveToLocalSafely(merged);
+        this.saveToLocalSafely(merged, mergedPlaces);
         return merged;
       }
 
@@ -246,64 +275,95 @@ export class SyncManager {
     };
   }
 
+  private analyzePlacesDifferences(localPlaces: PlaceItem[], cloudPlaces: PlaceItem[]) {
+    const localMap = new Map(localPlaces.map((p) => [p.id, p]));
+    const cloudMap = new Map(cloudPlaces.map((p) => [p.id, p]));
+
+    const conflicts: Array<{ id: string; name: string; local: PlaceItem; cloud: PlaceItem; conflictType: "modified" | "deleted-locally" | "deleted-in-cloud" }> = [];
+    const localOnly: PlaceItem[] = [];
+    const cloudOnly: PlaceItem[] = [];
+
+    for (const lp of localPlaces) {
+      const cp = cloudMap.get(lp.id);
+      if (!cp) {
+        localOnly.push(lp);
+      } else {
+        const lUpdated = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
+        const cUpdated = cp.updatedAt ? new Date(cp.updatedAt).getTime() : 0;
+        if (lUpdated !== cUpdated || JSON.stringify(lp) !== JSON.stringify(cp)) {
+          conflicts.push({ id: lp.id, name: lp.name, local: lp, cloud: cp, conflictType: "modified" });
+        }
+      }
+    }
+
+    for (const cp of cloudPlaces) {
+      if (!localMap.has(cp.id)) cloudOnly.push(cp);
+    }
+
+    return { conflicts, localOnly, cloudOnly };
+  }
+
   async intelligentSync(
     localItems: MediaItem[],
-  ): Promise<{ success: boolean; items: MediaItem[]; action: string }> {
+    localPlaces: PlaceItem[] = [],
+  ): Promise<{ success: boolean; items: { media: MediaItem[]; places: PlaceItem[] }; action: string }> {
     if (!this.authService.isAuthenticated()) {
-      return { success: false, items: localItems, action: "not-authenticated" };
+      return { success: false, items: { media: localItems, places: localPlaces }, action: "not-authenticated" };
     }
 
     try {
       const driveService = this.authService.getDriveService();
-      const conflict = await this.detectConflict(localItems);
+      const conflict = await this.detectConflict(localItems, localPlaces);
 
       if (!conflict) {
         const cloudData = await driveService.loadData();
-        const cloudItems = cloudData?.mediaItems || [];
+        const cloudItems: MediaItem[] = cloudData?.mediaItems || [];
+        const cloudPlaces: PlaceItem[] = cloudData?.placeItems || [];
 
         if (cloudItems.length === 0) {
-          await this.uploadToCloud(localItems);
+          await this.uploadToCloud(localItems, localPlaces);
           return {
             success: true,
-            items: localItems,
+            items: { media: localItems, places: localPlaces },
             action: "uploaded-to-cloud",
           };
         }
 
-        if (localItems.length === 0) {
-          this.saveToLocalSafely(cloudItems);
+        if (localItems.length === 0 && localPlaces.length === 0) {
+          this.saveToLocalSafely(cloudItems, cloudPlaces);
           return {
             success: true,
-            items: cloudItems,
+            items: { media: cloudItems, places: cloudPlaces },
             action: "downloaded-from-cloud",
           };
         }
 
         const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
-        if (hasLocalChanges && localItems.length < cloudItems.length) {
-          await this.uploadToCloud(localItems);
-          this.saveToLocalSafely(localItems);
+        if (hasLocalChanges && (localItems.length < cloudItems.length || localPlaces.length < cloudPlaces.length)) {
+          await this.uploadToCloud(localItems, localPlaces);
+          this.saveToLocalSafely(localItems, localPlaces);
           return {
             success: true,
-            items: localItems,
+            items: { media: localItems, places: localPlaces },
             action: "local-deletions-synced",
           };
         }
 
-        const merged = this.autoMergeAdditions(localItems, cloudItems);
-        await this.uploadToCloud(merged);
-        this.saveToLocalSafely(merged);
+        const mergedMedia = this.autoMergeAdditions(localItems, cloudItems);
+        const mergedPlaces = this.autoMergePlacesAdditions(localPlaces, cloudPlaces);
+        await this.uploadToCloud(mergedMedia, mergedPlaces);
+        this.saveToLocalSafely(mergedMedia, mergedPlaces);
 
-        return { success: true, items: merged, action: "auto-merged" };
+        return { success: true, items: { media: mergedMedia, places: mergedPlaces }, action: "auto-merged" };
       }
       return {
         success: false,
-        items: localItems,
+        items: { media: localItems, places: localPlaces },
         action: "requires-user-resolution",
       };
     } catch (error) {
       console.error("Intelligent sync failed:", error);
-      return { success: false, items: localItems, action: "error" };
+      return { success: false, items: { media: localItems, places: localPlaces }, action: "error" };
     }
   }
 
@@ -330,12 +390,17 @@ export class SyncManager {
       if (!existing) {
         merged.set(item.id, item);
       } else {
-        // Item exists, prefer the one with more recent data or more complete data
-        const existingScore = this.getItemCompleteness(existing);
-        const newScore = this.getItemCompleteness(item);
-
-        if (newScore > existingScore) {
+        // Prefer by updatedAt if available, else by completeness
+        const existingUpdated = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+        const itemUpdated = item.updatedAt ? new Date(item.updatedAt).getTime() : 0;
+        if (itemUpdated && itemUpdated > existingUpdated) {
           merged.set(item.id, item);
+        } else if (!itemUpdated && !existingUpdated) {
+          const existingScore = this.getItemCompleteness(existing);
+          const newScore = this.getItemCompleteness(item);
+          if (newScore > existingScore) {
+            merged.set(item.id, item);
+          }
         }
         // If scores are equal, keep existing (first one wins)
       }
@@ -359,10 +424,11 @@ export class SyncManager {
     return score;
   }
 
-  private async uploadToCloud(items: MediaItem[]): Promise<void> {
+  private async uploadToCloud(items: MediaItem[], places: PlaceItem[] = []): Promise<void> {
     const driveService = this.authService.getDriveService();
     const success = await driveService.saveData({
       mediaItems: items,
+      placeItems: places,
       lastModified: new Date().toISOString(),
       version: 1,
     });
@@ -381,9 +447,10 @@ export class SyncManager {
     localStorage.removeItem("hasLocalChanges");
   }
 
-  private saveToLocalSafely(items: MediaItem[]): void {
+  private saveToLocalSafely(items: MediaItem[], places: PlaceItem[] = []): void {
     const timestamp = new Date().toISOString();
     localStorage.setItem("mediaItems", JSON.stringify(items));
+    localStorage.setItem("placeItems", JSON.stringify(places));
     localStorage.setItem("localTimestamp", timestamp);
     localStorage.setItem("lastSync", timestamp);
     localStorage.removeItem("hasLocalChanges");
@@ -396,6 +463,38 @@ export class SyncManager {
     const sorted2 = [...items2].sort((a, b) => a.id.localeCompare(b.id));
 
     return JSON.stringify(sorted1) === JSON.stringify(sorted2);
+  }
+
+  private autoMergePlacesAdditions(localPlaces: PlaceItem[], cloudPlaces: PlaceItem[]): PlaceItem[] {
+    const localMap = new Map(localPlaces.map((p) => [p.id, p]));
+
+    const merged = new Map<string, PlaceItem>();
+
+    // Start with cloud, then apply local as preferred for conflicts
+    cloudPlaces.forEach((p) => merged.set(p.id, p));
+    localPlaces.forEach((p) => {
+      const existing = merged.get(p.id);
+      if (!existing) {
+        merged.set(p.id, p);
+      } else {
+        // Prefer most recent by updatedAt, fallback to local
+        const existingUpdated = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+        const itemUpdated = p.updatedAt ? new Date(p.updatedAt).getTime() : 0;
+        if (itemUpdated && itemUpdated > existingUpdated) {
+          merged.set(p.id, p);
+        }
+      }
+    });
+
+    // Also add any cloud-only places missing locally if there are local deletions with hasLocalChanges
+    const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
+    if (hasLocalChanges && localPlaces.length < cloudPlaces.length) {
+      cloudPlaces.forEach((cp) => {
+        if (!localMap.has(cp.id)) merged.set(cp.id, cp);
+      });
+    }
+
+    return Array.from(merged.values());
   }
 
   // Sharing functionality
@@ -419,6 +518,47 @@ export class SyncManager {
       console.error("Failed to create shareable file:", error);
       throw error;
     }
+  }
+
+  // Places-only sharing
+  async createPlacesShareFile(placeItems: PlaceItem[], sharedByEmail: string): Promise<string> {
+    if (!this.authService.isAuthenticated()) {
+      throw new Error("Must be authenticated to create shareable files");
+    }
+
+    const driveService = this.authService.getDriveService();
+    const payload = {
+      type: "isolist-share-places",
+      placeItems,
+      sharedBy: sharedByEmail,
+      sharedAt: new Date().toISOString(),
+      version: 1,
+    };
+    const fileName = `isolist-share-places-${Date.now()}.json`;
+    const fileId = await driveService.saveDataWithFileId(payload, fileName);
+    await driveService.makeFilePublic(fileId);
+    return fileId;
+  }
+
+  async updatePlacesShareFile(fileId: string, placeItems: PlaceItem[], sharedByEmail: string): Promise<boolean> {
+    if (!this.authService.isAuthenticated()) throw new Error("Must be authenticated");
+    const driveService = this.authService.getDriveService();
+    const payload = {
+      type: "isolist-share-places",
+      placeItems,
+      sharedBy: sharedByEmail,
+      sharedAt: new Date().toISOString(),
+      version: 1,
+    };
+    return await driveService.updateFileById(fileId, payload);
+  }
+
+  async accessPlacesShareFile(fileId: string): Promise<{ placeItems: PlaceItem[] } | null> {
+    if (!this.authService.isAuthenticated()) throw new Error("Must be authenticated");
+    const driveService = this.authService.getDriveService();
+    const data = await driveService.loadSharedData(fileId);
+    if (data?.type !== "isolist-share-places") return null;
+    return { placeItems: data.placeItems || [] };
   }
 
   async accessSharedFile(fileId: string): Promise<any> {

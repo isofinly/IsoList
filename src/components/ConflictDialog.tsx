@@ -90,20 +90,33 @@ export function ConflictDialog({
             </p>
           </div>
 
-          {conflict.conflictedItems.length > 0 && (
+          {(conflict.conflictedItems.length > 0 ||
+            (conflict.conflictedPlaces &&
+              conflict.conflictedPlaces.length > 0)) && (
             <div className="mt-4 p-4 bg-error-soft/20 border border-error-soft rounded-lg">
               <h4 className="font-medium text-text-primary mb-2">
-                Conflicted Items ({conflict.conflictedItems.length})
+                Conflicted Data
               </h4>
               <div className="space-y-2 max-h-32 overflow-y-auto">
                 {conflict.conflictedItems.map((item, index) => (
                   <div
-                    key={index}
+                    key={`media-${index}`}
                     className="flex items-center justify-between text-sm"
                   >
                     <span className="font-medium">{item.title}</span>
                     <span className="text-xs px-2 py-1 bg-error-soft rounded">
                       {item.conflictType}
+                    </span>
+                  </div>
+                ))}
+                {conflict.conflictedPlaces?.map((place, index) => (
+                  <div
+                    key={`place-${index}`}
+                    className="flex items-center justify-between text-sm"
+                  >
+                    <span className="font-medium">{place.name}</span>
+                    <span className="text-xs px-2 py-1 bg-error-soft rounded">
+                      {place.conflictType}
                     </span>
                   </div>
                 ))}
@@ -118,7 +131,8 @@ export function ConflictDialog({
                 <HardDrive size={16} className="text-text-secondary" />
                 <span className="font-medium">Local Data</span>
                 <span className="ml-auto text-sm text-text-muted">
-                  {conflict.local.count} items
+                  {conflict.local.count} media •{" "}
+                  {conflict.local.places?.length || 0} places
                 </span>
               </div>
 
@@ -151,7 +165,8 @@ export function ConflictDialog({
                 <Cloud size={16} className="text-info" />
                 <span className="font-medium">Cloud Data</span>
                 <span className="ml-auto text-sm text-text-muted">
-                  {conflict.cloud.count} items
+                  {conflict.cloud.count} media •{" "}
+                  {conflict.cloud.places?.length || 0} places
                 </span>
               </div>
 

@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { AuthService } from "./auth";
 import { PersistenceService } from "./persistence";
 import { SyncManager, type SyncConflict } from "./sync-manager";
-import type { MediaItem } from "./types";
+import type { MediaItem, PlaceItem } from "./types";
 
 export interface JoinedUser {
   id: string;
@@ -16,6 +16,7 @@ export interface JoinedUser {
 
 interface MediaState {
   mediaItems: MediaItem[];
+  placeItems: PlaceItem[];
   isLoading: boolean;
   syncStatus: {
     isSync: boolean;
@@ -29,6 +30,9 @@ interface MediaState {
   addMediaItem: (item: Omit<MediaItem, "id">) => void;
   updateMediaItem: (item: MediaItem) => void;
   deleteMediaItem: (id: string) => void;
+  addPlaceItem: (item: Omit<PlaceItem, "id">) => void;
+  updatePlaceItem: (item: PlaceItem) => void;
+  deletePlaceItem: (id: string) => void;
   initializeStore: () => Promise<void>;
   resolveConflict: (choice: "local" | "cloud" | "merge" | "cancel") => Promise<void>;
   setConflictDialog: (show: boolean) => void;
@@ -40,6 +44,7 @@ interface MediaState {
   setCurrentViewUser: (userId: string | null) => void;
   syncJoinedUserData: (userId: string, isManual?: boolean) => Promise<void>;
   getCurrentUserMediaItems: () => MediaItem[];
+  getCurrentUserPlaceItems: () => PlaceItem[];
   isViewingOwnData: () => boolean;
   startAutoRefresh: () => void;
   stopAutoRefresh: () => void;
@@ -47,6 +52,11 @@ interface MediaState {
   removeSharedFileId: (fileId: string) => void;
   getSharedFileIds: () => string[];
   updateSharedFiles: () => Promise<void>;
+  // places sharing
+  addPlacesSharedFileId: (fileId: string) => void;
+  removePlacesSharedFileId: (fileId: string) => void;
+  getPlacesSharedFileIds: () => string[];
+  updatePlacesSharedFiles: () => Promise<void>;
   refreshAllJoinedUsers: () => Promise<void>;
 }
 
@@ -71,69 +81,28 @@ const initialMediaItems: MediaItem[] = [
     genres: ["Sci-Fi", "Cyberpunk", "Action"],
     platform: "Netflix",
   },
+];
+
+const initialPlaceItems: PlaceItem[] = [
   {
-    id: "2",
-    title: "Blade Runner 2049",
-    type: "movie",
-    status: "completed",
-    imageUrl: "https://placehold.co/300x450/00A9E0/FFFFFF.png?text=Blade+Runner+2049&font=mono",
-    rating: 10,
-    notes: "A masterpiece of sci-fi cinema. Incredible visuals and atmosphere.",
-    premiereDate: "2017-10-06",
-    startDate: "2017-10-10",
-    completionDate: "2017-10-10",
-    genres: ["Sci-Fi", "Neo-noir", "Thriller"],
-    director: "Denis Villeneuve",
-  },
-  {
-    id: "3",
-    title: "Arcane",
-    type: "series",
-    status: "watching",
-    imageUrl: "https://placehold.co/300x450/D4AF37/000000.png?text=Arcane&font=mono",
-    rating: undefined,
-    notes: "Season 2 hype!",
-    premiereDate: "2021-11-06",
-    startDate: "2024-06-01",
-    episodesWatched: 3,
-    totalEpisodes: 9,
-    releaseDateTBD: false,
-    genres: ["Animation", "Action", "Fantasy"],
-    platform: "Netflix",
-  },
-  {
-    id: "4",
-    title: "Ghost in the Shell (1995)",
-    type: "anime",
-    status: "planned",
-    imageUrl: "https://placehold.co/300x450/32CD32/FFFFFF.png?text=GitS+1995&font=mono",
-    premiereDate: "1995-11-18",
-    genres: ["Sci-Fi", "Cyberpunk", "Philosophical"],
-    releaseDateTBD: false,
-  },
-  {
-    id: "5",
-    title: "Project Hail Mary (Adaptation)",
-    type: "movie",
-    status: "planned",
-    imageUrl: "https://placehold.co/300x450/708090/FFFFFF.png?text=Project+Hail+Mary&font=mono",
-    premiereDate: "2026-03-20",
-    releaseDateTBD: false,
-    genres: ["Sci-Fi", "Adventure"],
-  },
-  {
-    id: "6",
-    title: "Unknown Cyber Series X",
-    type: "series",
-    status: "planned",
-    imageUrl: "https://placehold.co/300x450/404040/FFFFFF.png?text=Series+X+TBD&font=mono",
-    releaseDateTBD: true,
-    genres: ["Cyberpunk", "Mystery"],
-  },
+    id: "p-1",
+    name: "Tokyo",
+    category: "city",
+    country: "Japan",
+    firstVisited: "2019-04-12",
+    lastVisited: "2019-04-20",
+    visitsCount: 1,
+    rating: 5,
+    favorite: true,
+    notes: "Akihabara, Shibuya crossing, sushi everywhere.",
+    tags: ["travel", "asia"],
+    imageUrl: "https://placehold.co/600x400/00A9E0/FFFFFF.png?text=Tokyo",
+  }
 ];
 
 export const useMediaStore = create<MediaState>((set, get) => ({
   mediaItems: [],
+  placeItems: [],
   isLoading: false,
   syncStatus: { isSync: false, lastSync: null, hasLocalChanges: false },
   conflict: null,
@@ -146,7 +115,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     try {
       const stored = localStorage.getItem("mediaItems");
+      const storedPlaces = localStorage.getItem("placeItems");
       let localItems: MediaItem[] = [];
+      let localPlaces: PlaceItem[] = [];
 
       if (stored) {
         try {
@@ -155,12 +126,23 @@ export const useMediaStore = create<MediaState>((set, get) => ({
           console.error("Failed to parse stored items:", error);
           localItems = [];
         }
-      }
-
-      if (localItems.length === 0) {
+      } else {
+        // Only use initial items if no data has ever been stored
         localItems = initialMediaItems;
         localStorage.setItem("mediaItems", JSON.stringify(localItems));
         localStorage.setItem("localTimestamp", new Date().toISOString());
+      }
+
+      if (storedPlaces) {
+        try {
+          localPlaces = JSON.parse(storedPlaces);
+        } catch (error) {
+          console.error("Failed to parse stored places:", error);
+          localPlaces = [];
+        }
+      } else {
+        localPlaces = initialPlaceItems;
+        localStorage.setItem("placeItems", JSON.stringify(localPlaces));
       }
 
       // Load joined users from localStorage
@@ -185,6 +167,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
       set({
         mediaItems: localItems,
+        placeItems: localPlaces,
         joinedUsers,
         currentViewUserId
       });
@@ -198,14 +181,14 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         const hasValidToken = await authService.ensureValidToken();
 
         if (hasValidToken) {
-          const syncResult = await syncManager.intelligentSync(localItems);
+          const syncResult = await syncManager.intelligentSync(localItems, localPlaces);
 
           if (syncResult.success) {
-            set({ mediaItems: syncResult.items });
+            set({ mediaItems: syncResult.items.media, placeItems: syncResult.items.places });
             localStorage.removeItem("hasLocalChanges");
             localStorage.setItem("lastSync", new Date().toISOString());
           } else if (syncResult.action === "requires-user-resolution") {
-            const conflict = await syncManager.detectConflict(localItems);
+            const conflict = await syncManager.detectConflict(localItems, localPlaces);
             if (conflict) {
               set({ conflict, showConflictDialog: true });
             }
@@ -240,7 +223,11 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     set({ isLoading: true });
 
     try {
-      const resolvedItems = await syncManager.safeSyncWithUserChoice(conflict.local.items, choice);
+      const resolvedItems = await syncManager.safeSyncWithUserChoice(
+        conflict.local.items,
+        get().placeItems,
+        choice,
+      );
 
       set({
         mediaItems: resolvedItems,
@@ -249,6 +236,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       });
 
       localStorage.setItem("mediaItems", JSON.stringify(resolvedItems));
+      // keep placeItems as-is (already in state)
       localStorage.setItem("localTimestamp", new Date().toISOString());
       localStorage.setItem("lastSync", new Date().toISOString());
       localStorage.removeItem("hasLocalChanges");
@@ -270,7 +258,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     }
   },
   addMediaItem: (item) => {
-    const newItem = { ...item, id: crypto.randomUUID() };
+    const newItem = { ...item, id: crypto.randomUUID(), updatedAt: new Date().toISOString() };
     const updatedItems = [...get().mediaItems, newItem];
 
     set({ mediaItems: updatedItems });
@@ -288,9 +276,27 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     get().updateSyncStatus();
   },
 
+  addPlaceItem: (item) => {
+    const newItem = { ...item, id: crypto.randomUUID(), updatedAt: new Date().toISOString() };
+    const updatedItems = [...get().placeItems, newItem];
+
+    set({ placeItems: updatedItems });
+
+    localStorage.setItem("placeItems", JSON.stringify(updatedItems));
+    localStorage.setItem("localTimestamp", new Date().toISOString());
+
+    if (authService.isAuthenticated()) {
+      localStorage.setItem("hasLocalChanges", "true");
+      get().updateSharedFiles().catch(console.error);
+    }
+
+    get().updateSyncStatus();
+  },
+
   updateMediaItem: (updatedItem) => {
+    const updatedWithTs = { ...updatedItem, updatedAt: new Date().toISOString() };
     const updatedItems = get().mediaItems.map((item) =>
-      item.id === updatedItem.id ? updatedItem : item,
+      item.id === updatedWithTs.id ? updatedWithTs : item,
     );
 
     set({ mediaItems: updatedItems });
@@ -302,6 +308,25 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       localStorage.setItem("hasLocalChanges", "true");
 
       // Trigger shared file update in background (don't wait for it)
+      get().updateSharedFiles().catch(console.error);
+    }
+
+    get().updateSyncStatus();
+  },
+
+  updatePlaceItem: (updatedItem) => {
+    const updatedWithTs = { ...updatedItem, updatedAt: new Date().toISOString() };
+    const updatedItems = get().placeItems.map((item) =>
+      item.id === updatedWithTs.id ? updatedWithTs : item,
+    );
+
+    set({ placeItems: updatedItems });
+
+    localStorage.setItem("placeItems", JSON.stringify(updatedItems));
+    localStorage.setItem("localTimestamp", new Date().toISOString());
+
+    if (authService.isAuthenticated()) {
+      localStorage.setItem("hasLocalChanges", "true");
       get().updateSharedFiles().catch(console.error);
     }
 
@@ -326,17 +351,34 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     get().updateSyncStatus();
   },
 
+  deletePlaceItem: (id) => {
+    const updatedItems = get().placeItems.filter((item) => item.id !== id);
+
+    set({ placeItems: updatedItems });
+
+    localStorage.setItem("placeItems", JSON.stringify(updatedItems));
+    localStorage.setItem("localTimestamp", new Date().toISOString());
+
+    if (authService.isAuthenticated()) {
+      localStorage.setItem("hasLocalChanges", "true");
+      get().updateSharedFiles().catch(console.error);
+    }
+
+    get().updateSyncStatus();
+  },
+
   manualSync: async () => {
     if (!authService.isAuthenticated()) return;
 
     set({ isLoading: true });
     try {
-      const currentItems = get().mediaItems;
+      const currentMedia = get().mediaItems;
+      const currentPlaces = get().placeItems;
 
-      const syncResult = await syncManager.intelligentSync(currentItems);
+      const syncResult = await syncManager.intelligentSync(currentMedia, currentPlaces);
 
       if (syncResult.success) {
-        set({ mediaItems: syncResult.items });
+        set({ mediaItems: syncResult.items.media, placeItems: syncResult.items.places });
 
         localStorage.removeItem("hasLocalChanges");
         localStorage.setItem("lastSync", new Date().toISOString());
@@ -344,7 +386,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         // Update shared files after successful sync
         await get().updateSharedFiles();
       } else if (syncResult.action === "requires-user-resolution") {
-        const conflict = await syncManager.detectConflict(currentItems);
+        const conflict = await syncManager.detectConflict(currentMedia, currentPlaces);
         if (conflict) {
           set({ conflict, showConflictDialog: true });
         }
@@ -376,9 +418,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
     set({ isLoading: true });
     try {
-      const cloudItems = await persistenceService.forceDownload();
-      if (cloudItems) {
-        set({ mediaItems: cloudItems });
+      const cloud = await persistenceService.forceDownload();
+      if (cloud) {
+        // persistence currently only pulls media; places handled via sync-manager path
+        set({ mediaItems: cloud });
         get().updateSyncStatus();
       }
     } catch (error) {
@@ -497,6 +540,18 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     return joinedUser?.mediaItems || [];
   },
 
+  getCurrentUserPlaceItems: () => {
+    const { currentViewUserId, joinedUsers, placeItems } = get();
+
+    if (!currentViewUserId) {
+      return placeItems; // Return own data
+    }
+
+    const joinedUser = joinedUsers.find(u => u.id === currentViewUserId);
+    // joined user shares currently only contain media; return empty until share includes places
+    return [];
+  },
+
   isViewingOwnData: () => {
     return get().currentViewUserId === null;
   },
@@ -582,6 +637,56 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         if (error.message?.includes('404') || error.status === 404) {
           console.log(`Shared file ${fileId} was deleted, removing from tracking`);
           get().removeSharedFileId(fileId);
+        }
+      }
+    }
+  },
+
+  // Places share management (separate from media shares)
+  addPlacesSharedFileId: (fileId: string) => {
+    const currentIds = JSON.parse(localStorage.getItem("placesSharedFileIds") || "[]");
+    if (!currentIds.includes(fileId)) {
+      currentIds.push(fileId);
+      localStorage.setItem("placesSharedFileIds", JSON.stringify(currentIds));
+    }
+  },
+
+  removePlacesSharedFileId: (fileId: string) => {
+    const currentIds = JSON.parse(localStorage.getItem("placesSharedFileIds") || "[]");
+    const filteredIds = currentIds.filter((id: string) => id !== fileId);
+    localStorage.setItem("placesSharedFileIds", JSON.stringify(filteredIds));
+  },
+
+  getPlacesSharedFileIds: () => {
+    return JSON.parse(localStorage.getItem("placesSharedFileIds") || "[]");
+  },
+
+  updatePlacesSharedFiles: async () => {
+    const { placeItems } = get();
+    const authService = AuthService.getInstance();
+    const currentUser = authService.getUser();
+    if (!currentUser) return;
+
+    const sharedFileIds = get().getPlacesSharedFileIds();
+    if (sharedFileIds.length === 0) return;
+
+    console.log(`Updating ${sharedFileIds.length} places shared files...`);
+    for (const fileId of sharedFileIds) {
+      try {
+        const payload = {
+          placeItems,
+          sharedBy: currentUser.email,
+          sharedAt: new Date().toISOString(),
+          version: 1,
+          type: "isolist-share-places",
+        };
+        await syncManager.updateSharedFile(fileId, payload);
+        console.log(`Successfully updated places shared file ${fileId}`);
+      } catch (error: any) {
+        console.error(`Error updating places shared file ${fileId}:`, error);
+        if (error.message?.includes('404') || error.status === 404) {
+          console.log(`Places shared file ${fileId} was deleted, removing from tracking`);
+          get().removePlacesSharedFileId(fileId);
         }
       }
     }

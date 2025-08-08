@@ -14,7 +14,7 @@ import { User, Users, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 interface UserSelectorProps {
-  page: "ratings" | "watchlist" | "calendar";
+  page: "ratings" | "watchlist" | "calendar" | "places";
   className?: string;
 }
 

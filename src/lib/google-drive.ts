@@ -134,6 +134,7 @@ export class GoogleDriveService {
   async saveData(
     data: {
       mediaItems?: any;
+      placeItems?: any;
       lastModified?: string;
       version?: number;
       type?: string;
@@ -518,6 +519,7 @@ export class GoogleDriveService {
   async saveDataWithFileId(
     data: {
       mediaItems?: any;
+      placeItems?: any;
       lastModified?: string;
       version?: number;
       type?: string;

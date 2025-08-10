@@ -11,7 +11,7 @@ export default function AddPage() {
   const noop = () => {};
 
   return (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn max-w-4xl mx-auto px-4">
       <h1 className="text-3xl font-mono text-theme-secondary mb-8 flex items-center">
         <CalendarPlus size={28} className="mr-3" /> New Item
       </h1>

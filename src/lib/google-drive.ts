@@ -1,5 +1,5 @@
 import type { AuthService } from "./auth";
-import type { BackupInfo } from "./sync-manager";
+import type { DriveData } from "./types";
 
 const FILE_NAME = "isolist-data.json";
 const FOLDER_NAME = "IsoList";
@@ -132,14 +132,7 @@ export class GoogleDriveService {
   }
 
   async saveData(
-    data: {
-      mediaItems?: any;
-      placeItems?: any;
-      lastModified?: string;
-      version?: number;
-      type?: string;
-      backup?: BackupInfo;
-    },
+    data: DriveData,
     fileName = "isolist-data.json",
   ): Promise<boolean> {
     const hasValidToken = await this.ensureValidToken();
@@ -215,7 +208,7 @@ export class GoogleDriveService {
   }
 
   // TODO: Type this method
-  async loadData(): Promise<any | null> {
+  async loadData(): Promise<DriveData | null> {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) {
       console.error("No valid token available for load operation");
@@ -451,7 +444,7 @@ export class GoogleDriveService {
     }
   }
 
-  async loadSharedData(fileId: string): Promise<any> {
+  async loadSharedData(fileId: string): Promise<DriveData> {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) {
       // Still try public access even if not authenticated
@@ -461,7 +454,7 @@ export class GoogleDriveService {
     try {
       // Method 1: Try to access the file with authentication first.
       // This works if the user has direct access to the file.
-      let response = await fetch(
+      const response = await fetch(
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
         {
           headers: {
@@ -490,8 +483,8 @@ export class GoogleDriveService {
             ? "File not found (may have been deleted by owner)"
             : (errorData.error || `Proxy request failed with status: ${proxyResponse.status}`);
 
-          const error = new Error(errorMessage);
-          (error as any).status = proxyResponse.status;
+          const error = new Error(errorMessage) as Error & { status?: number };
+          error.status = proxyResponse.status;
           throw error;
         }
 
@@ -503,28 +496,21 @@ export class GoogleDriveService {
           ? "File not found (may have been deleted by owner)"
           : `Google Drive API error: ${response.status}`;
 
-        const error = new Error(errorMessage);
-        (error as any).status = response.status;
+        const error = new Error(errorMessage) as Error & { status?: number };
+        error.status = response.status;
         throw error;
       }
-    } catch (error: any) {
-      console.error("Failed to load shared data:", error);
-
-      const err = new Error(`Failed to load shared data: ${error.message}`);
-      (err as any).status = error.status || 500;
-      throw err;
+    } catch (error: unknown) {
+      const err = error as Error & { status?: number };
+      console.error("Failed to load shared data:", err);
+      const wrappedErr = new Error(`Failed to load shared data: ${err.message}`) as Error & { status?: number };
+      wrappedErr.status = err.status || 500;
+      throw wrappedErr;
     }
   }
 
   async saveDataWithFileId(
-    data: {
-      mediaItems?: any;
-      placeItems?: any;
-      lastModified?: string;
-      version?: number;
-      type?: string;
-      backup?: BackupInfo;
-    },
+    data: DriveData,
     fileName = "isolist-data.json",
   ): Promise<string> {
     const hasValidToken = await this.ensureValidToken();
@@ -696,7 +682,7 @@ export class GoogleDriveService {
   }
 
   // Method to update a file by ID directly (for updating shared files)
-  async updateFileById(fileId: string, data: any): Promise<boolean> {
+  async updateFileById(fileId: string, data: DriveData): Promise<boolean> {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) {
       throw new Error("No valid token available");

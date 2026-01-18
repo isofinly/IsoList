@@ -8,7 +8,14 @@ interface AuthProviderProps {
   children: React.ReactNode;
 }
 
-const PUBLIC_ROUTES = ["/login", "/auth/callback", "/about", "/privacy", "/terms", "/help", "/contact"];
+const PROTECTED_ROUTES = [
+  "/tracker",
+  "/ratings",
+  "/watchlist",
+  "/calendar",
+  "/places",
+  "/add",
+];
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -19,16 +26,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuth = () => {
       const isAuthenticated = authService.isAuthenticated();
-      const isPublicRoute = PUBLIC_ROUTES.includes(pathname);
+      const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
+        pathname.startsWith(route)
+      );
 
-      if (isPublicRoute) {
-        setIsCheckingAuth(false);
-        return;
-      }
-
-      if (!isAuthenticated) {
+      if (isProtectedRoute && !isAuthenticated) {
         router.push("/login");
-      } else if (pathname === "/login") {
+      } else if (isAuthenticated && pathname === "/login") {
         router.push("/");
       }
 
@@ -38,7 +42,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth();
   }, [pathname, router, authService]);
 
-  if (isCheckingAuth && !PUBLIC_ROUTES.includes(pathname)) {
+  if (isCheckingAuth && PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />

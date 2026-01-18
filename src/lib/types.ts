@@ -55,17 +55,42 @@ export interface PlaceItem {
   imageUrl?: string;
 }
 
+export interface BackupInfo {
+  id: string;
+  timestamp: string;
+  items: MediaItem[];
+  reason: string;
+}
+
+export interface DriveData {
+  mediaItems?: MediaItem[];
+  placeItems?: PlaceItem[];
+  lastModified?: string;
+  version?: number;
+  type?: string;
+  backup?: BackupInfo;
+  sharedBy?: string;
+  sharedAt?: string;
+  [key: string]: unknown;
+}
+
 declare global {
   interface Window {
     google?: {
       accounts: {
         id: {
-          initialize: (config: any) => void;
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential: string }) => void;
+            auto_select?: boolean;
+            cancel_on_tap_outside?: boolean;
+          }) => void;
           prompt: () => void;
-          renderButton: (element: HTMLElement, config: any) => void;
+          renderButton: (element: HTMLElement, config: Record<string, unknown>) => void;
         };
       };
     };
+    isolistAutoRefreshInterval?: NodeJS.Timeout;
   }
 }
 

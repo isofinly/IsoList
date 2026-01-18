@@ -24,7 +24,7 @@ export function PrivacyInfoDialog() {
             <li>• Your existing Google Drive files, photos, or documents</li>
             <li>• Files created by other apps</li>
             <li>• Your Gmail, Calendar, or other Google services</li>
-            <li>• Files on your computer's hard drive</li>
+            <li>• Files on your computer&apos;s hard drive</li>
             <li>• Your browsing history or other personal data</li>
           </ul>
         </div>

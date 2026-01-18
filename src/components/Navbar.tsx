@@ -4,8 +4,6 @@ import { AuthService } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import {
   CalendarDays,
-  Command,
-  Film,
   ListChecks,
   LogIn,
   Menu,
@@ -13,25 +11,30 @@ import {
   Search,
   Tv,
   MapPin,
+  Globe,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const navLinks = [
+  { href: "/tracker", label: "Tracker", icon: <Tv size={18} /> },
+  { href: "/blog", label: "Blog", icon: <ListChecks size={18} /> },
+  { href: "/photo", label: "Photo Tool", icon: <PlusSquare size={18} /> },
+  { href: "/login", label: "Login", icon: <LogIn size={18} /> },
+];
+
+const trackerLinks = [
   { href: "/ratings", label: "Ratings", icon: <ListChecks size={18} /> },
   { href: "/watchlist", label: "Watchlist", icon: <Tv size={18} /> },
   { href: "/calendar", label: "Calendar", icon: <CalendarDays size={18} /> },
   { href: "/places", label: "Places", icon: <MapPin size={18} /> },
-  { href: "/add", label: "Add Item", icon: <PlusSquare size={18} /> },
-  { href: "/login", label: "Login", icon: <LogIn size={18} /> },
 ];
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCommandOpen, setIsCommandOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -75,7 +78,7 @@ export default function Navbar() {
             )}
           >
             <div className="relative">
-              <Film
+              <Globe
                 size={32}
                 className={cn(
                   "text-accent-primary transition-all duration-short ease-fluent-standard",
@@ -99,13 +102,21 @@ export default function Navbar() {
                 "transition-all duration-medium ease-fluent-standard"
               )}
             >
-              IsoList
+              IsoSpace
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-1">
-            {navLinks
+            {(pathname.startsWith("/tracker") ||
+            pathname.startsWith("/ratings") ||
+            pathname.startsWith("/watchlist") ||
+            pathname.startsWith("/calendar") ||
+            pathname.startsWith("/places") ||
+            pathname.startsWith("/add")
+              ? [...navLinks, ...trackerLinks]
+              : navLinks
+            )
               .filter((link) => link.href !== "/login" || !isAuthenticated)
               .map((link) => {
                 const isActive =
@@ -168,7 +179,7 @@ export default function Navbar() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setIsCommandOpen(true)}
+              onClick={() => console.log("Command palette not implemented")}
               className="text-text-secondary hover:text-text-primary hover:bg-bg-layer-1/80"
               aria-label="Open command palette"
             >
@@ -204,7 +215,15 @@ export default function Navbar() {
         >
           <div className="container mx-auto px-4 py-4">
             <div className="grid grid-cols-2 gap-2">
-              {navLinks
+              {(pathname.startsWith("/tracker") ||
+              pathname.startsWith("/ratings") ||
+              pathname.startsWith("/watchlist") ||
+              pathname.startsWith("/calendar") ||
+              pathname.startsWith("/places") ||
+              pathname.startsWith("/add")
+                ? [...navLinks, ...trackerLinks]
+                : navLinks
+              )
                 .filter((link) => link.href !== "/login" || !isAuthenticated)
                 .map((link) => {
                   const isActive =

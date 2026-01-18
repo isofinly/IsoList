@@ -88,6 +88,7 @@ export default function RootLayout({
 
       <body
         className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}
+        suppressHydrationWarning
       >
         <a
           href="#main-content"

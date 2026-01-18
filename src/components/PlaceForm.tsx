@@ -161,7 +161,7 @@ export default function PlaceForm({ item, onFormSubmit }: PlaceFormProps) {
         updatePlaceItem(payload);
         toast.success("Updated", `"${payload.name}" updated successfully.`);
       } else {
-        const { id, ...withoutId } = payload;
+        const { id: _, ...withoutId } = payload;
         // add will create ID
         addPlaceItem(withoutId);
         toast.success("Added", `"${payload.name}" added to Places.`);
@@ -169,7 +169,7 @@ export default function PlaceForm({ item, onFormSubmit }: PlaceFormProps) {
 
       if (onFormSubmit) onFormSubmit();
       else router.push("/places");
-    } catch (err) {
+    } catch {
       toast.error("Save Failed", "Could not save place. Try again.");
     } finally {
       setIsSubmitting(false);
@@ -201,7 +201,7 @@ export default function PlaceForm({ item, onFormSubmit }: PlaceFormProps) {
       toast.success("Deleted", `"${item.name}" removed from Places.`);
       if (onFormSubmit) onFormSubmit();
       else router.push("/places");
-    } catch (err) {
+    } catch {
       toast.error("Delete Failed", "Could not delete place.");
     } finally {
       setIsSubmitting(false);

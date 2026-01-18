@@ -1,4 +1,3 @@
-import { StorageUsageInfo } from "@/components/StorageUsageInfo";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Cloud, Database, Download, Eye, Lock, Shield, Trash2, UserCheck } from "lucide-react";
 
@@ -10,12 +9,8 @@ export default function PrivacyPage() {
           <Shield className="text-accent-primary" size={32} />
           <h1 className="text-3xl font-bold text-text-primary">Privacy Policy</h1>
         </div>
-        <p className="text-text-secondary max-w-2xl mx-auto">
-          Your privacy is fundamental to how IsoList works. This policy explains what data we collect,
-          how we use it, and your rights regarding your information.
-        </p>
         <div className="text-sm text-text-muted">
-          Last updated: June 6, 2025 • <StorageUsageInfo />
+          Last updated: January 17, 2026 • Effective: January 17, 2026
         </div>
       </div>
 
@@ -118,7 +113,7 @@ export default function PrivacyPage() {
                 • <strong>Primary:</strong> Your Google Drive account
               </li>
               <li>
-                • <strong>Local:</strong> Your browser's local storage (for offline access)
+                • <strong>Local:</strong> Your browser&apos;s local storage (for offline access)
               </li>
               <li>
                 • <strong>Our servers:</strong> No personal data stored
@@ -182,8 +177,8 @@ export default function PrivacyPage() {
                         drive.google.com
                       </a>
                     </li>
-                    <li>Look for the "IsoList" folder in your Drive</li>
-                    <li>Right-click the folder and select "Move to trash"</li>
+                    <li>Look for the &quot;IsoList&quot; folder in your Drive</li>
+                    <li>Right-click the folder and select &quot;Move to trash&quot;</li>
                     <li>Empty your Google Drive trash to permanently delete</li>
                   </ol>
                 </div>
@@ -205,8 +200,8 @@ export default function PrivacyPage() {
                         myaccount.google.com/permissions
                       </a>
                     </li>
-                    <li>Find "IsoList" in your connected apps</li>
-                    <li>Click "Remove access"</li>
+                    <li>Find &quot;IsoSpace&quot; in your connected apps</li>
+                    <li>Click &quot;Remove access&quot;</li>
                   </ol>
                 </div>
               </div>
@@ -216,10 +211,10 @@ export default function PrivacyPage() {
           <div className="mt-6 bg-success-soft/20 border border-success-soft rounded-lg p-4">
             <h3 className="font-medium text-success mb-2">What Happens When You Delete</h3>
             <ul className="text-sm text-text-secondary space-y-1">
-              <li>• Deleting the IsoList folder removes all your tracking data from Google Drive</li>
+              <li>• Deleting the IsoSpace folder removes all your tracking data from Google Drive</li>
               <li>• Your local browser data will remain until you clear it or use a different device</li>
-              <li>• You can continue using IsoList offline with your local data</li>
-              <li>• Revoking access prevents IsoList from creating new files or syncing</li>
+              <li>• You can continue using IsoSpace offline with your local data</li>
+              <li>• Revoking access prevents IsoSpace from creating new files or syncing</li>
               <li>
                 • You can always reconnect later - your locally stored data will sync to a new folder
               </li>
@@ -238,9 +233,9 @@ export default function PrivacyPage() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-success-soft/20 border border-success-soft rounded-lg p-4">
-              <h3 className="font-medium text-success mb-2">IsoList CAN </h3>
+              <h3 className="font-medium text-success mb-2">IsoSpace CAN </h3>
               <ul className="text-sm text-text-secondary space-y-1">
-                <li>• Access files created by IsoList only</li>
+                <li>• Access files created by IsoSpace only</li>
                 <li>• Access your basic profile public information</li>
                 <li>• Create backup files in your Drive</li>
                 <li>• Update your media tracking data</li>
@@ -248,7 +243,7 @@ export default function PrivacyPage() {
             </div>
 
             <div className="bg-error-soft/20 border border-error-soft rounded-lg p-4">
-              <h3 className="font-medium text-error mb-2">IsoList CANNOT Access</h3>
+              <h3 className="font-medium text-error mb-2">IsoSpace CANNOT Access</h3>
               <ul className="text-sm text-text-secondary space-y-1">
                 <li>• Your existing Google Drive files</li>
                 <li>• Photos, documents, or spreadsheets</li>

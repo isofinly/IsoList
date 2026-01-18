@@ -31,8 +31,8 @@ export class PersistenceService {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data.items));
       localStorage.setItem(LOCAL_TIMESTAMP_KEY, data.timestamp);
       localStorage.setItem("hasLocalChanges", "true");
-    } catch (error) {
-      console.error("Failed to save to localStorage:", error);
+    } catch {
+      console.error("Failed to save to localStorage");
     }
   }
 
@@ -46,8 +46,8 @@ export class PersistenceService {
         items: stored ? JSON.parse(stored) : [],
         timestamp,
       };
-    } catch (error) {
-      console.error("Failed to load from localStorage:", error);
+    } catch {
+      console.error("Failed to load from localStorage");
       return { items: [], timestamp: "" };
     }
   }
@@ -78,11 +78,12 @@ export class PersistenceService {
       if (!hasLocalChanges && cloudTime > localTime) {
         const cloudData = await driveService.loadData();
         if (cloudData?.mediaItems) {
-          this.saveToLocalWithoutChangesFlag(cloudData.mediaItems);
+          const cloudItems = cloudData.mediaItems;
+          this.saveToLocalWithoutChangesFlag(cloudItems);
           return {
             success: true,
             action: "downloaded",
-            itemCount: cloudData.mediaItems.length,
+            itemCount: cloudItems.length,
           };
         }
       } else if (hasLocalChanges && cloudTime <= localTime) {
@@ -96,7 +97,8 @@ export class PersistenceService {
         const cloudData = await driveService.loadData();
 
         if (cloudData?.mediaItems) {
-          const merged = await this.mergeData(currentItems, cloudData.mediaItems);
+          const cloudItems = cloudData.mediaItems;
+          const merged = await this.mergeData(currentItems, cloudItems);
           this.saveToLocalWithoutChangesFlag(merged);
           await this.syncToCloud(merged);
 
@@ -110,8 +112,8 @@ export class PersistenceService {
       }
 
       return { success: true, action: "no-change" };
-    } catch (error) {
-      console.error("Smart sync failed:", error);
+    } catch {
+      console.error("Smart sync failed");
       return { success: false, action: "no-change" };
     }
   }
@@ -124,13 +126,14 @@ export class PersistenceService {
       const cloudData = await driveService.loadData();
 
       if (cloudData?.mediaItems) {
-        this.saveToLocalWithoutChangesFlag(cloudData.mediaItems);
-        return cloudData.mediaItems;
+        const items = cloudData.mediaItems as MediaItem[];
+        this.saveToLocalWithoutChangesFlag(items);
+        return items;
       }
 
       return null;
-    } catch (error) {
-      console.error("Force download failed:", error);
+    } catch {
+      console.error("Force download failed");
       return null;
     }
   }
@@ -153,8 +156,8 @@ export class PersistenceService {
       }
 
       return success;
-    } catch (error) {
-      console.error("Cloud sync failed:", error);
+    } catch {
+      console.error("Cloud sync failed");
       return false;
     }
   }
@@ -195,9 +198,6 @@ export class PersistenceService {
   }
 
   private countConflicts(localItems: MediaItem[], cloudItems: MediaItem[]): number {
-    const localIds = new Set(localItems.map((item) => item.id));
-    const cloudIds = new Set(cloudItems.map((item) => item.id));
-
     const conflicts = localItems.filter((localItem) => {
       const cloudItem = cloudItems.find((c) => c.id === localItem.id);
       return cloudItem && JSON.stringify(localItem) !== JSON.stringify(cloudItem);
@@ -215,8 +215,8 @@ export class PersistenceService {
       localStorage.setItem(LOCAL_TIMESTAMP_KEY, timestamp);
       localStorage.setItem(LAST_SYNC_KEY, timestamp);
       localStorage.removeItem("hasLocalChanges");
-    } catch (error) {
-      console.error("Failed to save to localStorage:", error);
+    } catch {
+      console.error("Failed to save to localStorage");
     }
   }
 

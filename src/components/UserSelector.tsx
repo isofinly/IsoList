@@ -7,10 +7,9 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { User, Users, RefreshCw } from "lucide-react";
+import { Users, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 interface UserSelectorProps {
@@ -28,8 +27,8 @@ export function UserSelector({ page, className }: UserSelectorProps) {
   } = useMediaStore();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const authService = AuthService.getInstance();
-  const currentUser = authService.getUser();
+  const _ = AuthService.getInstance();
+  // const currentUser = authService.getUser();
 
   // Filter users based on status only (no permissions needed)
   const availableUsers = joinedUsers.filter((user) => {
@@ -58,8 +57,8 @@ export function UserSelector({ page, className }: UserSelectorProps) {
     setIsRefreshing(true);
     try {
       await refreshAllJoinedUsers();
-    } catch (error) {
-      console.error("Failed to refresh all users:", error);
+    } catch {
+      console.error("Failed to refresh all users");
     } finally {
       setIsRefreshing(false);
     }

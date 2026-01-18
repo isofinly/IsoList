@@ -2,7 +2,7 @@
 
 import { useGlobalToast } from "@/contexts/ToastContext";
 import type { SyncConflict } from "@/lib/sync-manager";
-import { AlertTriangle, Cloud, GitMerge, HardDrive, X } from "lucide-react";
+import { AlertTriangle, Cloud, HardDrive, X } from "lucide-react";
 import { useState } from "react";
 
 interface ConflictDialogProps {

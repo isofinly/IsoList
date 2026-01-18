@@ -24,7 +24,7 @@ export class AuthService {
     if (!AuthService.instance) {
       AuthService.instance = new AuthService();
       // TODO: Refactor such use
-      // Import GoogleDriveService here to avoid circular dependency at module load time
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { GoogleDriveService } = require("./google-drive");
       AuthService.instance.setDriveService(new GoogleDriveService(AuthService.instance));
     }
@@ -79,7 +79,7 @@ export class AuthService {
     });
   }
 
-  private async handleCredentialResponse(response: any) {
+  private async handleCredentialResponse(response: { credential: string }) {
     try {
       const payload = JSON.parse(atob(response.credential.split(".")[1]));
 
@@ -94,8 +94,8 @@ export class AuthService {
       localStorage.setItem("user", JSON.stringify(this.user));
 
       window.location.href = "/";
-    } catch (error) {
-      console.error("Authentication failed:", error);
+    } catch {
+      console.error("Authentication failed");
     }
   }
 

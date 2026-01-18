@@ -258,7 +258,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
       if (itemToStore.id) {
         updateMediaItem(itemToStore as MediaItem);
       } else {
-        const { id, ...newItemData } = itemToStore;
+        const { id: _, ...newItemData } = itemToStore;
         addMediaItem(newItemData as Omit<MediaItem, "id">);
         router.push(
           formData.status === "completed" ? "/ratings" : "/watchlist"
@@ -286,7 +286,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
       } else {
         router.push("/watchlist");
       }
-    } catch (error) {
+    } catch {
       toast.error(
         "Delete Failed",
         "Failed to delete the media item. Please try again."

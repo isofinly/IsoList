@@ -1,5 +1,5 @@
 import { AuthService } from "./auth";
-import type { MediaItem, PlaceItem } from "./types";
+import type { MediaItem, PlaceItem, BackupInfo } from "./types";
 
 export interface SyncConflict {
   type: "real-conflict" | "deletion-conflict";
@@ -37,12 +37,7 @@ export interface SyncConflict {
   };
 }
 
-export interface BackupInfo {
-  id: string;
-  timestamp: string;
-  items: MediaItem[];
-  reason: string;
-}
+// BackupInfo moved to types.ts
 
 export class SyncManager {
   private static instance: SyncManager;
@@ -498,7 +493,7 @@ export class SyncManager {
   }
 
   // Sharing functionality
-  async createShareableFile(shareData: any): Promise<string> {
+  async createShareableFile(shareData: Record<string, unknown>): Promise<string> {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to create shareable files");
     }
@@ -561,7 +556,7 @@ export class SyncManager {
     return { placeItems: data.placeItems || [] };
   }
 
-  async accessSharedFile(fileId: string): Promise<any> {
+  async accessSharedFile(fileId: string): Promise<Record<string, unknown>> {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to access shared files");
     }
@@ -573,20 +568,20 @@ export class SyncManager {
       const shareData = await driveService.loadSharedData(fileId);
 
       return shareData;
-    } catch (error: any) {
-      console.error("Failed to access shared file:", error);
+    } catch (error: unknown) {
+      const err = error as Error & { status?: number };
+      console.error("Failed to access shared file:", err);
 
       // Handle specific error types
-      if (error.status === 404) {
-        const err = new Error(`Shared file not found (deleted by owner): ${fileId}`);
-        (err as any).status = 404;
-        throw err;
+      if (err.status === 404) {
+        const wrappedErr = new Error(`Shared file not found (deleted by owner): ${fileId}`) as Error & { status?: number };
+        wrappedErr.status = 404;
+        throw wrappedErr;
       }
 
-      // Re-throw with status for proper error handling
-      const err = new Error(`Failed to access shared file: ${error.message}`);
-      (err as any).status = error.status || 500;
-      throw err;
+      const wrappedErr = new Error(`Failed to access shared file: ${err.message}`) as Error & { status?: number };
+      wrappedErr.status = err.status || 500;
+      throw wrappedErr;
     }
   }
 
@@ -618,7 +613,7 @@ export class SyncManager {
     }
   }
 
-  async updateSharedFile(fileId: string, shareData: any): Promise<boolean> {
+  async updateSharedFile(fileId: string, shareData: Record<string, unknown>): Promise<boolean> {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to update shared files");
     }

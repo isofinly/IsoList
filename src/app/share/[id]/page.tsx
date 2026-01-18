@@ -32,7 +32,7 @@ export default function SharedPage() {
     const loadSharedData = async () => {
       try {
         const data = await syncManager.accessSharedFile(id);
-        setSharedData(data);
+        setSharedData(data as unknown as SharedData);
       } catch (err: any) {
         console.error("Failed to load shared data:", err);
         if (err.status === 403 || err.status === 401) {
@@ -106,7 +106,7 @@ export default function SharedPage() {
           <div className="flex items-center justify-center gap-3 mb-4">
             <Share2 size={32} className="text-theme-accent" />
             <h1 className="text-3xl font-mono text-theme-foreground">
-              {sharedData.sharedBy}'s Lists
+              {sharedData.sharedBy}&apos;s Lists
             </h1>
           </div>
           <p className="text-theme-muted-foreground">

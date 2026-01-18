@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { useGlobalToast } from "@/contexts/ToastContext";
+import { MediaItem } from "@/lib/types";
 
 import { useMediaStore } from "@/lib/store";
 import { AuthService } from "@/lib/auth";
@@ -114,18 +115,18 @@ export function ShareDialog({
       // Add to joined users
       const newUser = {
         id: fileId,
-        email: shareData.sharedBy,
+        email: shareData.sharedBy as string,
         shareId: fileId,
         lastSync: new Date(),
         status: "active" as const,
-        mediaItems: shareData.mediaItems || [],
+        mediaItems: (shareData.mediaItems as MediaItem[]) || [],
       };
 
       addJoinedUser(newUser);
       setJoinShareId("");
       toast.success(
         "Share Joined!",
-        `Successfully joined ${shareData.sharedBy}'s shared lists!`
+        `Successfully joined ${shareData.sharedBy}&apos;s shared lists!`
       );
     } catch (error: any) {
       console.error("Failed to join share:", error);
@@ -254,7 +255,7 @@ export function ShareDialog({
           <div className="space-y-4 border-t pt-4">
             <h3 className="text-lg font-medium flex items-center gap-2">
               <UserPlus size={18} />
-              Join Someone's Share
+              Join Someone&apos;s Share
             </h3>
             <div className="space-y-2">
               <Label className="text-sm">Share URL or ID:</Label>

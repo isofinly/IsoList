@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import React from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(({ className, ...props }, ref) => {

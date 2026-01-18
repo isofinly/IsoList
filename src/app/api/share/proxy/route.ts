@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         try {
             const jsonData = JSON.parse(data);
             return NextResponse.json(jsonData);
-        } catch (parseError) {
+        } catch {
             // If it's not valid JSON, return an error
             return NextResponse.json(
                 { error: "Invalid JSON data received from Google Drive" },

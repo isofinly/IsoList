@@ -46,8 +46,11 @@ const CalendarItemDisplay: React.FC<{ item: MediaItem; simple?: boolean }> = ({
 export default function CalendarPage() {
   const { getCurrentUserMediaItems } = useMediaStore();
   const mediaItems = getCurrentUserMediaItems();
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Normalize today for date comparisons
+  const today = useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0); // Normalize today for date comparisons
+    return d;
+  }, []);
 
   const [currentMonthDate, setCurrentMonthDate] = React.useState(
     new Date(today.getFullYear(), today.getMonth(), 1)

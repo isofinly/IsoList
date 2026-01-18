@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { useMediaStore } from "@/lib/store";
 import type { PlaceItem } from "@/lib/types";
-import { Landmark, SortAsc, SortDesc, Star } from "lucide-react";
+import { Landmark, SortAsc, SortDesc } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type SortKey = "name" | "rating" | "visitsCount" | "lastVisited";

@@ -152,9 +152,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         try {
           const parsedUsers = JSON.parse(storedJoinedUsers);
           // Convert lastSync back to Date objects
-          joinedUsers = parsedUsers.map((user: any) => ({
+          joinedUsers = parsedUsers.map((user: Record<string, unknown>) => ({
             ...user,
-            lastSync: user.lastSync ? new Date(user.lastSync) : undefined
+            lastSync: user.lastSync ? new Date(user.lastSync as string) : undefined
           }));
         } catch (error) {
           console.error("Failed to parse joined users:", error);
@@ -492,10 +492,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         u.id === userId
           ? {
             ...u,
-            mediaItems: newMediaItems,
+            mediaItems: newMediaItems as MediaItem[],
             lastSync: new Date(),
             status: 'active' as const,
-            hasRecentUpdate: hasChanges && isManual // Flag for UI feedback
+            hasRecentUpdate: (hasChanges && isManual) || false // Ensure boolean
           }
           : u
       );
@@ -508,18 +508,19 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         console.log(`Updated data for currently viewed user ${user.email}`);
       }
 
-    } catch (error: any) {
-      console.error("Failed to sync joined user data:", error);
+    } catch (error: unknown) {
+      const err = error as Error & { status?: number };
+      console.error("Failed to sync joined user data:", err);
 
       // If file is deleted (404), remove the user entirely
-      if (error.status === 404) {
+      if (err.status === 404) {
         console.log(`Shared file for ${user.email} was deleted, removing user from joined list`);
         get().removeJoinedUser(userId);
         return;
       }
 
       // Update status based on error type
-      const status: 'unauthorized' | 'error' = error.status === 401 || error.status === 403 ? 'unauthorized' : 'error';
+      const status: 'unauthorized' | 'error' = err.status === 401 || err.status === 403 ? 'unauthorized' : 'error';
       const updatedUsers = get().joinedUsers.map(u =>
         u.id === userId ? { ...u, status } : u
       );
@@ -547,7 +548,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       return placeItems; // Return own data
     }
 
-    const joinedUser = joinedUsers.find(u => u.id === currentViewUserId);
+    const _ = joinedUsers.find(u => u.id === currentViewUserId);
     // joined user shares currently only contain media; return empty until share includes places
     return [];
   },
@@ -567,8 +568,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         if (user.status === 'active') {
           try {
             await get().syncJoinedUserData(user.id, false); // false = auto-sync
-          } catch (error: any) {
-            console.error(`Failed to auto-sync user ${user.email}:`, error);
+          } catch (error: unknown) {
+            const err = error as Error;
+            console.error(`Failed to auto-sync user ${user.email}:`, err);
             // Auto-sync errors are expected for deleted files and shouldn't propagate
           }
         }
@@ -576,13 +578,13 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     }, 2 * 60 * 1000); // 2 minutes
 
     // Store interval ID to clear later
-    (window as any).isolistAutoRefreshInterval = interval;
+    window.isolistAutoRefreshInterval = interval;
   },
 
   stopAutoRefresh: () => {
-    if ((window as any).isolistAutoRefreshInterval) {
-      clearInterval((window as any).isolistAutoRefreshInterval);
-      delete (window as any).isolistAutoRefreshInterval;
+    if (window.isolistAutoRefreshInterval) {
+      clearInterval(window.isolistAutoRefreshInterval);
+      delete window.isolistAutoRefreshInterval;
     }
   },
 
@@ -630,11 +632,12 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         // Update the shared file using SyncManager
         await syncManager.updateSharedFile(fileId, sharedData);
         console.log(`Successfully updated shared file ${fileId}`);
-      } catch (error: any) {
-        console.error(`Error updating shared file ${fileId}:`, error);
+      } catch (error: unknown) {
+        const err = error as Error & { status?: number };
+        console.error(`Error updating shared file ${fileId}:`, err);
 
         // If file not found (404), remove it from tracking
-        if (error.message?.includes('404') || error.status === 404) {
+        if (err.message?.includes('404') || err.status === 404) {
           console.log(`Shared file ${fileId} was deleted, removing from tracking`);
           get().removeSharedFileId(fileId);
         }
@@ -682,9 +685,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         };
         await syncManager.updateSharedFile(fileId, payload);
         console.log(`Successfully updated places shared file ${fileId}`);
-      } catch (error: any) {
-        console.error(`Error updating places shared file ${fileId}:`, error);
-        if (error.message?.includes('404') || error.status === 404) {
+      } catch (error: unknown) {
+        const err = error as Error & { status?: number };
+        console.error(`Error updating places shared file ${fileId}:`, err);
+        if (err.message?.includes('404') || err.status === 404) {
           console.log(`Places shared file ${fileId} was deleted, removing from tracking`);
           get().removePlacesSharedFileId(fileId);
         }
@@ -700,8 +704,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       if (user.status === 'active') {
         try {
           await get().syncJoinedUserData(user.id, true); // true = manual sync
-        } catch (error: any) {
-          console.error(`Failed to refresh user ${user.email}:`, error);
+        } catch (error: unknown) {
+          const err = error as Error;
+          console.error(`Failed to refresh user ${user.email}:`, err);
           // Manual sync errors are logged but don't break the refresh flow
         }
       }

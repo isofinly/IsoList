@@ -1,251 +1,114 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardGlass } from "@/components/ui/card";
-import { useMediaStore } from "@/lib/store";
-import { LogIn, Play, Star, TrendingUp, Zap, MapPin } from "lucide-react";
+import { CardGlass } from "@/components/ui/card";
+import { Film, BookText, Camera, Terminal, Shield, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { motion } from "framer-motion";
 
-export default function HomePage() {
-  const { mediaItems } = useMediaStore();
+const apps = [
+  {
+    id: "tracker",
+    name: "Movie & Place Tracker",
+    description: "Track your entertainment journey and favorite locations.",
+    icon: <Film className="w-8 h-8 text-accent-primary" />,
+    href: "/tracker",
+    color: "accent-primary",
+  },
+  {
+    id: "blog",
+    name: "Blog Platform",
+    description: "Read and host markdown-based notes and thoughts.",
+    icon: <BookText className="w-8 h-8 text-success" />,
+    href: "/blog",
+    color: "success",
+  },
+  {
+    id: "photo",
+    name: "Photo Tool",
+    description: "Adobe Color clone: Color wheel, theme, and gradient extraction.",
+    icon: <Camera className="w-8 h-8 text-info" />,
+    href: "/photo",
+    color: "info",
+  },
+];
 
-  const statistics = useMemo(() => {
-    const itemsTracked = mediaItems.length;
-
-    const ratedItems = mediaItems.filter((item) => item.rating !== undefined);
-    const averageRating =
-      ratedItems.length > 0
-        ? ratedItems.reduce((sum, item) => sum + (item.rating || 0), 0) /
-          ratedItems.length
-        : 0;
-
-    const ratingsGiven = ratedItems.length;
-
-    return {
-      itemsTracked,
-      averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal place
-      ratingsGiven,
-    };
-  }, [mediaItems]);
-
+export default function IsoSpacePage() {
   return (
-    <div className="w-full bg-gradient-to-br from-bg-base via-bg-layer-1 to-bg-base relative">
+    <div className="min-h-screen bg-bg-base relative overflow-hidden">
+      {/* Dynamic Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-accent-primary/8 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute top-1/3 -left-20 w-60 h-60 bg-accent-primary/4 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-        <div
-          className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-accent-primary/6 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "4s" }}
-        />
-        <div
-          className="absolute -bottom-40 left-1/3 w-80 h-80 bg-accent-primary/5 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
+        <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-accent-primary/5 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute top-1/4 -left-20 w-[400px] h-[400px] bg-success/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-info/5 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: "4s" }} />
       </div>
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden w-full">
-        <div className="w-full px-4 py-12 lg:py-16 relative">
-          <div className="flex flex-col items-center justify-center text-center max-w-4xl mx-auto">
-            <div className="mb-8 animate-fade-in-up">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-                Welcome to{" "}
-                <span className="text-gradient-primary bg-gradient-to-r from-accent-primary to-accent-primary-hover bg-clip-text text-transparent">
-                  IsoList
-                </span>
-              </h1>
-              <p className="text-lg sm:text-xl text-text-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-                Your personal, bloat-free tracker for movies, series, and anime.
-                Experience entertainment tracking with beautiful design and
-                seamless performance.
-              </p>
-            </div>
-
-            {/* Action buttons */}
-            <div
-              className="flex flex-col sm:flex-row gap-4 mb-12 animate-fade-in-up mt-4"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <Button asChild size="lg" variant="accent" className="group">
-                <Link href="/ratings" className="flex items-center">
-                  <Star className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-short" />
-                  View My Ratings
-                  <LogIn className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-short" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="group">
-                <Link href="/add" className="flex items-center">
-                  <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform duration-short" />
-                  Add New Media
-                </Link>
-              </Button>
-            </div>
-
-            {/* Features grid */}
-            <div
-              className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl animate-fade-in-up"
-              style={{ animationDelay: "0.4s" }}
-            >
-              <CardGlass className="p-6 text-center hover:scale-105 transition-all duration-medium cursor-default">
-                <div className="w-12 h-12 bg-accent-primary-soft rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Star className="w-6 h-6 text-accent-primary" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-text-primary">
-                  Smart Ratings
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  Track and rate your favorite content with intelligent
-                  recommendations.
-                </p>
-              </CardGlass>
-
-              <CardGlass className="p-6 text-center hover:scale-105 transition-all duration-medium cursor-default">
-                <div className="w-12 h-12 bg-success-soft rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <TrendingUp className="w-6 h-6 text-success" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-text-primary">
-                  Progress Tracking
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  Monitor your watching progress and discover viewing patterns.
-                </p>
-              </CardGlass>
-
-              <CardGlass className="p-6 text-center hover:scale-105 transition-all duration-medium cursor-default">
-                <div className="w-12 h-12 bg-info-soft rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Zap className="w-6 h-6 text-info" />
-                </div>
-                <h3 className="text-lg font-semibold mb-2 text-text-primary">
-                  Lightning Fast
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  Optimized performance with modern design principles.
-                </p>
-              </CardGlass>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Statistics Section */}
-      <section className="py-16 relative w-full">
-        <div className="w-full px-4 relative">
-          <Card className="max-w-6xl mx-auto fluent-surface-hover">
-            <CardContent className="p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-text-primary mb-2">
-                  Your Entertainment Journey
-                </h2>
-                <p className="text-text-secondary">
-                  Start tracking your media consumption today
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-accent-primary mb-2">
-                    {statistics.itemsTracked}
-                  </div>
-                  <div className="text-sm text-text-secondary">
-                    Items Tracked
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-success mb-2">
-                    {statistics.averageRating || "—"}
-                  </div>
-                  <div className="text-sm text-text-secondary">
-                    Average Rating
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-warning mb-2">
-                    {statistics.ratingsGiven}
-                  </div>
-                  <div className="text-sm text-text-secondary">
-                    Ratings Given
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Terminal section */}
-      <section className="py-16 relative w-full">
-        <div className="w-full px-4 relative">
-          <div className="max-w-2xl mx-auto">
-            <CardGlass className="p-6 bg-bg-layer-2/30 border border-border-subtle">
-              <div className="font-mono text-xs text-text-muted space-y-2">
-                <div className="flex items-center space-x-2">
-                  <span className="text-success">$</span>
-                  <span>ps aux | grep entertainment</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-success">$</span>
-                  <span>cd ~/media/tracker && ls -la</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-accent-primary">→</span>
-                  <span>Initializing IsoList v0.1.0</span>
-                  <span className="terminal-caret" />
-                </div>
-              </div>
-            </CardGlass>
-          </div>
-        </div>
-      </section>
-
-      {/* Quick navigation */}
-      <section className="py-16 relative w-full">
-        <div className="w-full px-4 relative">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-text-primary mb-2">
-              Quick Navigation
-            </h2>
-            <p className="text-text-secondary">
-              Jump to your favorite sections
+      <div className="relative z-10 container mx-auto px-4 pt-32 pb-20">
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
+              Welcome to{" "}
+              <span className="text-gradient-primary">IsoSpace</span>
+            </h1>
+            <p className="text-xl text-text-secondary leading-relaxed">
+              One home for all of isofinly&apos;s creative tools. Seamlessly switch between media tracking, blog hosting, and professional photo tools.
             </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            <Button asChild variant="outline" className="h-16 flex-col group">
-              <Link href="/ratings">
-                <Star className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-short" />
-                <span className="text-xs">Ratings</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 flex-col group">
-              <Link href="/watchlist">
-                <Play className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-short" />
-                <span className="text-xs">Watchlist</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 flex-col group">
-              <Link href="/calendar">
-                <TrendingUp className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-short" />
-                <span className="text-xs">Calendar</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 flex-col group">
-              <Link href="/places">
-                <MapPin className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-short" />
-                <span className="text-xs">Places</span>
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-16 flex-col group">
-              <Link href="/add">
-                <Zap className="h-6 w-6 mb-1 group-hover:scale-110 transition-transform duration-short" />
-                <span className="text-xs">Add New</span>
-              </Link>
-            </Button>
-          </div>
+          </motion.div>
         </div>
-      </section>
+
+        {/* App Switcher Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {apps.map((app, index) => (
+            <motion.div
+              key={app.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              <Link href={app.href}>
+                <CardGlass className="group p-8 h-full hover:scale-[1.02] transition-all duration-medium cursor-pointer border-white/5 hover:border-white/10">
+                  <div className={`w-16 h-16 rounded-2xl bg-${app.color}/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-medium`}>
+                    {app.icon}
+                  </div>
+                  <h2 className="text-2xl font-bold mb-3 text-text-primary group-hover:text-accent-primary transition-colors">
+                    {app.name}
+                  </h2>
+                  <p className="text-text-secondary mb-8 leading-relaxed">
+                    {app.description}
+                  </p>
+                  <div className="flex items-center text-sm font-semibold text-accent-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                    Launch App <ArrowRight className="ml-2 w-4 h-4" />
+                  </div>
+                </CardGlass>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Footer Info */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          className="mt-32 flex flex-wrap justify-center gap-12 text-text-muted"
+        >
+          <div className="flex items-center gap-2">
+            <Terminal className="w-5 h-5" />
+            <span>Built with Bun & Next.js</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5" />
+            <span>Fluent Design System</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Film className="w-5 h-5" />
+            <span>Version 0.2.0-isospace</span>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

@@ -148,7 +148,7 @@ Custom scrollbar styling applies webkit-specific properties for consistent appea
 
 ## Typography System
 
-The typography hierarchy uses Figtree as the primary sans-serif font with Fira Code for monospace elements. Heading styles implement progressive font weights from 700 for h1 to 600 for h6, with letter spacing adjustments for optical balance. Body text maintains 1.65 line height for comfortable reading.
+The typography hierarchy uses dmsans as the primary sans-serif font with Fira Code for monospace elements. Heading styles implement progressive font weights from 700 for h1 to 600 for h6, with letter spacing adjustments for optical balance. Body text maintains 1.65 line height for comfortable reading.
 
 ## Color Space Implementation
 

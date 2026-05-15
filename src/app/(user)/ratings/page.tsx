@@ -111,7 +111,7 @@ export default function RatingsPage() {
         <h1 className="text-3xl font-mono text-theme-secondary flex items-center">
           <Star size={28} className="mr-3" /> My Ratings
         </h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 z-999">
           <UserSelector
             page="ratings"
             className="bg-theme-surface-alt border-theme-border"

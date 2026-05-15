@@ -86,7 +86,7 @@ export default function PlacesPage() {
         <h1 className="text-3xl font-mono text-theme-secondary flex items-center">
           <Landmark size={28} className="mr-3" /> Places
         </h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 z-999">
           <UserSelector
             page="places"
             className="bg-theme-surface-alt border-theme-border"

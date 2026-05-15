@@ -5,20 +5,20 @@ import { StoreInitializer } from "@/components/StoreInitializer";
 import { SyncStatusIndicator } from "@/components/SyncStatusIndicator";
 import { ToastProvider } from "@/contexts/ToastContext";
 import type { Metadata, Viewport } from "next";
-import { Figtree, Fira_Code } from "next/font/google";
+import { DM_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const figtree = Figtree({
+const dmsans = DM_Sans({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-figtree",
+  variable: "--font-dm-sans",
   display: "swap",
 });
 
-const firaCode = Fira_Code({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  variable: "--font-fira-code",
+  variable: "--font-geist-mono",
   display: "swap",
 });
 
@@ -87,7 +87,7 @@ export default function RootLayout({
       </head>
 
       <body
-        className={`fluent-scroll ${figtree.variable} ${firaCode.variable}`}
+        className={`fluent-scroll ${dmsans.variable} ${geistMono.variable}`}
         suppressHydrationWarning
       >
         <a

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-figtree), system-ui, sans-serif;
-  --font-mono: var(--font-fira-code), ui-monospace, monospace;
+@theme {
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
   --color-bg-base: oklch(12% 0.003 240);
   --color-bg-layer-1: oklch(16% 0.005 240);
@@ -45,23 +45,31 @@
   --color-info: var(--color-accent-primary);
   --color-info-soft: oklch(from var(--color-info) l c h / 0.15);
 
-  --shadow-sm: 0 1px 2px oklch(from var(--color-bg-base) l c h / 0.1),
+  --shadow-sm:
+    0 1px 2px oklch(from var(--color-bg-base) l c h / 0.1),
     0 1px 3px oklch(from var(--color-bg-base) l c h / 0.08);
-  --shadow-md: 0 4px 8px oklch(from var(--color-bg-base) l c h / 0.12),
+  --shadow-md:
+    0 4px 8px oklch(from var(--color-bg-base) l c h / 0.12),
     0 2px 4px oklch(from var(--color-bg-base) l c h / 0.08);
-  --shadow-lg: 0 8px 16px oklch(from var(--color-bg-base) l c h / 0.15),
+  --shadow-lg:
+    0 8px 16px oklch(from var(--color-bg-base) l c h / 0.15),
     0 4px 8px oklch(from var(--color-bg-base) l c h / 0.1);
-  --shadow-xl: 0 12px 24px oklch(from var(--color-bg-base) l c h / 0.2),
+  --shadow-xl:
+    0 12px 24px oklch(from var(--color-bg-base) l c h / 0.2),
     0 6px 12px oklch(from var(--color-bg-base) l c h / 0.15);
   --shadow-inner: inset 0 2px 4px 0
     oklch(from var(--color-bg-base) l c h / 0.05);
-  --shadow-fluent-card: 0 1.6px 3.6px 0 oklch(from black l c h / 0.11),
+  --shadow-fluent-card:
+    0 1.6px 3.6px 0 oklch(from black l c h / 0.11),
     0 0.3px 0.9px 0 oklch(from black l c h / 0.09);
-  --shadow-fluent-dialog: 0 6.4px 14.4px 0 oklch(from black l c h / 0.13),
+  --shadow-fluent-dialog:
+    0 6.4px 14.4px 0 oklch(from black l c h / 0.13),
     0 1.2px 3.6px 0 oklch(from black l c h / 0.11);
-  --shadow-fluent-popup: 0 3.2px 7.2px 0 oklch(from black l c h / 0.12),
+  --shadow-fluent-popup:
+    0 3.2px 7.2px 0 oklch(from black l c h / 0.12),
     0 0.6px 1.8px 0 oklch(from black l c h / 0.1);
-  --shadow-fluent-flyout: 0 8px 16px 0 oklch(from black l c h / 0.14),
+  --shadow-fluent-flyout:
+    0 8px 16px 0 oklch(from black l c h / 0.14),
     0 2px 4px 0 oklch(from black l c h / 0.12);
 
   --radius-sm: 0.25rem;

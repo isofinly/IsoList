@@ -262,7 +262,7 @@ export default function WatchlistPage() {
         <h1 className="text-3xl font-mono text-theme-secondary flex items-center">
           <Tv size={28} className="mr-3" /> My Watchlist
         </h1>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 z-999">
           <UserSelector
             page="watchlist"
             className="bg-theme-surface-alt border-theme-border"

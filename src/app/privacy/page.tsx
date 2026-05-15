@@ -1,5 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Cloud, Database, Download, Eye, Lock, Shield, Trash2, UserCheck } from "lucide-react";
+import {
+  Cloud,
+  Database,
+  Download,
+  Eye,
+  Lock,
+  Shield,
+  Trash2,
+  UserCheck,
+} from "lucide-react";
 
 export default function PrivacyPage() {
   return (
@@ -7,7 +16,9 @@ export default function PrivacyPage() {
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3">
           <Shield className="text-accent-primary" size={32} />
-          <h1 className="text-3xl font-bold text-text-primary">Privacy Policy</h1>
+          <h1 className="text-3xl font-bold text-text-primary">
+            Privacy Policy
+          </h1>
         </div>
         <div className="text-sm text-text-muted">
           Last updated: January 17, 2026 • Effective: January 17, 2026
@@ -24,7 +35,9 @@ export default function PrivacyPage() {
         <CardContent className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-accent-primary-soft/10 border border-accent-primary-soft rounded-lg p-4">
-              <h3 className="font-medium text-text-primary mb-2">Media Tracking Data</h3>
+              <h3 className="font-medium text-text-primary mb-2">
+                Media Tracking Data
+              </h3>
               <ul className="text-sm text-text-secondary space-y-1">
                 <li>• Movie, series, and anime titles you track</li>
                 <li>• Your ratings, notes, and viewing progress</li>
@@ -34,7 +47,9 @@ export default function PrivacyPage() {
             </div>
 
             <div className="bg-info-soft/10 border border-info-soft rounded-lg p-4">
-              <h3 className="font-medium text-text-primary mb-2">Account Information</h3>
+              <h3 className="font-medium text-text-primary mb-2">
+                Account Information
+              </h3>
               <ul className="text-sm text-text-secondary space-y-1">
                 <li>• Google account email address</li>
                 <li>• Display name and profile picture</li>
@@ -97,7 +112,9 @@ export default function PrivacyPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="bg-success-soft/20 border border-success-soft rounded-lg p-4">
-            <h3 className="font-medium text-success mb-2">Your Data is Secure</h3>
+            <h3 className="font-medium text-success mb-2">
+              Your Data is Secure
+            </h3>
             <ul className="text-sm text-text-secondary space-y-1">
               <li>• Stored in your personal Google Drive (not our servers)</li>
               <li>• Encrypted in transit using HTTPS/TLS</li>
@@ -107,19 +124,23 @@ export default function PrivacyPage() {
           </div>
 
           <div className="bg-info-soft/20 border border-info-soft rounded-lg p-4">
-            <h3 className="font-medium text-info mb-2">Where Your Data Lives</h3>
+            <h3 className="font-medium text-info mb-2">
+              Where Your Data Lives
+            </h3>
             <ul className="text-sm text-text-secondary space-y-1">
               <li>
                 • <strong>Primary:</strong> Your Google Drive account
               </li>
               <li>
-                • <strong>Local:</strong> Your browser&apos;s local storage (for offline access)
+                • <strong>Local:</strong> Your browser&apos;s local storage (for
+                offline access)
               </li>
               <li>
                 • <strong>Our servers:</strong> No personal data stored
               </li>
               <li>
-                • <strong>Backups:</strong> Automatic backups in your Google Drive
+                • <strong>Backups:</strong> Automatic backups in your Google
+                Drive
               </li>
             </ul>
           </div>
@@ -136,35 +157,52 @@ export default function PrivacyPage() {
         <CardContent>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <h3 className="font-medium text-text-primary">Data Access & Control</h3>
+              <h3 className="font-medium text-text-primary">
+                Data Access & Control
+              </h3>
               <ul className="text-sm text-text-secondary space-y-2">
                 <li className="flex items-start gap-2">
-                  <Lock size={16} className="text-warning mt-0.5 flex-shrink-0" />
+                  <Lock
+                    size={16}
+                    className="text-warning mt-0.5 flex-shrink-0"
+                  />
                   <span>
-                    <strong>Revoke Access:</strong> Disconnect IsoList from your Google account anytime
+                    <strong>Revoke Access:</strong> Disconnect IsoList from your
+                    Google account anytime
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Trash2 size={16} className="text-error mt-0.5 flex-shrink-0" />
+                  <Trash2
+                    size={16}
+                    className="text-error mt-0.5 flex-shrink-0"
+                  />
                   <span>
-                    <strong>Delete Data:</strong> Remove the IsoList folder from your Google Drive
-                    manually
+                    <strong>Delete Data:</strong> Remove the IsoList folder from
+                    your Google Drive manually
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Download size={16} className="text-accent-primary mt-0.5 flex-shrink-0" />
+                  <Download
+                    size={16}
+                    className="text-accent-primary mt-0.5 flex-shrink-0"
+                  />
                   <span>
-                    <strong>Download:</strong> Access your data files directly from Google Drive
+                    <strong>Download:</strong> Access your data files directly
+                    from Google Drive
                   </span>
                 </li>
               </ul>
             </div>
 
             <div className="space-y-3">
-              <h3 className="font-medium text-text-primary">How to Delete Your Data</h3>
+              <h3 className="font-medium text-text-primary">
+                How to Delete Your Data
+              </h3>
               <div className="space-y-3 text-sm">
                 <div className="bg-info-soft/20 border border-info-soft rounded-lg p-3">
-                  <h4 className="font-medium text-info mb-2">Step-by-step deletion:</h4>
+                  <h4 className="font-medium text-info mb-2">
+                    Step-by-step deletion:
+                  </h4>
                   <ol className="text-text-secondary space-y-1 list-decimal list-inside">
                     <li>
                       Go to{" "}
@@ -177,16 +215,24 @@ export default function PrivacyPage() {
                         drive.google.com
                       </a>
                     </li>
-                    <li>Look for the &quot;IsoList&quot; folder in your Drive</li>
-                    <li>Right-click the folder and select &quot;Move to trash&quot;</li>
+                    <li>
+                      Look for the &quot;IsoList&quot; folder in your Drive
+                    </li>
+                    <li>
+                      Right-click the folder and select &quot;Move to
+                      trash&quot;
+                    </li>
                     <li>Empty your Google Drive trash to permanently delete</li>
                   </ol>
                 </div>
 
                 <div className="bg-warning-soft/20 border border-warning-soft rounded-lg p-3">
-                  <h4 className="font-medium text-warning mb-2">Revoke App Access:</h4>
+                  <h4 className="font-medium text-warning mb-2">
+                    Revoke App Access:
+                  </h4>
                   <p className="text-text-secondary text-sm mb-2">
-                    To prevent IsoList from accessing your Google Drive in the future:
+                    To prevent IsoList from accessing your Google Drive in the
+                    future:
                   </p>
                   <ol className="text-text-secondary space-y-1 list-decimal list-inside text-sm">
                     <li>
@@ -209,14 +255,28 @@ export default function PrivacyPage() {
           </div>
 
           <div className="mt-6 bg-success-soft/20 border border-success-soft rounded-lg p-4">
-            <h3 className="font-medium text-success mb-2">What Happens When You Delete</h3>
+            <h3 className="font-medium text-success mb-2">
+              What Happens When You Delete
+            </h3>
             <ul className="text-sm text-text-secondary space-y-1">
-              <li>• Deleting the IsoSpace folder removes all your tracking data from Google Drive</li>
-              <li>• Your local browser data will remain until you clear it or use a different device</li>
-              <li>• You can continue using IsoSpace offline with your local data</li>
-              <li>• Revoking access prevents IsoSpace from creating new files or syncing</li>
               <li>
-                • You can always reconnect later - your locally stored data will sync to a new folder
+                • Deleting the IsoSpace folder removes all your tracking data
+                from Google Drive
+              </li>
+              <li>
+                • Your local browser data will remain until you clear it or use
+                a different device
+              </li>
+              <li>
+                • You can continue using IsoSpace offline with your local data
+              </li>
+              <li>
+                • Revoking access prevents IsoSpace from creating new files or
+                syncing
+              </li>
+              <li>
+                • You can always reconnect later - your locally stored data will
+                sync to a new folder
               </li>
             </ul>
           </div>
@@ -243,7 +303,9 @@ export default function PrivacyPage() {
             </div>
 
             <div className="bg-error-soft/20 border border-error-soft rounded-lg p-4">
-              <h3 className="font-medium text-error mb-2">IsoSpace CANNOT Access</h3>
+              <h3 className="font-medium text-error mb-2">
+                IsoSpace CANNOT Access
+              </h3>
               <ul className="text-sm text-text-secondary space-y-1">
                 <li>• Your existing Google Drive files</li>
                 <li>• Photos, documents, or spreadsheets</li>

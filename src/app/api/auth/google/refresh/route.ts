@@ -6,7 +6,10 @@ export async function POST(request: NextRequest) {
 
     if (!refreshToken) {
       console.error("No refresh token provided");
-      return NextResponse.json({ error: "Refresh token required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Refresh token required" },
+        { status: 400 },
+      );
     }
 
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
@@ -48,6 +51,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Refresh token error:", error);
-    return NextResponse.json({ error: "Token refresh failed", message: String(error) }, { status: 500 });
+    return NextResponse.json(
+      { error: "Token refresh failed", message: String(error) },
+      { status: 500 },
+    );
   }
 }

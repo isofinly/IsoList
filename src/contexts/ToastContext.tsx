@@ -26,22 +26,22 @@ interface ToastContextType {
     success: (
       title: string,
       description?: string,
-      options?: { duration?: number }
+      options?: { duration?: number },
     ) => string;
     error: (
       title: string,
       description?: string,
-      options?: { duration?: number }
+      options?: { duration?: number },
     ) => string;
     warning: (
       title: string,
       description?: string,
-      options?: { duration?: number }
+      options?: { duration?: number },
     ) => string;
     info: (
       title: string,
       description?: string,
-      options?: { duration?: number }
+      options?: { duration?: number },
     ) => string;
   };
 }
@@ -72,25 +72,25 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       success: (
         title: string,
         description?: string,
-        options?: { duration?: number }
+        options?: { duration?: number },
       ) => addToast({ title, description, type: "success", ...options }),
       error: (
         title: string,
         description?: string,
-        options?: { duration?: number }
+        options?: { duration?: number },
       ) => addToast({ title, description, type: "error", ...options }),
       warning: (
         title: string,
         description?: string,
-        options?: { duration?: number }
+        options?: { duration?: number },
       ) => addToast({ title, description, type: "warning", ...options }),
       info: (
         title: string,
         description?: string,
-        options?: { duration?: number }
+        options?: { duration?: number },
       ) => addToast({ title, description, type: "info", ...options }),
     }),
-    [addToast]
+    [addToast],
   );
 
   return (

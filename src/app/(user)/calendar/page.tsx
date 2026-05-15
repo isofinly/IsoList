@@ -53,7 +53,7 @@ export default function CalendarPage() {
   }, []);
 
   const [currentMonthDate, setCurrentMonthDate] = React.useState(
-    new Date(today.getFullYear(), today.getMonth(), 1)
+    new Date(today.getFullYear(), today.getMonth(), 1),
   );
 
   const upcomingReleases = useMemo(() => {
@@ -62,12 +62,12 @@ export default function CalendarPage() {
         (item) =>
           item.premiereDate &&
           new Date(item.premiereDate + "T00:00:00") >= today &&
-          !item.releaseDateTBD
+          !item.releaseDateTBD,
       )
       .sort(
         (a, b) =>
           new Date(a.premiereDate!).getTime() -
-          new Date(b.premiereDate!).getTime()
+          new Date(b.premiereDate!).getTime(),
       );
   }, [mediaItems, today]);
 
@@ -87,19 +87,19 @@ export default function CalendarPage() {
       .sort(
         (a, b) =>
           new Date(a.premiereDate!).getDate() -
-          new Date(b.premiereDate!).getDate()
+          new Date(b.premiereDate!).getDate(),
       );
   }, [mediaItems, currentMonthDate]);
 
   const daysInMonth = new Date(
     currentMonthDate.getFullYear(),
     currentMonthDate.getMonth() + 1,
-    0
+    0,
   ).getDate();
   const firstDayOfMonth = new Date(
     currentMonthDate.getFullYear(),
     currentMonthDate.getMonth(),
-    1
+    1,
   ).getDay(); // 0 (Sun) - 6 (Sat)
 
   // Adjust for Monday start: convert Sunday (0) to 6, others subtract 1
@@ -117,10 +117,10 @@ export default function CalendarPage() {
       const date = new Date(
         currentMonthDate.getFullYear(),
         currentMonthDate.getMonth(),
-        day
+        day,
       );
       const dayReleases = releasesInCurrentMonth.filter(
-        (item) => new Date(item.premiereDate! + "T00:00:00").getDate() === day
+        (item) => new Date(item.premiereDate! + "T00:00:00").getDate() === day,
       );
       grid.push({
         key: `day-${day}`,
@@ -140,7 +140,7 @@ export default function CalendarPage() {
 
   const changeMonth = (offset: number) => {
     setCurrentMonthDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1)
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1),
     );
   };
 

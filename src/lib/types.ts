@@ -1,5 +1,10 @@
 export type MediaType = "movie" | "series" | "anime";
-export type MediaStatus = "completed" | "watching" | "planned" | "on-hold" | "dropped";
+export type MediaStatus =
+  | "completed"
+  | "watching"
+  | "planned"
+  | "on-hold"
+  | "dropped";
 
 export interface MediaItem {
   id: string;
@@ -86,7 +91,10 @@ declare global {
             cancel_on_tap_outside?: boolean;
           }) => void;
           prompt: () => void;
-          renderButton: (element: HTMLElement, config: Record<string, unknown>) => void;
+          renderButton: (
+            element: HTMLElement,
+            config: Record<string, unknown>,
+          ) => void;
         };
       };
     };
@@ -94,4 +102,4 @@ declare global {
   }
 }
 
-export { };
+export {};

@@ -10,7 +10,9 @@ export function PrivacyInfoDialog() {
 
       <div className="space-y-3 text-sm">
         <div className="bg-success-soft/20 border border-success-soft rounded-lg p-4">
-          <h4 className="font-medium text-success mb-2">What IsoList CAN access:</h4>
+          <h4 className="font-medium text-success mb-2">
+            What IsoList CAN access:
+          </h4>
           <ul className="space-y-1 text-text-secondary">
             <li>• Only files created by IsoList (your media tracking data)</li>
             <li>• Your basic profile info (name, email, profile picture)</li>
@@ -19,7 +21,9 @@ export function PrivacyInfoDialog() {
         </div>
 
         <div className="bg-error-soft/20 border border-error-soft rounded-lg p-4">
-          <h4 className="font-medium text-error mb-2">What IsoList CANNOT access:</h4>
+          <h4 className="font-medium text-error mb-2">
+            What IsoList CANNOT access:
+          </h4>
           <ul className="space-y-1 text-text-secondary">
             <li>• Your existing Google Drive files, photos, or documents</li>
             <li>• Files created by other apps</li>

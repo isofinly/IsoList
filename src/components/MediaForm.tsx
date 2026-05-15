@@ -137,7 +137,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
       const validStatus =
         item.status &&
         ["completed", "watching", "planned", "on-hold", "dropped"].includes(
-          item.status
+          item.status,
         )
           ? item.status
           : "planned";
@@ -179,7 +179,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value, type } = e.target;
 
@@ -261,7 +261,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
         const { id: _, ...newItemData } = itemToStore;
         addMediaItem(newItemData as Omit<MediaItem, "id">);
         router.push(
-          formData.status === "completed" ? "/ratings" : "/watchlist"
+          formData.status === "completed" ? "/ratings" : "/watchlist",
         );
       }
       if (onFormSubmit) onFormSubmit();
@@ -278,7 +278,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
       deleteMediaItem(item.id);
       toast.success(
         "Deleted Successfully",
-        `"${item.title}" has been removed from your collection.`
+        `"${item.title}" has been removed from your collection.`,
       );
 
       if (onFormSubmit) {
@@ -289,7 +289,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
     } catch {
       toast.error(
         "Delete Failed",
-        "Failed to delete the media item. Please try again."
+        "Failed to delete the media item. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -391,7 +391,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                   >
                     <div
                       className={`w-2 h-2 rounded-full ${getStatusColor(
-                        formData.status
+                        formData.status,
                       ).replace("text-", "bg-")}`}
                     />
                     Status
@@ -425,7 +425,7 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                           <div className="flex items-center gap-2">
                             <div
                               className={`w-2 h-2 rounded-full ${getStatusColor(
-                                s
+                                s,
                               ).replace("text-", "bg-")}`}
                             />
                             {s.charAt(0).toUpperCase() +
@@ -763,8 +763,8 @@ export default function MediaForm({ item, onFormSubmit }: MediaFormProps) {
                       ? "Saving Changes..."
                       : "Adding Media..."
                     : item
-                    ? "Save Changes"
-                    : "Add Media"}
+                      ? "Save Changes"
+                      : "Add Media"}
                 </Button>
               </div>
             </div>

@@ -41,7 +41,7 @@ export default function PlaceCard({
           "shadow-fluent-dialog scale-[1.01] border-border-interactive",
           "bg-gradient-to-br from-bg-layer-1 to-bg-layer-2",
         ],
-        "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50"
+        "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50",
       )}
     >
       <div className="flex flex-col lg:flex-row h-full">
@@ -50,7 +50,7 @@ export default function PlaceCard({
             "relative flex-shrink-0 aspect-[3/4] lg:aspect-auto lg:w-48",
             "overflow-hidden rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none",
             hasImage ? "bg-bg-layer-2" : "bg-bg-layer-2",
-            !hasImage && "flex items-center justify-center p-6"
+            !hasImage && "flex items-center justify-center p-6",
           )}
         >
           {hasImage ? (
@@ -62,7 +62,7 @@ export default function PlaceCard({
                 sizes="(max-width: 1024px) 100vw, 192px"
                 className={cn(
                   "object-cover transition-all duration-medium ease-fluent-standard",
-                  "group-hover:scale-105"
+                  "group-hover:scale-105",
                 )}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />

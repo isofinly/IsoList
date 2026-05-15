@@ -1,7 +1,13 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { CardGlass } from "@/components/ui/card";
-import { HarmonyRule, ColorHSL, getHarmoniousColors, hslToHex, hexToHsl } from "@/lib/colors";
+import {
+  HarmonyRule,
+  ColorHSL,
+  getHarmoniousColors,
+  hslToHex,
+  hexToHsl,
+} from "@/lib/colors";
 import { cn } from "@/lib/utils";
 import { Copy, Check } from "lucide-react";
 
@@ -71,12 +77,16 @@ const dotStyles = `
 
 export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
   const [baseColor, setBaseColor] = useState<ColorHSL>(() => {
-    if (initialPalette && initialPalette.length > 0) return hexToHsl(initialPalette[0]);
+    if (initialPalette && initialPalette.length > 0)
+      return hexToHsl(initialPalette[0]);
     return { h: 210, s: 70, l: 50 };
   });
-  const [rule, setRule] = useState<HarmonyRule>(initialPalette && initialPalette.length > 0 ? "custom" : "analogous");
+  const [rule, setRule] = useState<HarmonyRule>(
+    initialPalette && initialPalette.length > 0 ? "custom" : "analogous",
+  );
   const [palette, setPalette] = useState<ColorHSL[]>(() => {
-    if (initialPalette && initialPalette.length > 0) return initialPalette.map(hexToHsl);
+    if (initialPalette && initialPalette.length > 0)
+      return initialPalette.map(hexToHsl);
     return [];
   });
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -108,11 +118,16 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
 
   const getBaseIndex = (r: HarmonyRule) => {
     switch (r) {
-        case "analogous": return 2;
-        case "shades": return 2;
-        case "monochromatic": return 2;
-        case "split": return 0;
-        default: return 0;
+      case "analogous":
+        return 2;
+      case "shades":
+        return 2;
+      case "monochromatic":
+        return 2;
+      case "split":
+        return 0;
+      default:
+        return 0;
     }
   };
 
@@ -140,32 +155,41 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
     }
   }, []);
 
-  const updatePalette = useCallback((newBase: ColorHSL, r: HarmonyRule, s: number, ss: number, satOffsets?: number[]) => {
-    if (r === "shades") {
-      const { h, s, l } = newBase;
-      return [
-        { h, s, l: Math.max(10, l - ss * 2.5) },
-        { h, s, l: Math.max(10, l - ss * 1.5) },
-        newBase,
-        { h, s, l: Math.min(90, l + ss * 0.75) },
-        { h, s, l: Math.min(90, l + ss * 1.5) },
-        { h, s, l: Math.min(90, l + ss * 2.25) },
-      ];
-    }
+  const updatePalette = useCallback(
+    (
+      newBase: ColorHSL,
+      r: HarmonyRule,
+      s: number,
+      ss: number,
+      satOffsets?: number[],
+    ) => {
+      if (r === "shades") {
+        const { h, s, l } = newBase;
+        return [
+          { h, s, l: Math.max(10, l - ss * 2.5) },
+          { h, s, l: Math.max(10, l - ss * 1.5) },
+          newBase,
+          { h, s, l: Math.min(90, l + ss * 0.75) },
+          { h, s, l: Math.min(90, l + ss * 1.5) },
+          { h, s, l: Math.min(90, l + ss * 2.25) },
+        ];
+      }
 
-    // Get base harmony colors
-    const baseColors = getHarmoniousColors(newBase, r, s);
+      // Get base harmony colors
+      const baseColors = getHarmoniousColors(newBase, r, s);
 
-    // Apply individual saturation offsets if available
-    if (satOffsets && satOffsets.length === baseColors.length) {
-      return baseColors.map((color, idx) => ({
-        ...color,
-        s: Math.max(0, Math.min(100, color.s + satOffsets[idx]))
-      }));
-    }
+      // Apply individual saturation offsets if available
+      if (satOffsets && satOffsets.length === baseColors.length) {
+        return baseColors.map((color, idx) => ({
+          ...color,
+          s: Math.max(0, Math.min(100, color.s + satOffsets[idx])),
+        }));
+      }
 
-    return baseColors;
-  }, []);
+      return baseColors;
+    },
+    [],
+  );
 
   // Initialize saturation offsets when rule changes (NOT when baseColor changes)
   useEffect(() => {
@@ -200,8 +224,17 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
   // Update palette on state changes
   useEffect(() => {
     if (rule === "custom") return;
-    setPalette(updatePalette(baseColor, rule, spread, shadesSpacing, saturationOffsets));
-  }, [baseColor, rule, spread, shadesSpacing, saturationOffsets, updatePalette]);
+    setPalette(
+      updatePalette(baseColor, rule, spread, shadesSpacing, saturationOffsets),
+    );
+  }, [
+    baseColor,
+    rule,
+    spread,
+    shadesSpacing,
+    saturationOffsets,
+    updatePalette,
+  ]);
 
   // Update canvas rendering
   useEffect(() => {
@@ -253,112 +286,139 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
   };
 
   // Process the pending update - extracted for RAF callback
-  const processDragUpdate = useCallback((
-    mouseH: number,
-    mouseS: number,
-    dx: number,
-    dy: number,
-    radius: number,
-    currentDraggingIdx: number
-  ) => {
-    const baseIdx = getBaseIndex(rule);
-    const isBase = currentDraggingIdx === baseIdx;
+  const processDragUpdate = useCallback(
+    (
+      mouseH: number,
+      mouseS: number,
+      dx: number,
+      dy: number,
+      radius: number,
+      currentDraggingIdx: number,
+    ) => {
+      const baseIdx = getBaseIndex(rule);
+      const isBase = currentDraggingIdx === baseIdx;
 
-    // 1. CUSTOM: Full Freedom
-    if (rule === "custom") {
-      setPalette(prev => {
-        const newPalette = [...prev];
-        newPalette[currentDraggingIdx] = { ...newPalette[currentDraggingIdx], h: mouseH, s: mouseS };
-        if (currentDraggingIdx === 0) setBaseColor(newPalette[0]);
-        return newPalette;
-      });
-      return;
-    }
-
-    // 2. MONOCHROMATIC: All colors share the same hue
-    if (rule === "monochromatic") {
-      if (isBase) {
-        setBaseColor(prev => {
-          const satChanged = Math.abs(mouseS - prev.s) > 1;
-          if (satChanged) {
-            setSaturationOffsets(new Array(palette.length).fill(0));
-          }
-          return { ...prev, h: mouseH, s: mouseS };
+      // 1. CUSTOM: Full Freedom
+      if (rule === "custom") {
+        setPalette((prev) => {
+          const newPalette = [...prev];
+          newPalette[currentDraggingIdx] = {
+            ...newPalette[currentDraggingIdx],
+            h: mouseH,
+            s: mouseS,
+          };
+          if (currentDraggingIdx === 0) setBaseColor(newPalette[0]);
+          return newPalette;
         });
-      } else {
-        setSaturationOffsets(prev => {
-          const newOffset = mouseS - baseColor.s;
-          const newOffsets = [...prev];
-          newOffsets[currentDraggingIdx] = newOffset;
-          return newOffsets;
-        });
+        return;
       }
-      return;
-    }
 
-    // 3. SHADES: Fixed hue, varying lightness
-    if (rule === "shades") {
-      if (isBase) {
-        setBaseColor(prev => ({ ...prev, h: mouseH, s: mouseS }));
+      // 2. MONOCHROMATIC: All colors share the same hue
+      if (rule === "monochromatic") {
+        if (isBase) {
+          setBaseColor((prev) => {
+            const satChanged = Math.abs(mouseS - prev.s) > 1;
+            if (satChanged) {
+              setSaturationOffsets(new Array(palette.length).fill(0));
+            }
+            return { ...prev, h: mouseH, s: mouseS };
+          });
+        } else {
+          setSaturationOffsets((prev) => {
+            const newOffset = mouseS - baseColor.s;
+            const newOffsets = [...prev];
+            newOffsets[currentDraggingIdx] = newOffset;
+            return newOffsets;
+          });
+        }
+        return;
       }
-      return;
-    }
 
-    // 4. ANALOGOUS / SPLIT: Constrained movement
-    if (rule === "analogous" || rule === "split") {
+      // 3. SHADES: Fixed hue, varying lightness
+      if (rule === "shades") {
+        if (isBase) {
+          setBaseColor((prev) => ({ ...prev, h: mouseH, s: mouseS }));
+        }
+        return;
+      }
+
+      // 4. ANALOGOUS / SPLIT: Constrained movement
+      if (rule === "analogous" || rule === "split") {
+        if (isBase) {
+          setBaseColor((prev) => ({ ...prev, h: mouseH, s: mouseS }));
+        } else {
+          const hueOffsets = getHueOffsets(rule, spread);
+          const targetHue =
+            (baseColor.h + hueOffsets[currentDraggingIdx] + 360) % 360;
+          const targetAngle = ((targetHue - 180) * Math.PI) / 180;
+          const projectedDist =
+            dx * Math.cos(targetAngle) + dy * Math.sin(targetAngle);
+          const newS = Math.min(
+            100,
+            Math.max(0, (Math.max(0, projectedDist) / radius) * 100),
+          );
+
+          const baseHarmonyColors = getHarmoniousColors(
+            baseColor,
+            rule,
+            spread,
+          );
+          const baseSatForThisIdx =
+            baseHarmonyColors[currentDraggingIdx]?.s || baseColor.s;
+          const newOffset = newS - baseSatForThisIdx;
+
+          setSaturationOffsets((prev) => {
+            const newOffsets = [...prev];
+            newOffsets[currentDraggingIdx] = newOffset;
+            return newOffsets;
+          });
+        }
+        return;
+      }
+
+      // 5. RIGID SHAPES (Triad, Square, Complementary, Compound)
       if (isBase) {
-        setBaseColor(prev => ({ ...prev, h: mouseH, s: mouseS }));
+        setBaseColor((prev) => ({ ...prev, h: mouseH, s: mouseS }));
       } else {
         const hueOffsets = getHueOffsets(rule, spread);
-        const targetHue = (baseColor.h + hueOffsets[currentDraggingIdx] + 360) % 360;
+        const targetHue =
+          (baseColor.h + hueOffsets[currentDraggingIdx] + 360) % 360;
         const targetAngle = ((targetHue - 180) * Math.PI) / 180;
-        const projectedDist = dx * Math.cos(targetAngle) + dy * Math.sin(targetAngle);
-        const newS = Math.min(100, Math.max(0, (Math.max(0, projectedDist) / radius) * 100));
+        const projectedDist =
+          dx * Math.cos(targetAngle) + dy * Math.sin(targetAngle);
+        const newS = Math.min(
+          100,
+          Math.max(0, (Math.max(0, projectedDist) / radius) * 100),
+        );
+
+        const currentColorHue = palette[currentDraggingIdx]?.h || targetHue;
+        let hueDiff = mouseH - currentColorHue;
+        if (hueDiff > 180) hueDiff -= 360;
+        if (hueDiff < -180) hueDiff += 360;
+
+        const tangentialMovement = Math.abs(hueDiff);
+        if (tangentialMovement > 1.5) {
+          // Reduced threshold for snappier rotation
+          setBaseColor((prev) => ({
+            ...prev,
+            h: (prev.h + hueDiff + 360) % 360,
+          }));
+        }
 
         const baseHarmonyColors = getHarmoniousColors(baseColor, rule, spread);
-        const baseSatForThisIdx = baseHarmonyColors[currentDraggingIdx]?.s || baseColor.s;
+        const baseSatForThisIdx =
+          baseHarmonyColors[currentDraggingIdx]?.s || baseColor.s;
         const newOffset = newS - baseSatForThisIdx;
 
-        setSaturationOffsets(prev => {
+        setSaturationOffsets((prev) => {
           const newOffsets = [...prev];
           newOffsets[currentDraggingIdx] = newOffset;
           return newOffsets;
         });
       }
-      return;
-    }
-
-    // 5. RIGID SHAPES (Triad, Square, Complementary, Compound)
-    if (isBase) {
-      setBaseColor(prev => ({ ...prev, h: mouseH, s: mouseS }));
-    } else {
-      const hueOffsets = getHueOffsets(rule, spread);
-      const targetHue = (baseColor.h + hueOffsets[currentDraggingIdx] + 360) % 360;
-      const targetAngle = ((targetHue - 180) * Math.PI) / 180;
-      const projectedDist = dx * Math.cos(targetAngle) + dy * Math.sin(targetAngle);
-      const newS = Math.min(100, Math.max(0, (Math.max(0, projectedDist) / radius) * 100));
-
-      const currentColorHue = palette[currentDraggingIdx]?.h || targetHue;
-      let hueDiff = mouseH - currentColorHue;
-      if (hueDiff > 180) hueDiff -= 360;
-      if (hueDiff < -180) hueDiff += 360;
-
-      const tangentialMovement = Math.abs(hueDiff);
-      if (tangentialMovement > 1.5) { // Reduced threshold for snappier rotation
-        setBaseColor(prev => ({ ...prev, h: (prev.h + hueDiff + 360) % 360 }));
-      }
-
-      const baseHarmonyColors = getHarmoniousColors(baseColor, rule, spread);
-      const baseSatForThisIdx = baseHarmonyColors[currentDraggingIdx]?.s || baseColor.s;
-      const newOffset = newS - baseSatForThisIdx;
-
-      setSaturationOffsets(prev => {
-        const newOffsets = [...prev];
-        newOffsets[currentDraggingIdx] = newOffset;
-        return newOffsets;
-      });
-    }
-  }, [rule, spread, baseColor, palette, getHueOffsets]);
+    },
+    [rule, spread, baseColor, palette, getHueOffsets],
+  );
 
   const handlePointerDown = useCallback((idx: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -382,65 +442,70 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
     setTimeout(() => setPulsingIdx(null), 400);
   }, []);
 
-  const handlePointerMove = useCallback((e: React.MouseEvent) => {
-    if (draggingIdx === null) return;
+  const handlePointerMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (draggingIdx === null) return;
 
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+      const canvas = canvasRef.current;
+      if (!canvas) return;
 
-    const now = performance.now();
-    const deltaTime = now - lastUpdateTimeRef.current;
+      const now = performance.now();
+      const deltaTime = now - lastUpdateTimeRef.current;
 
-    // Calculate velocity for potential momentum effects
-    if (lastMousePosRef.current) {
-      const vx = (e.clientX - lastMousePosRef.current.x) / Math.max(deltaTime, 1);
-      const vy = (e.clientY - lastMousePosRef.current.y) / Math.max(deltaTime, 1);
-      velocityRef.current = {
-        x: vx * 0.3 + velocityRef.current.x * 0.7, // Smooth velocity
-        y: vy * 0.3 + velocityRef.current.y * 0.7
-      };
-    }
-
-    lastMousePosRef.current = { x: e.clientX, y: e.clientY };
-    lastUpdateTimeRef.current = now;
-
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left - 16;
-    const y = e.clientY - rect.top - 16;
-    const radius = canvas.width / 2;
-    const dx = x - radius;
-    const dy = y - radius;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    // Allow dragging a bit outside
-    if (dist <= radius + 50) {
-      const angle = Math.atan2(dy, dx) + Math.PI;
-      const mouseH = (angle * 180) / Math.PI;
-      const mouseS = Math.min(100, Math.max(0, (dist / radius) * 100));
-
-      // Store pending update
-      pendingUpdateRef.current = { mouseH, mouseS, dx, dy, radius };
-
-      // Use RAF for smooth updates - only schedule if not already pending
-      if (!animationFrameRef.current) {
-        animationFrameRef.current = requestAnimationFrame(() => {
-          animationFrameRef.current = null;
-          const pending = pendingUpdateRef.current;
-          if (pending && draggingIdx !== null) {
-            processDragUpdate(
-              pending.mouseH,
-              pending.mouseS,
-              pending.dx,
-              pending.dy,
-              pending.radius,
-              draggingIdx
-            );
-          }
-          pendingUpdateRef.current = null;
-        });
+      // Calculate velocity for potential momentum effects
+      if (lastMousePosRef.current) {
+        const vx =
+          (e.clientX - lastMousePosRef.current.x) / Math.max(deltaTime, 1);
+        const vy =
+          (e.clientY - lastMousePosRef.current.y) / Math.max(deltaTime, 1);
+        velocityRef.current = {
+          x: vx * 0.3 + velocityRef.current.x * 0.7, // Smooth velocity
+          y: vy * 0.3 + velocityRef.current.y * 0.7,
+        };
       }
-    }
-  }, [draggingIdx, processDragUpdate]);
+
+      lastMousePosRef.current = { x: e.clientX, y: e.clientY };
+      lastUpdateTimeRef.current = now;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left - 16;
+      const y = e.clientY - rect.top - 16;
+      const radius = canvas.width / 2;
+      const dx = x - radius;
+      const dy = y - radius;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Allow dragging a bit outside
+      if (dist <= radius + 50) {
+        const angle = Math.atan2(dy, dx) + Math.PI;
+        const mouseH = (angle * 180) / Math.PI;
+        const mouseS = Math.min(100, Math.max(0, (dist / radius) * 100));
+
+        // Store pending update
+        pendingUpdateRef.current = { mouseH, mouseS, dx, dy, radius };
+
+        // Use RAF for smooth updates - only schedule if not already pending
+        if (!animationFrameRef.current) {
+          animationFrameRef.current = requestAnimationFrame(() => {
+            animationFrameRef.current = null;
+            const pending = pendingUpdateRef.current;
+            if (pending && draggingIdx !== null) {
+              processDragUpdate(
+                pending.mouseH,
+                pending.mouseS,
+                pending.dx,
+                pending.dy,
+                pending.radius,
+                draggingIdx,
+              );
+            }
+            pendingUpdateRef.current = null;
+          });
+        }
+      }
+    },
+    [draggingIdx, processDragUpdate],
+  );
 
   const handlePointerUp = useCallback(() => {
     // Cancel pending animation frame
@@ -521,8 +586,10 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
       return (
         <line
           key={`guide-${idx}`}
-          x1={x1} y1={y1}
-          x2={x2} y2={y2}
+          x1={x1}
+          y1={y1}
+          x2={x2}
+          y2={y2}
           stroke="white"
           strokeWidth="1"
           strokeDasharray="4 4"
@@ -538,47 +605,78 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
 
     switch (rule) {
       case "complementary":
-        return palette.length >= 2 && (
-          <line
-            x1={getPointerPos(palette[0]).x} y1={getPointerPos(palette[0]).y}
-            x2={getPointerPos(palette[1]).x} y2={getPointerPos(palette[1]).y}
-            stroke="white" strokeWidth="2" strokeDasharray="6 3"
-          />
+        return (
+          palette.length >= 2 && (
+            <line
+              x1={getPointerPos(palette[0]).x}
+              y1={getPointerPos(palette[0]).y}
+              x2={getPointerPos(palette[1]).x}
+              y2={getPointerPos(palette[1]).y}
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="6 3"
+            />
+          )
         );
       case "triad":
-        return palette.length >= 3 && (
-          <path
-            d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} Z`}
-            fill="none" stroke="white" strokeWidth="2" strokeDasharray="6 3"
-          />
+        return (
+          palette.length >= 3 && (
+            <path
+              d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} Z`}
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="6 3"
+            />
+          )
         );
       case "square":
-        return palette.length >= 4 && (
-          <path
-            d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} L ${getPointerPos(palette[3]).x} ${getPointerPos(palette[3]).y} Z`}
-            fill="none" stroke="white" strokeWidth="2" strokeDasharray="6 3"
-          />
+        return (
+          palette.length >= 4 && (
+            <path
+              d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} L ${getPointerPos(palette[3]).x} ${getPointerPos(palette[3]).y} Z`}
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="6 3"
+            />
+          )
         );
       case "analogous":
-        return palette.length >= 5 && (
-          <path
-            d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} L ${getPointerPos(palette[3]).x} ${getPointerPos(palette[3]).y} L ${getPointerPos(palette[4]).x} ${getPointerPos(palette[4]).y}`}
-            fill="none" stroke="white" strokeWidth="2" strokeDasharray="6 3"
-          />
+        return (
+          palette.length >= 5 && (
+            <path
+              d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} L ${getPointerPos(palette[3]).x} ${getPointerPos(palette[3]).y} L ${getPointerPos(palette[4]).x} ${getPointerPos(palette[4]).y}`}
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="6 3"
+            />
+          )
         );
       case "split":
-        return palette.length >= 3 && (
-          <path
-            d={`M ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y}`}
-            fill="none" stroke="white" strokeWidth="2" strokeDasharray="6 3"
-          />
+        return (
+          palette.length >= 3 && (
+            <path
+              d={`M ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} L ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y}`}
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="6 3"
+            />
+          )
         );
       case "compound":
-        return palette.length >= 5 && (
-          <path
-            d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[4]).x} ${getPointerPos(palette[4]).y} M ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} L ${getPointerPos(palette[3]).x} ${getPointerPos(palette[3]).y}`}
-            fill="none" stroke="white" strokeWidth="2" strokeDasharray="6 3"
-          />
+        return (
+          palette.length >= 5 && (
+            <path
+              d={`M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[1]).x} ${getPointerPos(palette[1]).y} M ${getPointerPos(palette[0]).x} ${getPointerPos(palette[0]).y} L ${getPointerPos(palette[4]).x} ${getPointerPos(palette[4]).y} M ${getPointerPos(palette[2]).x} ${getPointerPos(palette[2]).y} L ${getPointerPos(palette[3]).x} ${getPointerPos(palette[3]).y}`}
+              fill="none"
+              stroke="white"
+              strokeWidth="2"
+              strokeDasharray="6 3"
+            />
+          )
         );
       default:
         return null;
@@ -589,7 +687,9 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
       <style>{dotStyles}</style>
       <div className="lg:col-span-1">
-        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-4">Harmony Rules</h3>
+        <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider mb-4">
+          Harmony Rules
+        </h3>
         <div className="space-y-1">
           {rules.map((r) => (
             <button
@@ -599,7 +699,7 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
                 "w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all duration-short",
                 rule === r.id
                   ? "bg-accent-primary-soft text-accent-primary border border-accent-primary/20"
-                  : "text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent"
+                  : "text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent",
               )}
             >
               {r.label}
@@ -614,7 +714,7 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
             ref={containerRef}
             className={cn(
               "relative group p-4 rounded-full bg-white/5 border border-white/10 shadow-2xl overflow-visible wheel-container",
-              draggingIdx !== null && "dragging-active"
+              draggingIdx !== null && "dragging-active",
             )}
             onMouseMove={handlePointerMove}
           >
@@ -628,13 +728,9 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
 
             <svg className="absolute inset-4 w-[350px] h-[350px] pointer-events-none overflow-visible">
               {/* Radial guide lines from center through each dot */}
-              <g className="opacity-60 guide-line">
-                {renderGuideLines()}
-              </g>
+              <g className="opacity-60 guide-line">{renderGuideLines()}</g>
               {/* Harmony shape connections */}
-              <g className="opacity-40 harmony-line">
-                {renderHarmonyShape()}
-              </g>
+              <g className="opacity-40 harmony-line">{renderHarmonyShape()}</g>
             </svg>
 
             {palette.map((color, idx) => {
@@ -655,16 +751,21 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
                       ? "w-9 h-9 border-4 border-white z-20 shadow-[0_0_20px_rgba(255,255,255,0.4)]"
                       : "w-7 h-7 border-2 border-white/90 opacity-90",
                     isBaseColor && "ring-4 ring-white/30 z-20",
-                    isDragging && "scale-110 shadow-xl dragging cursor-grabbing",
-                    isPulsing && "pulse"
+                    isDragging &&
+                      "scale-110 shadow-xl dragging cursor-grabbing",
+                    isPulsing && "pulse",
                   )}
                   style={{
                     left: `${pos.x + 16}px`,
                     top: `${pos.y + 16}px`,
                     backgroundColor: hslToHex(color),
-                    transform: "translate(-50%, -50%)" // Ensure transform is applied here for base position
+                    transform: "translate(-50%, -50%)", // Ensure transform is applied here for base position
                   }}
-                  title={isBaseColor ? "Base color (drag freely)" : "Drag along guide line"}
+                  title={
+                    isBaseColor
+                      ? "Base color (drag freely)"
+                      : "Drag along guide line"
+                  }
                 >
                   {isBaseColor && (
                     <div className="w-1.5 h-1.5 bg-white rounded-full pointer-events-none" />
@@ -677,84 +778,119 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
           <div className="flex flex-col gap-6 w-full max-w-xs">
             <h4 className="text-lg font-bold">Selected Color</h4>
             {palette[selectedIdx] && (
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">Hue</label>
-                <input
-                  type="range" min="0" max="360" value={Math.round(palette[selectedIdx].h)}
-                  onChange={(e) => {
-                    const newH = parseInt(e.target.value);
-                    const oldH = palette[selectedIdx].h;
-                    let hDiff = newH - oldH;
-                    // Normalize
-                    if (hDiff > 180) hDiff -= 360;
-                    if (hDiff < -180) hDiff += 360;
-
-                    // Rotate entire palette
-                    const newBaseH = (baseColor.h + hDiff + 360) % 360;
-                    setBaseColor({ ...baseColor, h: newBaseH });
-                  }}
-                  className="w-full accent-accent-primary"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">Saturation</label>
-                <input
-                  type="range" min="0" max="100" value={Math.round(palette[selectedIdx].s)}
-                  onChange={(e) => {
-                    const newS = parseInt(e.target.value);
-                    const baseIdx = getBaseIndex(rule);
-
-                    if (selectedIdx === baseIdx) {
-                      // Changing base saturation
-                      setBaseColor({ ...baseColor, s: newS });
-                    } else {
-                      // Calculate offset from what harmony would give
-                      const baseHarmonyColors = getHarmoniousColors(baseColor, rule, spread);
-                      const baseSatForThisIdx = baseHarmonyColors[selectedIdx]?.s || baseColor.s;
-                      const newOffset = newS - baseSatForThisIdx;
-
-                      const newOffsets = [...saturationOffsets];
-                      newOffsets[selectedIdx] = newOffset;
-                      setSaturationOffsets(newOffsets);
-                    }
-                  }}
-                  className="w-full accent-accent-primary"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">Lightness</label>
-                <input
-                  type="range" min="0" max="100" value={Math.round(palette[selectedIdx].l)}
-                  onChange={(e) => {
-                    const newL = parseInt(e.target.value);
-                    const newPalette = [...palette];
-                    newPalette[selectedIdx] = { ...newPalette[selectedIdx], l: newL };
-                    setPalette(newPalette);
-
-                    // Update base color if this is the base
-                    if (selectedIdx === getBaseIndex(rule)) {
-                      setBaseColor({ ...baseColor, l: newL });
-                    }
-                  }}
-                  className="w-full accent-accent-primary"
-                />
-              </div>
-              {rule === "shades" && (
+              <div className="space-y-4">
                 <div>
-                  <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">Spacing</label>
+                  <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">
+                    Hue
+                  </label>
                   <input
-                    type="range" min="5" max="40" value={shadesSpacing}
-                    onChange={(e) => setShadesSpacing(parseInt(e.target.value))}
+                    type="range"
+                    min="0"
+                    max="360"
+                    value={Math.round(palette[selectedIdx].h)}
+                    onChange={(e) => {
+                      const newH = parseInt(e.target.value);
+                      const oldH = palette[selectedIdx].h;
+                      let hDiff = newH - oldH;
+                      // Normalize
+                      if (hDiff > 180) hDiff -= 360;
+                      if (hDiff < -180) hDiff += 360;
+
+                      // Rotate entire palette
+                      const newBaseH = (baseColor.h + hDiff + 360) % 360;
+                      setBaseColor({ ...baseColor, h: newBaseH });
+                    }}
                     className="w-full accent-accent-primary"
                   />
                 </div>
-              )}
-              <div className="pt-4 flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 mt-4">
-                <span className="font-mono text-lg font-bold">{hslToHex(palette[selectedIdx]).toUpperCase()}</span>
-                <div className="w-12 h-12 rounded-xl shadow-inner border border-white/10" style={{ backgroundColor: hslToHex(palette[selectedIdx]) }} />
+                <div>
+                  <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">
+                    Saturation
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={Math.round(palette[selectedIdx].s)}
+                    onChange={(e) => {
+                      const newS = parseInt(e.target.value);
+                      const baseIdx = getBaseIndex(rule);
+
+                      if (selectedIdx === baseIdx) {
+                        // Changing base saturation
+                        setBaseColor({ ...baseColor, s: newS });
+                      } else {
+                        // Calculate offset from what harmony would give
+                        const baseHarmonyColors = getHarmoniousColors(
+                          baseColor,
+                          rule,
+                          spread,
+                        );
+                        const baseSatForThisIdx =
+                          baseHarmonyColors[selectedIdx]?.s || baseColor.s;
+                        const newOffset = newS - baseSatForThisIdx;
+
+                        const newOffsets = [...saturationOffsets];
+                        newOffsets[selectedIdx] = newOffset;
+                        setSaturationOffsets(newOffsets);
+                      }
+                    }}
+                    className="w-full accent-accent-primary"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">
+                    Lightness
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={Math.round(palette[selectedIdx].l)}
+                    onChange={(e) => {
+                      const newL = parseInt(e.target.value);
+                      const newPalette = [...palette];
+                      newPalette[selectedIdx] = {
+                        ...newPalette[selectedIdx],
+                        l: newL,
+                      };
+                      setPalette(newPalette);
+
+                      // Update base color if this is the base
+                      if (selectedIdx === getBaseIndex(rule)) {
+                        setBaseColor({ ...baseColor, l: newL });
+                      }
+                    }}
+                    className="w-full accent-accent-primary"
+                  />
+                </div>
+                {rule === "shades" && (
+                  <div>
+                    <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest">
+                      Spacing
+                    </label>
+                    <input
+                      type="range"
+                      min="5"
+                      max="40"
+                      value={shadesSpacing}
+                      onChange={(e) =>
+                        setShadesSpacing(parseInt(e.target.value))
+                      }
+                      className="w-full accent-accent-primary"
+                    />
+                  </div>
+                )}
+                <div className="pt-4 flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10 mt-4">
+                  <span className="font-mono text-lg font-bold">
+                    {hslToHex(palette[selectedIdx]).toUpperCase()}
+                  </span>
+                  <div
+                    className="w-12 h-12 rounded-xl shadow-inner border border-white/10"
+                    style={{ backgroundColor: hslToHex(palette[selectedIdx]) }}
+                  />
+                </div>
               </div>
-            </div>
             )}
           </div>
         </div>
@@ -764,19 +900,34 @@ export function ColorWheel({ initialPalette }: { initialPalette?: string[] }) {
             const hex = hslToHex(color).toUpperCase();
             const isBaseColor = idx === getBaseIndex(rule);
             return (
-              <CardGlass key={idx} className={cn(
-                "p-4 flex flex-col gap-4 group hover:scale-105 transition-all duration-medium",
-                isBaseColor && "ring-2 ring-yellow-400/30"
-              )}>
-                <div className="aspect-square w-full rounded-2xl shadow-inner border border-white/5" style={{ backgroundColor: hex }} />
+              <CardGlass
+                key={idx}
+                className={cn(
+                  "p-4 flex flex-col gap-4 group hover:scale-105 transition-all duration-medium",
+                  isBaseColor && "ring-2 ring-yellow-400/30",
+                )}
+              >
+                <div
+                  className="aspect-square w-full rounded-2xl shadow-inner border border-white/5"
+                  style={{ backgroundColor: hex }}
+                />
                 <div className="flex items-center justify-between px-1">
                   <span className="font-mono text-sm font-semibold">{hex}</span>
-                  <button onClick={() => copyToClipboard(hex, idx)} className="text-text-muted hover:text-accent-primary transition-colors">
-                    {copiedIndex === idx ? <Check size={16} /> : <Copy size={16} />}
+                  <button
+                    onClick={() => copyToClipboard(hex, idx)}
+                    className="text-text-muted hover:text-accent-primary transition-colors"
+                  >
+                    {copiedIndex === idx ? (
+                      <Check size={16} />
+                    ) : (
+                      <Copy size={16} />
+                    )}
                   </button>
                 </div>
                 {isBaseColor && (
-                  <span className="text-xs text-yellow-400/70 text-center">Base</span>
+                  <span className="text-xs text-yellow-400/70 text-center">
+                    Base
+                  </span>
                 )}
               </CardGlass>
             );

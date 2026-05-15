@@ -101,7 +101,7 @@ export default function MediaCard({
           "shadow-fluent-dialog scale-[1.01] border-border-interactive",
           "bg-gradient-to-br from-bg-layer-1 to-bg-layer-2",
         ],
-        "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50"
+        "bg-gradient-to-br from-bg-layer-1 via-bg-layer-1 to-bg-layer-2/50",
       )}
     >
       <div className="flex flex-col lg:flex-row h-full">
@@ -110,7 +110,7 @@ export default function MediaCard({
             "relative flex-shrink-0 aspect-[3/4] lg:aspect-auto lg:w-48",
             "overflow-hidden rounded-t-lg lg:rounded-l-lg lg:rounded-tr-none",
             placeholderColor,
-            !item.imageUrl && "flex items-center justify-center p-6"
+            !item.imageUrl && "flex items-center justify-center p-6",
           )}
         >
           {item.imageUrl && !imageError ? (
@@ -123,7 +123,7 @@ export default function MediaCard({
                 className={cn(
                   "object-cover transition-all duration-medium ease-fluent-standard",
                   "group-hover:scale-105",
-                  imageLoaded ? "opacity-100" : "opacity-0"
+                  imageLoaded ? "opacity-100" : "opacity-0",
                 )}
                 onLoad={() => setImageLoaded(true)}
                 onError={() => setImageError(true)}
@@ -169,7 +169,7 @@ export default function MediaCard({
               <div
                 className={cn(
                   "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all duration-short",
-                  statusColorClass
+                  statusColorClass,
                 )}
               >
                 <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />

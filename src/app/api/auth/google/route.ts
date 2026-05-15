@@ -51,7 +51,10 @@ export async function POST(request: NextRequest) {
 
     if (!userInfoResponse.ok) {
       console.error("User info fetch failed:", userInfoResponse.status);
-      return NextResponse.json({ error: "Failed to get user info" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Failed to get user info" },
+        { status: 400 },
+      );
     }
 
     const userInfo = await userInfoResponse.json();

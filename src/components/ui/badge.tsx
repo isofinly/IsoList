@@ -17,8 +17,10 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-text-on-destructive hover:bg-destructive-hover shadow-sm",
         outline:
           "border-border-subtle text-text-primary hover:bg-accent-primary-soft hover:text-accent-primary hover:border-accent-primary/50",
-        success: "border-transparent bg-success text-text-on-accent hover:bg-success/90 shadow-sm",
-        warning: "border-transparent bg-warning text-black hover:bg-warning/90 shadow-sm",
+        success:
+          "border-transparent bg-success text-text-on-accent hover:bg-success/90 shadow-sm",
+        warning:
+          "border-transparent bg-warning text-black hover:bg-warning/90 shadow-sm",
         info: "border-transparent bg-info text-text-on-accent hover:bg-info/90 shadow-sm",
         accent:
           "border-transparent bg-gradient-to-r from-accent-primary to-accent-primary-hover text-text-on-accent hover:from-accent-primary-hover hover:to-accent-primary-active shadow-md",
@@ -27,9 +29,12 @@ const badgeVariants = cva(
         soft: "border-accent-primary/20 bg-accent-primary-soft text-accent-primary hover:bg-accent-primary-soft-hover",
         "soft-destructive":
           "border-destructive/20 bg-destructive-soft text-destructive hover:bg-destructive-soft/80",
-        "soft-success": "border-success/20 bg-success-soft text-success hover:bg-success-soft/80",
-        "soft-warning": "border-warning/20 bg-warning-soft text-warning hover:bg-warning-soft/80",
-        "soft-info": "border-info/20 bg-info-soft text-info hover:bg-info-soft/80",
+        "soft-success":
+          "border-success/20 bg-success-soft text-success hover:bg-success-soft/80",
+        "soft-warning":
+          "border-warning/20 bg-warning-soft text-warning hover:bg-warning-soft/80",
+        "soft-info":
+          "border-info/20 bg-info-soft text-info hover:bg-info-soft/80",
       },
       size: {
         sm: "px-2 py-0.5 text-xs rounded-md",
@@ -46,7 +51,8 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
+  extends
+    React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
   icon?: React.ReactNode;
   dot?: boolean;
@@ -55,7 +61,20 @@ export interface BadgeProps
 }
 
 const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
-  ({ className, variant, size, icon, dot, removable, onRemove, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      icon,
+      dot,
+      removable,
+      onRemove,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <div
         ref={ref}
@@ -76,7 +95,10 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
               variant === "warning" && "bg-warning",
               variant === "info" && "bg-info",
               variant === "default" && "bg-accent-primary",
-              (!variant || variant === "secondary" || variant === "outline" || variant === "ghost") &&
+              (!variant ||
+                variant === "secondary" ||
+                variant === "outline" ||
+                variant === "ghost") &&
                 "bg-current",
             )}
           />
@@ -85,7 +107,10 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
         {icon && (
           <div className="mr-1.5 flex-shrink-0">
             {React.cloneElement(icon as React.ReactElement, {
-              className: cn("w-3 h-3", (icon as React.ReactElement).props?.className),
+              className: cn(
+                "w-3 h-3",
+                (icon as React.ReactElement).props?.className,
+              ),
             })}
           </div>
         )}
@@ -115,7 +140,11 @@ const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
               viewBox="0 0 24 24"
               strokeWidth={2}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         )}
@@ -130,7 +159,14 @@ Badge.displayName = "Badge";
 const StatusBadge = React.forwardRef<
   HTMLDivElement,
   Omit<BadgeProps, "variant"> & {
-    status: "completed" | "watching" | "planned" | "on-hold" | "dropped" | "cancelled" | "upcoming";
+    status:
+      | "completed"
+      | "watching"
+      | "planned"
+      | "on-hold"
+      | "dropped"
+      | "cancelled"
+      | "upcoming";
   }
 >(({ status, ...props }, ref) => {
   const getVariantForStatus = (status: string) => {
@@ -154,7 +190,12 @@ const StatusBadge = React.forwardRef<
   };
 
   return (
-    <Badge ref={ref} variant={getVariantForStatus(status) as any} dot {...props}>
+    <Badge
+      ref={ref}
+      variant={getVariantForStatus(status) as any}
+      dot
+      {...props}
+    >
       {status.replace("-", " ")}
     </Badge>
   );

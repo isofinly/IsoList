@@ -60,7 +60,8 @@ export class PersistenceService {
     try {
       const driveService = this.authService.getDriveService();
       const localData = this.loadFromLocal();
-      const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
+      const hasLocalChanges =
+        localStorage.getItem("hasLocalChanges") === "true";
 
       const fileInfo = await driveService.getFileInfo();
 
@@ -72,7 +73,9 @@ export class PersistenceService {
           itemCount: currentItems.length,
         };
       }
-      const localTime = localData.timestamp ? new Date(localData.timestamp).getTime() : 0;
+      const localTime = localData.timestamp
+        ? new Date(localData.timestamp).getTime()
+        : 0;
       const cloudTime = fileInfo.lastModified.getTime();
 
       if (!hasLocalChanges && cloudTime > localTime) {
@@ -162,14 +165,17 @@ export class PersistenceService {
     }
   }
 
-  private async mergeData(localItems: MediaItem[], cloudItems: MediaItem[]): Promise<MediaItem[]> {
-    const localMap = new Map(localItems.map(item => [item.id, item]));
+  private async mergeData(
+    localItems: MediaItem[],
+    cloudItems: MediaItem[],
+  ): Promise<MediaItem[]> {
+    const localMap = new Map(localItems.map((item) => [item.id, item]));
 
     const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
     if (hasLocalChanges && localItems.length < cloudItems.length) {
-      const merged = new Map(localItems.map(item => [item.id, item]));
+      const merged = new Map(localItems.map((item) => [item.id, item]));
 
-      cloudItems.forEach(cloudItem => {
+      cloudItems.forEach((cloudItem) => {
         if (!localMap.has(cloudItem.id)) {
           merged.set(cloudItem.id, cloudItem);
         }
@@ -197,10 +203,15 @@ export class PersistenceService {
     return Array.from(merged.values());
   }
 
-  private countConflicts(localItems: MediaItem[], cloudItems: MediaItem[]): number {
+  private countConflicts(
+    localItems: MediaItem[],
+    cloudItems: MediaItem[],
+  ): number {
     const conflicts = localItems.filter((localItem) => {
       const cloudItem = cloudItems.find((c) => c.id === localItem.id);
-      return cloudItem && JSON.stringify(localItem) !== JSON.stringify(cloudItem);
+      return (
+        cloudItem && JSON.stringify(localItem) !== JSON.stringify(cloudItem)
+      );
     });
 
     return conflicts.length;

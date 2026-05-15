@@ -1,9 +1,22 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardGlass, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardGlass,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { AuthService } from "@/lib/auth";
-import { Chrome, Cloud, LogIn, Shield, Sparkles, TrendingUp } from "lucide-react";
+import {
+  Chrome,
+  Cloud,
+  LogIn,
+  Shield,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 export default function LoginPage() {
@@ -51,7 +64,8 @@ export default function LoginPage() {
                 Welcome to IsoList
               </CardTitle>
               <p className="text-text-secondary text-sm leading-relaxed">
-                Track, rate, and discover your favorite movies, series, and anime with cloud sync
+                Track, rate, and discover your favorite movies, series, and
+                anime with cloud sync
               </p>
             </div>
           </CardHeader>
@@ -85,7 +99,9 @@ export default function LoginPage() {
                 <div className="w-full border-t border-border-divider" />
               </div>
               <div className="relative flex justify-center text-xs">
-                <span className="bg-bg-layer-1 px-4 text-text-muted">Secure cloud storage</span>
+                <span className="bg-bg-layer-1 px-4 text-text-muted">
+                  Secure cloud storage
+                </span>
               </div>
             </div>
 
@@ -95,8 +111,8 @@ export default function LoginPage() {
               <div className="text-sm">
                 <p className="text-text-primary font-medium mb-1">Cloud Sync</p>
                 <p className="text-text-secondary text-xs leading-relaxed">
-                  Your data syncs automatically to Google Drive. Access your lists from any device, even
-                  offline.
+                  Your data syncs automatically to Google Drive. Access your
+                  lists from any device, even offline.
                 </p>
               </div>
             </div>
@@ -104,9 +120,12 @@ export default function LoginPage() {
             <div className="flex items-start gap-3 p-4 bg-success-soft/50 rounded-lg border border-success-soft">
               <Shield size={20} className="text-success flex-shrink-0 mt-0.5" />
               <div className="text-sm">
-                <p className="text-text-primary font-medium mb-1">Privacy & Security</p>
+                <p className="text-text-primary font-medium mb-1">
+                  Privacy & Security
+                </p>
                 <p className="text-text-secondary text-xs leading-relaxed">
-                  Your data is stored in your personal Google Drive. We only access files we create.
+                  Your data is stored in your personal Google Drive. We only
+                  access files we create.
                 </p>
               </div>
             </div>
@@ -145,11 +164,17 @@ export default function LoginPage() {
 
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-4 text-xs text-text-muted">
-            <a href="/privacy" className="hover:text-accent-primary transition-colors duration-short">
+            <a
+              href="/privacy"
+              className="hover:text-accent-primary transition-colors duration-short"
+            >
               Privacy Policy
             </a>
             <span>•</span>
-            <a href="/terms" className="hover:text-accent-primary transition-colors duration-short">
+            <a
+              href="/terms"
+              className="hover:text-accent-primary transition-colors duration-short"
+            >
               Terms of Service
             </a>
             <span>•</span>

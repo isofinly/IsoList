@@ -26,7 +26,9 @@ export class AuthService {
       // TODO: Refactor such use
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { GoogleDriveService } = require("./google-drive");
-      AuthService.instance.setDriveService(new GoogleDriveService(AuthService.instance));
+      AuthService.instance.setDriveService(
+        new GoogleDriveService(AuthService.instance),
+      );
     }
     return AuthService.instance;
   }
@@ -35,8 +37,13 @@ export class AuthService {
   private generateCodeVerifier(): string {
     const array = new Uint8Array(32);
     crypto.getRandomValues(array);
-    const base64String = btoa(String.fromCharCode.apply(null, Array.from(array)));
-    return base64String.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    const base64String = btoa(
+      String.fromCharCode.apply(null, Array.from(array)),
+    );
+    return base64String
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
   }
 
   private async generateCodeChallenge(verifier: string): Promise<string> {
@@ -44,19 +51,30 @@ export class AuthService {
     const data = encoder.encode(verifier);
     const digest = await crypto.subtle.digest("SHA-256", data);
     const digestArray = new Uint8Array(digest);
-    const base64String = btoa(String.fromCharCode.apply(null, Array.from(digestArray)));
-    return base64String.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+    const base64String = btoa(
+      String.fromCharCode.apply(null, Array.from(digestArray)),
+    );
+    return base64String
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
   }
 
   async initializeGoogleOAuth(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (typeof window === "undefined") {
-        reject(new Error("Google OAuth can only be initialized in the browser"));
+        reject(
+          new Error("Google OAuth can only be initialized in the browser"),
+        );
         return;
       }
 
       // Check if script already exists
-      if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
+      if (
+        document.querySelector(
+          'script[src="https://accounts.google.com/gsi/client"]',
+        )
+      ) {
         resolve();
         return;
       }
@@ -74,7 +92,8 @@ export class AuthService {
         }
         resolve();
       };
-      script.onerror = () => reject(new Error("Failed to load Google OAuth script"));
+      script.onerror = () =>
+        reject(new Error("Failed to load Google OAuth script"));
       document.head.appendChild(script);
     });
   }
@@ -139,7 +158,9 @@ export class AuthService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ error: "Unknown error" }));
         console.error("API Error:", {
           status: response.status,
           statusText: response.statusText,
@@ -150,7 +171,8 @@ export class AuthService {
         );
       }
 
-      const { user, accessToken, refreshToken, expiresIn } = await response.json();
+      const { user, accessToken, refreshToken, expiresIn } =
+        await response.json();
 
       this.user = {
         ...user,

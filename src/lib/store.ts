@@ -9,7 +9,7 @@ export interface JoinedUser {
   email: string;
   shareId: string;
   lastSync?: Date;
-  status: 'active' | 'error' | 'unauthorized';
+  status: "active" | "error" | "unauthorized";
   mediaItems?: MediaItem[];
   hasRecentUpdate?: boolean;
 }
@@ -34,7 +34,9 @@ interface MediaState {
   updatePlaceItem: (item: PlaceItem) => void;
   deletePlaceItem: (id: string) => void;
   initializeStore: () => Promise<void>;
-  resolveConflict: (choice: "local" | "cloud" | "merge" | "cancel") => Promise<void>;
+  resolveConflict: (
+    choice: "local" | "cloud" | "merge" | "cancel",
+  ) => Promise<void>;
   setConflictDialog: (show: boolean) => void;
   manualSync: () => Promise<void>;
   updateSyncStatus: () => void;
@@ -70,7 +72,8 @@ const initialMediaItems: MediaItem[] = [
     title: "Cyberpunk: Edgerunners",
     type: "anime",
     status: "completed",
-    imageUrl: "https://placehold.co/300x450/FF0055/FFFFFF.png?text=Edgerunners&font=mono",
+    imageUrl:
+      "https://placehold.co/300x450/FF0055/FFFFFF.png?text=Edgerunners&font=mono",
     rating: 9,
     notes: "Visually stunning with a heartbreaking story. Peak cyberpunk.",
     premiereDate: "2022-09-13",
@@ -97,7 +100,7 @@ const initialPlaceItems: PlaceItem[] = [
     notes: "Akihabara, Shibuya crossing, sushi everywhere.",
     tags: ["travel", "asia"],
     imageUrl: "https://placehold.co/600x400/00A9E0/FFFFFF.png?text=Tokyo",
-  }
+  },
 ];
 
 export const useMediaStore = create<MediaState>((set, get) => ({
@@ -154,7 +157,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
           // Convert lastSync back to Date objects
           joinedUsers = parsedUsers.map((user: Record<string, unknown>) => ({
             ...user,
-            lastSync: user.lastSync ? new Date(user.lastSync as string) : undefined
+            lastSync: user.lastSync
+              ? new Date(user.lastSync as string)
+              : undefined,
           }));
         } catch (error) {
           console.error("Failed to parse joined users:", error);
@@ -169,7 +174,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         mediaItems: localItems,
         placeItems: localPlaces,
         joinedUsers,
-        currentViewUserId
+        currentViewUserId,
       });
 
       // Start auto-refresh for joined users
@@ -181,14 +186,23 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         const hasValidToken = await authService.ensureValidToken();
 
         if (hasValidToken) {
-          const syncResult = await syncManager.intelligentSync(localItems, localPlaces);
+          const syncResult = await syncManager.intelligentSync(
+            localItems,
+            localPlaces,
+          );
 
           if (syncResult.success) {
-            set({ mediaItems: syncResult.items.media, placeItems: syncResult.items.places });
+            set({
+              mediaItems: syncResult.items.media,
+              placeItems: syncResult.items.places,
+            });
             localStorage.removeItem("hasLocalChanges");
             localStorage.setItem("lastSync", new Date().toISOString());
           } else if (syncResult.action === "requires-user-resolution") {
-            const conflict = await syncManager.detectConflict(localItems, localPlaces);
+            const conflict = await syncManager.detectConflict(
+              localItems,
+              localPlaces,
+            );
             if (conflict) {
               set({ conflict, showConflictDialog: true });
             }
@@ -258,7 +272,11 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     }
   },
   addMediaItem: (item) => {
-    const newItem = { ...item, id: crypto.randomUUID(), updatedAt: new Date().toISOString() };
+    const newItem = {
+      ...item,
+      id: crypto.randomUUID(),
+      updatedAt: new Date().toISOString(),
+    };
     const updatedItems = [...get().mediaItems, newItem];
 
     set({ mediaItems: updatedItems });
@@ -277,7 +295,11 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   addPlaceItem: (item) => {
-    const newItem = { ...item, id: crypto.randomUUID(), updatedAt: new Date().toISOString() };
+    const newItem = {
+      ...item,
+      id: crypto.randomUUID(),
+      updatedAt: new Date().toISOString(),
+    };
     const updatedItems = [...get().placeItems, newItem];
 
     set({ placeItems: updatedItems });
@@ -294,7 +316,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   updateMediaItem: (updatedItem) => {
-    const updatedWithTs = { ...updatedItem, updatedAt: new Date().toISOString() };
+    const updatedWithTs = {
+      ...updatedItem,
+      updatedAt: new Date().toISOString(),
+    };
     const updatedItems = get().mediaItems.map((item) =>
       item.id === updatedWithTs.id ? updatedWithTs : item,
     );
@@ -315,7 +340,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   updatePlaceItem: (updatedItem) => {
-    const updatedWithTs = { ...updatedItem, updatedAt: new Date().toISOString() };
+    const updatedWithTs = {
+      ...updatedItem,
+      updatedAt: new Date().toISOString(),
+    };
     const updatedItems = get().placeItems.map((item) =>
       item.id === updatedWithTs.id ? updatedWithTs : item,
     );
@@ -375,10 +403,16 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       const currentMedia = get().mediaItems;
       const currentPlaces = get().placeItems;
 
-      const syncResult = await syncManager.intelligentSync(currentMedia, currentPlaces);
+      const syncResult = await syncManager.intelligentSync(
+        currentMedia,
+        currentPlaces,
+      );
 
       if (syncResult.success) {
-        set({ mediaItems: syncResult.items.media, placeItems: syncResult.items.places });
+        set({
+          mediaItems: syncResult.items.media,
+          placeItems: syncResult.items.places,
+        });
 
         localStorage.removeItem("hasLocalChanges");
         localStorage.setItem("lastSync", new Date().toISOString());
@@ -386,7 +420,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         // Update shared files after successful sync
         await get().updateSharedFiles();
       } else if (syncResult.action === "requires-user-resolution") {
-        const conflict = await syncManager.detectConflict(currentMedia, currentPlaces);
+        const conflict = await syncManager.detectConflict(
+          currentMedia,
+          currentPlaces,
+        );
         if (conflict) {
           set({ conflict, showConflictDialog: true });
         }
@@ -434,7 +471,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   addJoinedUser: (user: JoinedUser) => {
     const { joinedUsers } = get();
     const wasEmpty = joinedUsers.length === 0;
-    const updatedUsers = joinedUsers.filter(u => u.id !== user.id);
+    const updatedUsers = joinedUsers.filter((u) => u.id !== user.id);
     updatedUsers.push(user);
     set({ joinedUsers: updatedUsers });
     localStorage.setItem("joinedUsers", JSON.stringify(updatedUsers));
@@ -446,7 +483,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   removeJoinedUser: (userId: string) => {
-    const updatedUsers = get().joinedUsers.filter(u => u.id !== userId);
+    const updatedUsers = get().joinedUsers.filter((u) => u.id !== userId);
     set({ joinedUsers: updatedUsers });
     localStorage.setItem("joinedUsers", JSON.stringify(updatedUsers));
 
@@ -468,7 +505,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   syncJoinedUserData: async (userId: string, isManual: boolean = false) => {
-    const user = get().joinedUsers.find(u => u.id === userId);
+    const user = get().joinedUsers.find((u) => u.id === userId);
     if (!user) return;
 
     if (isManual) {
@@ -481,23 +518,26 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
       // Check if data actually changed
       const currentItems = user.mediaItems || [];
-      const hasChanges = JSON.stringify(currentItems) !== JSON.stringify(newMediaItems);
+      const hasChanges =
+        JSON.stringify(currentItems) !== JSON.stringify(newMediaItems);
 
       if (hasChanges) {
-        console.log(`New data found for ${user.email}, updating... (${isManual ? 'manual' : 'auto'} sync)`);
+        console.log(
+          `New data found for ${user.email}, updating... (${isManual ? "manual" : "auto"} sync)`,
+        );
       }
 
       // Update the user's data and status
-      const updatedUsers = get().joinedUsers.map(u =>
+      const updatedUsers = get().joinedUsers.map((u) =>
         u.id === userId
           ? {
-            ...u,
-            mediaItems: newMediaItems as MediaItem[],
-            lastSync: new Date(),
-            status: 'active' as const,
-            hasRecentUpdate: (hasChanges && isManual) || false // Ensure boolean
-          }
-          : u
+              ...u,
+              mediaItems: newMediaItems as MediaItem[],
+              lastSync: new Date(),
+              status: "active" as const,
+              hasRecentUpdate: (hasChanges && isManual) || false, // Ensure boolean
+            }
+          : u,
       );
 
       set({ joinedUsers: updatedUsers });
@@ -507,22 +547,24 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       if (hasChanges && get().currentViewUserId === userId) {
         console.log(`Updated data for currently viewed user ${user.email}`);
       }
-
     } catch (error: unknown) {
       const err = error as Error & { status?: number };
       console.error("Failed to sync joined user data:", err);
 
       // If file is deleted (404), remove the user entirely
       if (err.status === 404) {
-        console.log(`Shared file for ${user.email} was deleted, removing user from joined list`);
+        console.log(
+          `Shared file for ${user.email} was deleted, removing user from joined list`,
+        );
         get().removeJoinedUser(userId);
         return;
       }
 
       // Update status based on error type
-      const status: 'unauthorized' | 'error' = err.status === 401 || err.status === 403 ? 'unauthorized' : 'error';
-      const updatedUsers = get().joinedUsers.map(u =>
-        u.id === userId ? { ...u, status } : u
+      const status: "unauthorized" | "error" =
+        err.status === 401 || err.status === 403 ? "unauthorized" : "error";
+      const updatedUsers = get().joinedUsers.map((u) =>
+        u.id === userId ? { ...u, status } : u,
       );
 
       set({ joinedUsers: updatedUsers });
@@ -537,7 +579,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       return mediaItems; // Return own data
     }
 
-    const joinedUser = joinedUsers.find(u => u.id === currentViewUserId);
+    const joinedUser = joinedUsers.find((u) => u.id === currentViewUserId);
     return joinedUser?.mediaItems || [];
   },
 
@@ -548,7 +590,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       return placeItems; // Return own data
     }
 
-    const _ = joinedUsers.find(u => u.id === currentViewUserId);
+    const _ = joinedUsers.find((u) => u.id === currentViewUserId);
     // joined user shares currently only contain media; return empty until share includes places
     return [];
   },
@@ -559,23 +601,26 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
   startAutoRefresh: () => {
     // Auto-refresh joined users every 2 minutes
-    const interval = setInterval(async () => {
-      const { joinedUsers } = get();
-      if (joinedUsers.length > 0) {
-        console.log(`Auto-refreshing ${joinedUsers.length} joined users...`);
-      }
-      for (const user of joinedUsers) {
-        if (user.status === 'active') {
-          try {
-            await get().syncJoinedUserData(user.id, false); // false = auto-sync
-          } catch (error: unknown) {
-            const err = error as Error;
-            console.error(`Failed to auto-sync user ${user.email}:`, err);
-            // Auto-sync errors are expected for deleted files and shouldn't propagate
+    const interval = setInterval(
+      async () => {
+        const { joinedUsers } = get();
+        if (joinedUsers.length > 0) {
+          console.log(`Auto-refreshing ${joinedUsers.length} joined users...`);
+        }
+        for (const user of joinedUsers) {
+          if (user.status === "active") {
+            try {
+              await get().syncJoinedUserData(user.id, false); // false = auto-sync
+            } catch (error: unknown) {
+              const err = error as Error;
+              console.error(`Failed to auto-sync user ${user.email}:`, err);
+              // Auto-sync errors are expected for deleted files and shouldn't propagate
+            }
           }
         }
-      }
-    }, 2 * 60 * 1000); // 2 minutes
+      },
+      2 * 60 * 1000,
+    ); // 2 minutes
 
     // Store interval ID to clear later
     window.isolistAutoRefreshInterval = interval;
@@ -589,7 +634,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   addSharedFileId: (fileId: string) => {
-    const currentIds = JSON.parse(localStorage.getItem("sharedFileIds") || "[]");
+    const currentIds = JSON.parse(
+      localStorage.getItem("sharedFileIds") || "[]",
+    );
     if (!currentIds.includes(fileId)) {
       currentIds.push(fileId);
       localStorage.setItem("sharedFileIds", JSON.stringify(currentIds));
@@ -597,7 +644,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   removeSharedFileId: (fileId: string) => {
-    const currentIds = JSON.parse(localStorage.getItem("sharedFileIds") || "[]");
+    const currentIds = JSON.parse(
+      localStorage.getItem("sharedFileIds") || "[]",
+    );
     const filteredIds = currentIds.filter((id: string) => id !== fileId);
     localStorage.setItem("sharedFileIds", JSON.stringify(filteredIds));
   },
@@ -637,8 +686,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
         console.error(`Error updating shared file ${fileId}:`, err);
 
         // If file not found (404), remove it from tracking
-        if (err.message?.includes('404') || err.status === 404) {
-          console.log(`Shared file ${fileId} was deleted, removing from tracking`);
+        if (err.message?.includes("404") || err.status === 404) {
+          console.log(
+            `Shared file ${fileId} was deleted, removing from tracking`,
+          );
           get().removeSharedFileId(fileId);
         }
       }
@@ -647,7 +698,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
 
   // Places share management (separate from media shares)
   addPlacesSharedFileId: (fileId: string) => {
-    const currentIds = JSON.parse(localStorage.getItem("placesSharedFileIds") || "[]");
+    const currentIds = JSON.parse(
+      localStorage.getItem("placesSharedFileIds") || "[]",
+    );
     if (!currentIds.includes(fileId)) {
       currentIds.push(fileId);
       localStorage.setItem("placesSharedFileIds", JSON.stringify(currentIds));
@@ -655,7 +708,9 @@ export const useMediaStore = create<MediaState>((set, get) => ({
   },
 
   removePlacesSharedFileId: (fileId: string) => {
-    const currentIds = JSON.parse(localStorage.getItem("placesSharedFileIds") || "[]");
+    const currentIds = JSON.parse(
+      localStorage.getItem("placesSharedFileIds") || "[]",
+    );
     const filteredIds = currentIds.filter((id: string) => id !== fileId);
     localStorage.setItem("placesSharedFileIds", JSON.stringify(filteredIds));
   },
@@ -688,8 +743,10 @@ export const useMediaStore = create<MediaState>((set, get) => ({
       } catch (error: unknown) {
         const err = error as Error & { status?: number };
         console.error(`Error updating places shared file ${fileId}:`, err);
-        if (err.message?.includes('404') || err.status === 404) {
-          console.log(`Places shared file ${fileId} was deleted, removing from tracking`);
+        if (err.message?.includes("404") || err.status === 404) {
+          console.log(
+            `Places shared file ${fileId} was deleted, removing from tracking`,
+          );
           get().removePlacesSharedFileId(fileId);
         }
       }
@@ -701,7 +758,7 @@ export const useMediaStore = create<MediaState>((set, get) => ({
     console.log(`Refreshing ${joinedUsers.length} joined users...`);
 
     for (const user of joinedUsers) {
-      if (user.status === 'active') {
+      if (user.status === "active") {
         try {
           await get().syncJoinedUserData(user.id, true); // true = manual sync
         } catch (error: unknown) {

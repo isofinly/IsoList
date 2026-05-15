@@ -14,7 +14,7 @@ interface SelectContextType {
 }
 
 const SelectContext = React.createContext<SelectContextType | undefined>(
-  undefined
+  undefined,
 );
 
 interface SelectProps {
@@ -39,7 +39,7 @@ const Select: React.FC<SelectProps> = ({
         return newMap;
       });
     },
-    []
+    [],
   );
 
   return (
@@ -90,7 +90,7 @@ const SelectTrigger = React.forwardRef<
         "shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.05)]",
         "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
         "reveal-hover relative overflow-hidden",
-        className
+        className,
       )}
       {...props}
     >
@@ -98,7 +98,7 @@ const SelectTrigger = React.forwardRef<
       <ChevronDown
         className={cn(
           "h-4 w-4 opacity-50 transition-transform duration-short shrink-0",
-          open && "rotate-180"
+          open && "rotate-180",
         )}
       />
     </button>
@@ -209,7 +209,7 @@ const SelectContent = React.forwardRef<
         "text-text-primary",
         "animate-fadeIn",
         "fluent-scroll max-h-60",
-        className
+        className,
       )}
       {...props}
     >
@@ -274,7 +274,7 @@ const SelectItem = React.forwardRef<
         isSelected && "bg-accent-primary-soft text-accent-primary",
         "transition-all duration-short ease-fluent-standard",
         "reveal-hover",
-        className
+        className,
       )}
       onClick={handleClick}
       {...props}
@@ -314,7 +314,7 @@ const SimpleSelect = React.forwardRef<
           "focus:shadow-[inset_0_1px_2px_oklch(from_black_l_c_h_/_0.1)]",
           "reveal-hover relative overflow-hidden",
 
-          className
+          className,
         )}
         ref={ref}
         {...props}

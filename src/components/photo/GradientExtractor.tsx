@@ -29,8 +29,9 @@ export function GradientExtractor() {
     if (!imgRef.current) return;
     const colorThief = new ColorThief();
     const palette = colorThief.getPalette(imgRef.current, stops);
-    const hexColors = palette.map((rgb: number[]) =>
-      "#" + rgb.map(x => x.toString(16).padStart(2, "0")).join("")
+    const hexColors = palette.map(
+      (rgb: number[]) =>
+        "#" + rgb.map((x) => x.toString(16).padStart(2, "0")).join(""),
     );
     setColors(hexColors);
   };
@@ -42,10 +43,14 @@ export function GradientExtractor() {
       <div className="lg:col-span-1">
         <div className="flex items-center gap-2 mb-4 text-text-muted">
           <Sliders size={18} />
-          <h3 className="text-sm font-semibold uppercase tracking-wider">Settings</h3>
+          <h3 className="text-sm font-semibold uppercase tracking-wider">
+            Settings
+          </h3>
         </div>
         <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
-          <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest font-bold">Gradient Stops</label>
+          <label className="text-xs text-text-muted block mb-1 uppercase tracking-widest font-bold">
+            Gradient Stops
+          </label>
           <div className="flex items-center gap-4">
             <input
               type="range"
@@ -58,7 +63,9 @@ export function GradientExtractor() {
               }}
               className="flex-grow accent-accent-primary"
             />
-            <span className="font-mono font-bold text-accent-primary w-6">{stops}</span>
+            <span className="font-mono font-bold text-accent-primary w-6">
+              {stops}
+            </span>
           </div>
         </div>
       </div>
@@ -69,9 +76,20 @@ export function GradientExtractor() {
             onClick={() => fileInputRef.current?.click()}
             className="aspect-video w-full rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 hover:border-accent-primary/50 transition-all group"
           >
-            <Upload size={48} className="text-text-muted mb-4 group-hover:scale-110 transition-transform" />
-            <p className="text-text-secondary font-medium">Upload image to extract gradient</p>
-            <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
+            <Upload
+              size={48}
+              className="text-text-muted mb-4 group-hover:scale-110 transition-transform"
+            />
+            <p className="text-text-secondary font-medium">
+              Upload image to extract gradient
+            </p>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              className="hidden"
+              accept="image/*"
+            />
           </div>
         ) : (
           <div className="space-y-8">
@@ -97,13 +115,17 @@ export function GradientExtractor() {
 
             {/* Gradient Preview */}
             <div className="space-y-4">
-              <h4 className="text-sm font-bold uppercase tracking-widest text-text-muted px-1">Resulting Gradient</h4>
+              <h4 className="text-sm font-bold uppercase tracking-widest text-text-muted px-1">
+                Resulting Gradient
+              </h4>
               <div
                 className="h-32 w-full rounded-2xl shadow-inner border border-white/10 reveal-hover"
                 style={{ background: gradientString }}
               />
               <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/10">
-                <code className="text-xs text-text-secondary font-mono break-all">{gradientString}</code>
+                <code className="text-xs text-text-secondary font-mono break-all">
+                  {gradientString}
+                </code>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText(gradientString);
@@ -112,7 +134,11 @@ export function GradientExtractor() {
                   }}
                   className="ml-4 text-text-muted hover:text-accent-primary transition-colors flex-shrink-0"
                 >
-                  {copiedIndex === 999 ? <Check size={16} /> : <Copy size={16} />}
+                  {copiedIndex === 999 ? (
+                    <Check size={16} />
+                  ) : (
+                    <Copy size={16} />
+                  )}
                 </button>
               </div>
             </div>
@@ -120,13 +146,18 @@ export function GradientExtractor() {
             {/* Individual Colors */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">
               {colors.map((hex, idx) => (
-                <CardGlass key={idx} className="p-4 flex flex-col gap-4 group hover:scale-105 transition-all duration-medium">
+                <CardGlass
+                  key={idx}
+                  className="p-4 flex flex-col gap-4 group hover:scale-105 transition-all duration-medium"
+                >
                   <div
                     className="aspect-square w-full rounded-2xl shadow-inner border border-white/5"
                     style={{ backgroundColor: hex }}
                   />
                   <div className="flex items-center justify-between px-1">
-                    <span className="font-mono text-sm font-semibold">{hex.toUpperCase()}</span>
+                    <span className="font-mono text-sm font-semibold">
+                      {hex.toUpperCase()}
+                    </span>
                     <button
                       onClick={() => {
                         navigator.clipboard.writeText(hex);
@@ -135,7 +166,11 @@ export function GradientExtractor() {
                       }}
                       className="text-text-muted hover:text-accent-primary transition-colors"
                     >
-                      {copiedIndex === idx ? <Check size={16} /> : <Copy size={16} />}
+                      {copiedIndex === idx ? (
+                        <Check size={16} />
+                      ) : (
+                        <Copy size={16} />
+                      )}
                     </button>
                   </div>
                 </CardGlass>

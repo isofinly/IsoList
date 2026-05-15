@@ -71,24 +71,30 @@ export class GoogleDriveService {
         }
 
         if (searchData.files.length > 1) {
-          console.warn("Multiple IsoList folders found:", searchData.files.length);
+          console.warn(
+            "Multiple IsoList folders found:",
+            searchData.files.length,
+          );
         }
 
         return this.appFolderId;
       }
 
-      const createResponse = await fetch("https://www.googleapis.com/drive/v3/files", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
-          "Content-Type": "application/json",
+      const createResponse = await fetch(
+        "https://www.googleapis.com/drive/v3/files",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: FOLDER_NAME,
+            mimeType: "application/vnd.google-apps.folder",
+            description: "IsoList media tracking data folder",
+          }),
         },
-        body: JSON.stringify({
-          name: FOLDER_NAME,
-          mimeType: "application/vnd.google-apps.folder",
-          description: "IsoList media tracking data folder",
-        }),
-      });
+      );
 
       if (!createResponse.ok) {
         const errorText = await createResponse.text();
@@ -167,7 +173,9 @@ export class GoogleDriveService {
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Failed to update file:", response.status, errorText);
-          throw new Error(`Failed to update file: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to update file: ${response.status} ${errorText}`,
+          );
         }
       } else {
         const metadata = {
@@ -177,7 +185,10 @@ export class GoogleDriveService {
         };
 
         const form = new FormData();
-        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+        form.append(
+          "metadata",
+          new Blob([JSON.stringify(metadata)], { type: "application/json" }),
+        );
         form.append("file", new Blob([jsonData], { type: "application/json" }));
 
         const response = await fetch(
@@ -194,7 +205,9 @@ export class GoogleDriveService {
         if (!response.ok) {
           const errorText = await response.text();
           console.error("Failed to create file:", response.status, errorText);
-          throw new Error(`Failed to create file: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to create file: ${response.status} ${errorText}`,
+          );
         }
 
         await response.json();
@@ -222,11 +235,14 @@ export class GoogleDriveService {
         return null;
       }
 
-      const response = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`, {
-        headers: {
-          Authorization: `Bearer ${this.accessToken}`,
+      const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${file.id}?alt=media`,
+        {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Download failed: ${response.status}`);
@@ -242,7 +258,11 @@ export class GoogleDriveService {
     }
   }
 
-  private async findDataFile(): Promise<{ id: string; name: string; modifiedTime: string } | null> {
+  private async findDataFile(): Promise<{
+    id: string;
+    name: string;
+    modifiedTime: string;
+  } | null> {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) {
       console.log("No valid token for file search");
@@ -279,7 +299,11 @@ export class GoogleDriveService {
     }
   }
 
-  async getFolderInfo(): Promise<{ id: string; name: string; webViewLink: string } | null> {
+  async getFolderInfo(): Promise<{
+    id: string;
+    name: string;
+    webViewLink: string;
+  } | null> {
     try {
       const folderId = await this.ensureAppFolder();
       if (!folderId) return null;
@@ -371,7 +395,12 @@ export class GoogleDriveService {
   }
 
   async findAllIsoListFolders(): Promise<
-    Array<{ id: string; name: string; createdTime: string; webViewLink: string }>
+    Array<{
+      id: string;
+      name: string;
+      createdTime: string;
+      webViewLink: string;
+    }>
   > {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) return [];
@@ -426,18 +455,19 @@ export class GoogleDriveService {
             type: "anyone",
             allowFileDiscovery: false, // File won't appear in search results
           }),
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to make file public: ${response.status} ${errorText}`);
+        throw new Error(
+          `Failed to make file public: ${response.status} ${errorText}`,
+        );
       }
 
       // Verify the permission was set correctly
       const permissionResult = await response.json();
       console.log("File made public with permission ID:", permissionResult.id);
-
     } catch (error) {
       console.error("Failed to make file public:", error);
       throw error;
@@ -460,7 +490,7 @@ export class GoogleDriveService {
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
           },
-        }
+        },
       );
 
       if (response.ok) {
@@ -472,16 +502,16 @@ export class GoogleDriveService {
         // Method 2: If authenticated access fails with 403/404,
         // it's likely a public file we don't have direct permission for.
         // Use our server-side proxy to bypass CORS.
-        console.log(
-          "Authenticated access failed, trying server-side proxy..."
-        );
+        console.log("Authenticated access failed, trying server-side proxy...");
         const proxyResponse = await fetch(`/api/share/proxy?fileId=${fileId}`);
 
         if (!proxyResponse.ok) {
           const errorData = await proxyResponse.json();
-          const errorMessage = proxyResponse.status === 404
-            ? "File not found (may have been deleted by owner)"
-            : (errorData.error || `Proxy request failed with status: ${proxyResponse.status}`);
+          const errorMessage =
+            proxyResponse.status === 404
+              ? "File not found (may have been deleted by owner)"
+              : errorData.error ||
+                `Proxy request failed with status: ${proxyResponse.status}`;
 
           const error = new Error(errorMessage) as Error & { status?: number };
           error.status = proxyResponse.status;
@@ -489,12 +519,12 @@ export class GoogleDriveService {
         }
 
         return await proxyResponse.json();
-
       } else {
         // Handle other API errors
-        const errorMessage = response.status === 404
-          ? "File not found (may have been deleted by owner)"
-          : `Google Drive API error: ${response.status}`;
+        const errorMessage =
+          response.status === 404
+            ? "File not found (may have been deleted by owner)"
+            : `Google Drive API error: ${response.status}`;
 
         const error = new Error(errorMessage) as Error & { status?: number };
         error.status = response.status;
@@ -503,7 +533,9 @@ export class GoogleDriveService {
     } catch (error: unknown) {
       const err = error as Error & { status?: number };
       console.error("Failed to load shared data:", err);
-      const wrappedErr = new Error(`Failed to load shared data: ${err.message}`) as Error & { status?: number };
+      const wrappedErr = new Error(
+        `Failed to load shared data: ${err.message}`,
+      ) as Error & { status?: number };
       wrappedErr.status = err.status || 500;
       throw wrappedErr;
     }
@@ -527,7 +559,7 @@ export class GoogleDriveService {
       const jsonData = JSON.stringify(data, null, 2);
 
       // For share files, always create a new file instead of updating existing ones
-      if (fileName.includes('share') || data.type === 'isolist-share') {
+      if (fileName.includes("share") || data.type === "isolist-share") {
         const metadata = {
           name: fileName,
           parents: [folderId],
@@ -535,7 +567,10 @@ export class GoogleDriveService {
         };
 
         const form = new FormData();
-        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+        form.append(
+          "metadata",
+          new Blob([JSON.stringify(metadata)], { type: "application/json" }),
+        );
         form.append("file", new Blob([jsonData], { type: "application/json" }));
 
         const response = await fetch(
@@ -551,7 +586,9 @@ export class GoogleDriveService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Failed to create share file: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to create share file: ${response.status} ${errorText}`,
+          );
         }
 
         const result = await response.json();
@@ -576,7 +613,9 @@ export class GoogleDriveService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Failed to update file: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to update file: ${response.status} ${errorText}`,
+          );
         }
 
         return existingFile.id;
@@ -588,7 +627,10 @@ export class GoogleDriveService {
         };
 
         const form = new FormData();
-        form.append("metadata", new Blob([JSON.stringify(metadata)], { type: "application/json" }));
+        form.append(
+          "metadata",
+          new Blob([JSON.stringify(metadata)], { type: "application/json" }),
+        );
         form.append("file", new Blob([jsonData], { type: "application/json" }));
 
         const response = await fetch(
@@ -604,7 +646,9 @@ export class GoogleDriveService {
 
         if (!response.ok) {
           const errorText = await response.text();
-          throw new Error(`Failed to create file: ${response.status} ${errorText}`);
+          throw new Error(
+            `Failed to create file: ${response.status} ${errorText}`,
+          );
         }
 
         const result = await response.json();
@@ -631,12 +675,14 @@ export class GoogleDriveService {
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to delete file: ${response.status} ${errorText}`);
+        throw new Error(
+          `Failed to delete file: ${response.status} ${errorText}`,
+        );
       }
 
       return true;
@@ -647,7 +693,9 @@ export class GoogleDriveService {
   }
 
   // Method to list files created by the user (for managing shares)
-  async listUserFiles(): Promise<Array<{ id: string, name: string, createdTime: string }>> {
+  async listUserFiles(): Promise<
+    Array<{ id: string; name: string; createdTime: string }>
+  > {
     const hasValidToken = await this.ensureValidToken();
     if (!hasValidToken) {
       throw new Error("No valid token available");
@@ -665,12 +713,14 @@ export class GoogleDriveService {
           headers: {
             Authorization: `Bearer ${this.accessToken}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to list files: ${response.status} ${errorText}`);
+        throw new Error(
+          `Failed to list files: ${response.status} ${errorText}`,
+        );
       }
 
       const data = await response.json();
@@ -700,12 +750,14 @@ export class GoogleDriveService {
             "Content-Type": "application/json",
           },
           body: jsonData,
-        }
+        },
       );
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to update file: ${response.status} ${errorText}`);
+        throw new Error(
+          `Failed to update file: ${response.status} ${errorText}`,
+        );
       }
 
       return true;

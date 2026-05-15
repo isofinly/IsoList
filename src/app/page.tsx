@@ -1,6 +1,13 @@
 "use client";
 import { CardGlass } from "@/components/ui/card";
-import { Film, BookText, Camera, Terminal, Shield, ArrowRight } from "lucide-react";
+import {
+  Film,
+  BookText,
+  Camera,
+  Terminal,
+  Shield,
+  ArrowRight,
+} from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
@@ -13,22 +20,6 @@ const apps = [
     href: "/tracker",
     color: "accent-primary",
   },
-  {
-    id: "blog",
-    name: "Blog Platform",
-    description: "Read and host markdown-based notes and thoughts.",
-    icon: <BookText className="w-8 h-8 text-success" />,
-    href: "/blog",
-    color: "success",
-  },
-  {
-    id: "photo",
-    name: "Photo Tool",
-    description: "Adobe Color clone: Color wheel, theme, and gradient extraction.",
-    icon: <Camera className="w-8 h-8 text-info" />,
-    href: "/photo",
-    color: "info",
-  },
 ];
 
 export default function IsoSpacePage() {
@@ -37,8 +28,14 @@ export default function IsoSpacePage() {
       {/* Dynamic Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] bg-accent-primary/5 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute top-1/4 -left-20 w-[400px] h-[400px] bg-success/5 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-info/5 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: "4s" }} />
+        <div
+          className="absolute top-1/4 -left-20 w-[400px] h-[400px] bg-success/5 rounded-full blur-[100px] animate-pulse"
+          style={{ animationDelay: "2s" }}
+        />
+        <div
+          className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-info/5 rounded-full blur-[80px] animate-pulse"
+          style={{ animationDelay: "4s" }}
+        />
       </div>
 
       <div className="relative z-10 container mx-auto px-4 pt-32 pb-20">
@@ -50,11 +47,11 @@ export default function IsoSpacePage() {
             transition={{ duration: 0.5 }}
           >
             <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight">
-              Welcome to{" "}
-              <span className="text-gradient-primary">IsoSpace</span>
+              Welcome to <span className="text-gradient-primary">IsoSpace</span>
             </h1>
             <p className="text-xl text-text-secondary leading-relaxed">
-              One home for all of isofinly&apos;s creative tools. Seamlessly switch between media tracking, blog hosting, and professional photo tools.
+              One home for all of isofinly&apos;s creative tools. Seamlessly
+              switch between media tracking.
             </p>
           </motion.div>
         </div>
@@ -70,7 +67,9 @@ export default function IsoSpacePage() {
             >
               <Link href={app.href}>
                 <CardGlass className="group p-8 h-full hover:scale-[1.02] transition-all duration-medium cursor-pointer border-white/5 hover:border-white/10">
-                  <div className={`w-16 h-16 rounded-2xl bg-${app.color}/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-medium`}>
+                  <div
+                    className={`w-16 h-16 rounded-2xl bg-${app.color}/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-medium`}
+                  >
                     {app.icon}
                   </div>
                   <h2 className="text-2xl font-bold mb-3 text-text-primary group-hover:text-accent-primary transition-colors">

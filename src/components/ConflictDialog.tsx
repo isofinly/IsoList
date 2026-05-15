@@ -39,7 +39,7 @@ export function ConflictDialog({
       console.error("Conflict resolution failed:", error);
       toast.error(
         "Conflict Resolution Failed",
-        `Failed to resolve conflict: ${error}`
+        `Failed to resolve conflict: ${error}`,
       );
     } finally {
       setIsResolving(false);

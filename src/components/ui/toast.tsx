@@ -30,7 +30,8 @@ const toastVariants = cva(
     variants: {
       variant: {
         default: "border bg-background text-foreground",
-        destructive: "destructive group border-destructive bg-destructive text-destructive-foreground",
+        destructive:
+          "destructive group border-destructive bg-destructive text-destructive-foreground",
       },
     },
     defaultVariants: {
@@ -44,33 +45,34 @@ type ToastProps = React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
 
 type ToastActionElement = React.ReactElement<typeof ToastAction>;
 
-const Toast = React.forwardRef<React.ElementRef<typeof ToastPrimitives.Root>, ToastProps>(
-  ({ className, variant: _, ...props }, ref) => {
-    return (
-      <ToastPrimitives.Root
-        ref={ref}
-        className={cn(
-          "group pointer-events-auto relative flex w-full items-start gap-4",
-          "overflow-hidden rounded-lg p-4 shadow-fluent-popup",
-          "fluent-glass border border-border-subtle",
-          "transition-all duration-medium ease-fluent-standard",
-          "data-[state=open]:animate-slide-in-right",
-          "data-[state=closed]:animate-slide-out-right",
-          "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
-          "data-[swipe=cancel]:translate-x-0",
-          "data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]",
-          "data-[swipe=move]:transition-none",
-          "data-[swipe=end]:animate-slide-out-right",
-          "hover:shadow-fluent-dialog hover:scale-[1.02]",
-          "reveal-hover",
+const Toast = React.forwardRef<
+  React.ElementRef<typeof ToastPrimitives.Root>,
+  ToastProps
+>(({ className, variant: _, ...props }, ref) => {
+  return (
+    <ToastPrimitives.Root
+      ref={ref}
+      className={cn(
+        "group pointer-events-auto relative flex w-full items-start gap-4",
+        "overflow-hidden rounded-lg p-4 shadow-fluent-popup",
+        "fluent-glass border border-border-subtle",
+        "transition-all duration-medium ease-fluent-standard",
+        "data-[state=open]:animate-slide-in-right",
+        "data-[state=closed]:animate-slide-out-right",
+        "data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]",
+        "data-[swipe=cancel]:translate-x-0",
+        "data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]",
+        "data-[swipe=move]:transition-none",
+        "data-[swipe=end]:animate-slide-out-right",
+        "hover:shadow-fluent-dialog hover:scale-[1.02]",
+        "reveal-hover",
 
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
+        className,
+      )}
+      {...props}
+    />
+  );
+});
 Toast.displayName = ToastPrimitives.Root.displayName;
 
 const ToastAction = React.forwardRef<
@@ -121,7 +123,10 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold text-text-primary leading-tight", className)}
+    className={cn(
+      "text-sm font-semibold text-text-primary leading-tight",
+      className,
+    )}
     {...props}
   />
 ));
@@ -148,8 +153,22 @@ interface ToastWithIconProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-const ToastWithIcon = React.forwardRef<React.ElementRef<typeof Toast>, ToastWithIconProps>(
-  ({ title, description, type, action, duration = 5000, onOpenChange, ...props }, ref) => {
+const ToastWithIcon = React.forwardRef<
+  React.ElementRef<typeof Toast>,
+  ToastWithIconProps
+>(
+  (
+    {
+      title,
+      description,
+      type,
+      action,
+      duration = 5000,
+      onOpenChange,
+      ...props
+    },
+    ref,
+  ) => {
     const getIcon = () => {
       switch (type) {
         case "success":
@@ -188,7 +207,11 @@ const ToastWithIcon = React.forwardRef<React.ElementRef<typeof Toast>, ToastWith
           <div className="flex-shrink-0 mt-0.5">{getIcon()}</div>
           <div className="flex-1 min-w-0">
             <ToastTitle>{title}</ToastTitle>
-            {description && <ToastDescription className="mt-1">{description}</ToastDescription>}
+            {description && (
+              <ToastDescription className="mt-1">
+                {description}
+              </ToastDescription>
+            )}
           </div>
         </div>
 

@@ -5,7 +5,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
 export default function AuthCallback() {
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading",
+  );
   const router = useRouter();
   const searchParams = useSearchParams();
   const authService = AuthService.getInstance();

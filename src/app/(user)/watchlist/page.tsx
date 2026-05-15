@@ -61,7 +61,7 @@ export default function WatchlistPage() {
   const [sortKey, setSortKey] = useState<SortKey>("premiereDate");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [filterStatus, setFilterStatus] = useState<WatchlistStatus | "all">(
-    "all"
+    "all",
   );
   const [enableSeparation, setEnableSeparation] = useState(true);
 
@@ -70,7 +70,7 @@ export default function WatchlistPage() {
       (item) =>
         item.status === "watching" ||
         item.status === "planned" ||
-        item.status === "on-hold"
+        item.status === "on-hold",
     );
 
     if (filterStatus !== "all") {
@@ -92,13 +92,13 @@ export default function WatchlistPage() {
             valA = a.premiereDate
               ? new Date(a.premiereDate).getTime()
               : a.startDate
-              ? new Date(a.startDate).getTime()
-              : Number.POSITIVE_INFINITY;
+                ? new Date(a.startDate).getTime()
+                : Number.POSITIVE_INFINITY;
             valB = b.premiereDate
               ? new Date(b.premiereDate).getTime()
               : b.startDate
-              ? new Date(b.startDate).getTime()
-              : Number.POSITIVE_INFINITY;
+                ? new Date(b.startDate).getTime()
+                : Number.POSITIVE_INFINITY;
             break;
           }
           case "status": {
@@ -183,7 +183,7 @@ export default function WatchlistPage() {
     items: MediaItem[],
     title: string,
     icon: React.ReactNode,
-    emptyMessage: string
+    emptyMessage: string,
   ) => {
     if (items.length === 0) {
       return (
@@ -350,14 +350,14 @@ export default function WatchlistPage() {
                 futureReleases,
                 "Upcoming Releases",
                 <Calendar size={20} className="text-theme-primary" />,
-                "No upcoming releases match the current filter."
+                "No upcoming releases match the current filter.",
               )}
 
               {renderSection(
                 alreadyReleased,
                 "Available to Watch",
                 <Clock size={20} className="text-theme-accent" />,
-                "No available content matches the current filter."
+                "No available content matches the current filter.",
               )}
             </>
           ) : (

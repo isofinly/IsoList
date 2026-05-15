@@ -64,7 +64,7 @@ export function ConfirmationDialog({
             "hover:bg-destructive-hover",
             "focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2",
             "transition-all duration-short ease-fluent-standard",
-            "reveal-hover"
+            "reveal-hover",
           ),
           cancel: cn(
             "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium",
@@ -72,7 +72,7 @@ export function ConfirmationDialog({
             "hover:bg-bg-layer-2 hover:border-border-interactive",
             "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2",
             "transition-all duration-short ease-fluent-standard",
-            "reveal-hover"
+            "reveal-hover",
           ),
         };
       case "warning":
@@ -83,7 +83,7 @@ export function ConfirmationDialog({
             "hover:bg-warning/90",
             "focus:outline-none focus:ring-2 focus:ring-warning focus:ring-offset-2",
             "transition-all duration-short ease-fluent-standard",
-            "reveal-hover"
+            "reveal-hover",
           ),
           cancel: cn(
             "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium",
@@ -91,7 +91,7 @@ export function ConfirmationDialog({
             "hover:bg-bg-layer-2 hover:border-border-interactive",
             "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2",
             "transition-all duration-short ease-fluent-standard",
-            "reveal-hover"
+            "reveal-hover",
           ),
         };
       default:
@@ -102,7 +102,7 @@ export function ConfirmationDialog({
             "hover:bg-accent-primary-hover",
             "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2",
             "transition-all duration-short ease-fluent-standard",
-            "reveal-hover"
+            "reveal-hover",
           ),
           cancel: cn(
             "inline-flex h-9 items-center justify-center rounded-md px-4 text-sm font-medium",
@@ -110,7 +110,7 @@ export function ConfirmationDialog({
             "hover:bg-bg-layer-2 hover:border-border-interactive",
             "focus:outline-none focus:ring-2 focus:ring-accent-primary focus:ring-offset-2",
             "transition-all duration-short ease-fluent-standard",
-            "reveal-hover"
+            "reveal-hover",
           ),
         };
     }

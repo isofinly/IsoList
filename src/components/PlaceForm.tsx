@@ -118,7 +118,7 @@ export default function PlaceForm({ item, onFormSubmit }: PlaceFormProps) {
   }, [item]);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target as {
       name: keyof PlaceFormData;

@@ -27,7 +27,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const checkAuth = () => {
       const isAuthenticated = authService.isAuthenticated();
       const isProtectedRoute = PROTECTED_ROUTES.some((route) =>
-        pathname.startsWith(route)
+        pathname.startsWith(route),
       );
 
       if (isProtectedRoute && !isAuthenticated) {
@@ -42,7 +42,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth();
   }, [pathname, router, authService]);
 
-  if (isCheckingAuth && PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
+  if (
+    isCheckingAuth &&
+    PROTECTED_ROUTES.some((route) => pathname.startsWith(route))
+  ) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-accent-primary border-t-transparent rounded-full animate-spin" />

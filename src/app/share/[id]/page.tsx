@@ -37,7 +37,7 @@ export default function SharedPage() {
         console.error("Failed to load shared data:", err);
         if (err.status === 403 || err.status === 401) {
           setError(
-            "Access denied. This share may be private or the link is invalid."
+            "Access denied. This share may be private or the link is invalid.",
           );
         } else if (err.status === 404) {
           setError("Share not found. Please check the link.");
@@ -86,16 +86,16 @@ export default function SharedPage() {
   }
 
   const completedItems = sharedData.mediaItems.filter(
-    (item) => item.status === "completed"
+    (item) => item.status === "completed",
   );
   const watchlistItems = sharedData.mediaItems.filter(
     (item) =>
       item.status === "watching" ||
       item.status === "planned" ||
-      item.status === "on-hold"
+      item.status === "on-hold",
   );
   const upcomingItems = sharedData.mediaItems.filter(
-    (item) => item.premiereDate && new Date(item.premiereDate) > new Date()
+    (item) => item.premiereDate && new Date(item.premiereDate) > new Date(),
   );
 
   return (

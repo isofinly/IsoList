@@ -105,7 +105,7 @@ export default function RootLayout({
 
                 <main
                   id="main-content"
-                  className="container mx-auto px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
+                  className="w-full px-4 py-8 min-h-[calc(100vh-var(--navbar-height))] flex flex-col"
                 >
                   <div className="flex-grow">{children}</div>
 

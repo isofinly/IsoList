@@ -19,8 +19,6 @@ import { useEffect, useState } from "react";
 
 const navLinks = [
   { href: "/tracker", label: "Tracker", icon: <Tv size={18} /> },
-  { href: "/blog", label: "Blog", icon: <ListChecks size={18} /> },
-  { href: "/photo", label: "Photo Tool", icon: <PlusSquare size={18} /> },
   { href: "/login", label: "Login", icon: <LogIn size={18} /> },
 ];
 
@@ -62,7 +60,7 @@ export default function Navbar() {
           isScrolled
             ? "border-border-interactive shadow-fluent-popup"
             : "border-border-subtle/50",
-          "reveal-hover"
+          "reveal-hover",
         )}
       >
         <div className="container mx-auto flex h-full items-center justify-between px-4 lg:px-6">
@@ -74,7 +72,7 @@ export default function Navbar() {
               "text-text-primary hover:text-accent-primary",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-primary",
               "focus-visible:ring-offset-2 focus-visible:ring-offset-bg-base rounded-md",
-              "px-2 py-1 -ml-2"
+              "px-2 py-1 -ml-2",
             )}
           >
             <div className="relative">
@@ -83,14 +81,14 @@ export default function Navbar() {
                 className={cn(
                   "text-accent-primary transition-all duration-short ease-fluent-standard",
                   "group-hover:scale-110 group-hover:text-accent-primary-hover",
-                  "drop-shadow-sm"
+                  "drop-shadow-sm",
                 )}
               />
               <div
                 className={cn(
                   "absolute inset-0 rounded-full bg-accent-primary/20 blur-md",
                   "opacity-0 group-hover:opacity-100 transition-opacity duration-medium",
-                  "scale-150"
+                  "scale-150",
                 )}
               />
             </div>
@@ -99,7 +97,7 @@ export default function Navbar() {
                 "ml-3 font-sans text-xl font-semibold tracking-tight",
                 "bg-gradient-to-r from-text-primary to-accent-primary bg-clip-text",
                 "group-hover:from-accent-primary group-hover:to-accent-primary-hover",
-                "transition-all duration-medium ease-fluent-standard"
+                "transition-all duration-medium ease-fluent-standard",
               )}
             >
               IsoSpace
@@ -143,14 +141,14 @@ export default function Navbar() {
                             "hover:bg-bg-layer-1/80 hover:backdrop-blur-sm",
                           ],
                       "hover:shadow-sm hover:scale-[1.02]",
-                      "active:scale-[0.98] active:transition-transform active:duration-75"
+                      "active:scale-[0.98] active:transition-transform active:duration-75",
                     )}
                     title={link.label}
                   >
                     <span
                       className={cn(
                         "transition-all duration-short ease-fluent-standard",
-                        isActive ? "text-accent-primary" : "text-current"
+                        isActive ? "text-accent-primary" : "text-current",
                       )}
                     >
                       {link.icon}
@@ -165,7 +163,7 @@ export default function Navbar() {
                         className={cn(
                           "absolute bottom-0 left-1/2 -translate-x-1/2",
                           "w-1 h-1 bg-accent-primary rounded-full",
-                          "animate-scale-in"
+                          "animate-scale-in",
                         )}
                       />
                     )}
@@ -192,7 +190,8 @@ export default function Navbar() {
               className={cn(
                 "text-text-secondary hover:text-text-primary",
                 "hover:bg-bg-layer-1/80 hover:backdrop-blur-sm",
-                isMobileMenuOpen && "bg-accent-primary-soft text-accent-primary"
+                isMobileMenuOpen &&
+                  "bg-accent-primary-soft text-accent-primary",
               )}
               aria-label="Toggle mobile menu"
             >
@@ -210,7 +209,7 @@ export default function Navbar() {
             "shadow-fluent-popup",
             isMobileMenuOpen
               ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 -translate-y-2 pointer-events-none"
+              : "opacity-0 -translate-y-2 pointer-events-none",
           )}
         >
           <div className="container mx-auto px-4 py-4">
@@ -251,7 +250,7 @@ export default function Navbar() {
                               "hover:bg-bg-layer-1/80",
                             ],
                         "hover:shadow-sm hover:scale-[1.02]",
-                        "active:scale-[0.98] active:transition-transform active:duration-75"
+                        "active:scale-[0.98] active:transition-transform active:duration-75",
                       )}
                     >
                       <span
@@ -259,7 +258,7 @@ export default function Navbar() {
                           "mb-1 transition-all duration-short ease-fluent-standard",
                           isActive
                             ? "text-accent-primary scale-110"
-                            : "text-current"
+                            : "text-current",
                         )}
                       >
                         {link.icon}

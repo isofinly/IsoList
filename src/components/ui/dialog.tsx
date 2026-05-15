@@ -87,7 +87,10 @@ const DialogContent = React.forwardRef<
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogHeader = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
       "flex flex-col space-y-2 text-center sm:text-left",
@@ -99,7 +102,10 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 );
 DialogHeader.displayName = "DialogHeader";
 
-const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const DialogFooter = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
       "flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2",
@@ -135,7 +141,11 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-text-secondary leading-relaxed", "max-w-prose", className)}
+    className={cn(
+      "text-sm text-text-secondary leading-relaxed",
+      "max-w-prose",
+      className,
+    )}
     {...props}
   />
 ));
@@ -171,7 +181,11 @@ const DialogConfirm = React.forwardRef<
     <DialogContent ref={ref} className={cn("max-w-md", className)} {...props}>
       <DialogHeader>
         <DialogTitle className="text-left">{title}</DialogTitle>
-        {description && <DialogDescription className="text-left">{description}</DialogDescription>}
+        {description && (
+          <DialogDescription className="text-left">
+            {description}
+          </DialogDescription>
+        )}
       </DialogHeader>
 
       {children}
@@ -231,13 +245,19 @@ const DialogForm = React.forwardRef<
     description?: string;
   }
 >(({ className, title, description, children, ...props }, ref) => (
-  <DialogContent ref={ref} className={cn("max-w-2xl max-h-[90vh]", className)} {...props}>
+  <DialogContent
+    ref={ref}
+    className={cn("max-w-2xl max-h-[90vh]", className)}
+    {...props}
+  >
     <DialogHeader>
       <DialogTitle>{title}</DialogTitle>
       {description && <DialogDescription>{description}</DialogDescription>}
     </DialogHeader>
 
-    <div className="max-h-[60vh] overflow-auto fluent-scroll pr-2">{children}</div>
+    <div className="max-h-[60vh] overflow-auto fluent-scroll pr-2">
+      {children}
+    </div>
   </DialogContent>
 ));
 DialogForm.displayName = "DialogForm";

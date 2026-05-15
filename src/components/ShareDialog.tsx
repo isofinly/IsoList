@@ -81,7 +81,7 @@ export function ShareDialog({
       console.error("Failed to create share:", error);
       toast.error(
         "Share Creation Failed",
-        "Failed to create share. Please try again."
+        "Failed to create share. Please try again.",
       );
     } finally {
       setIsCreatingShare(false);
@@ -126,14 +126,14 @@ export function ShareDialog({
       setJoinShareId("");
       toast.success(
         "Share Joined!",
-        `Successfully joined ${shareData.sharedBy}&apos;s shared lists!`
+        `Successfully joined ${shareData.sharedBy}&apos;s shared lists!`,
       );
     } catch (error: any) {
       console.error("Failed to join share:", error);
       if (error.status === 403 || error.status === 401) {
         toast.error(
           "Access Denied",
-          "Make sure the share link is correct and you have permission."
+          "Make sure the share link is correct and you have permission.",
         );
       } else if (error.status === 404) {
         toast.error("Share Not Found", "Please check the link.");
@@ -305,7 +305,7 @@ export function ShareDialog({
                         variant="outline"
                         onClick={() =>
                           navigator.clipboard.writeText(
-                            `${window.location.origin}/share/${file.id}`
+                            `${window.location.origin}/share/${file.id}`,
                           )
                         }
                         title="Copy link"

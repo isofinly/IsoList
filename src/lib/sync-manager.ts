@@ -115,7 +115,10 @@ export class SyncManager {
     return backup.items;
   }
 
-  async detectConflict(localItems: MediaItem[], localPlaces: PlaceItem[] = []): Promise<SyncConflict | null> {
+  async detectConflict(
+    localItems: MediaItem[],
+    localPlaces: PlaceItem[] = [],
+  ): Promise<SyncConflict | null> {
     if (!this.authService.isAuthenticated()) return null;
 
     try {
@@ -128,9 +131,15 @@ export class SyncManager {
       const cloudTimestamp = cloudData?.lastModified || "";
 
       const analysis = this.analyzeDataDifferences(localItems, cloudItems);
-      const placeAnalysis = this.analyzePlacesDifferences(localPlaces, cloudPlaces);
+      const placeAnalysis = this.analyzePlacesDifferences(
+        localPlaces,
+        cloudPlaces,
+      );
 
-      if (analysis.conflicts.length === 0 && placeAnalysis.conflicts.length === 0) {
+      if (
+        analysis.conflicts.length === 0 &&
+        placeAnalysis.conflicts.length === 0
+      ) {
         return null;
       }
 
@@ -175,7 +184,10 @@ export class SyncManager {
     const conflict = await this.detectConflict(localItems);
     if (!conflict) return localItems;
 
-    await this.createBackup(conflict.cloud.items, `Before sync - user chose ${userChoice}`);
+    await this.createBackup(
+      conflict.cloud.items,
+      `Before sync - user chose ${userChoice}`,
+    );
 
     switch (userChoice) {
       case "local": {
@@ -199,11 +211,17 @@ export class SyncManager {
       }
 
       case "merge": {
-        const merged = this.autoMergeAdditions(conflict.local.items, conflict.cloud.items);
+        const merged = this.autoMergeAdditions(
+          conflict.local.items,
+          conflict.cloud.items,
+        );
         const driveService = this.authService.getDriveService();
         const cloudData = await driveService.loadData();
         const cloudPlaces: PlaceItem[] = cloudData?.placeItems || [];
-        const mergedPlaces = this.autoMergePlacesAdditions(localPlaces, cloudPlaces);
+        const mergedPlaces = this.autoMergePlacesAdditions(
+          localPlaces,
+          cloudPlaces,
+        );
         await this.authService.getDriveService().saveData({
           mediaItems: merged,
           placeItems: mergedPlaces,
@@ -223,7 +241,10 @@ export class SyncManager {
     }
   }
 
-  private analyzeDataDifferences(localItems: MediaItem[], cloudItems: MediaItem[]) {
+  private analyzeDataDifferences(
+    localItems: MediaItem[],
+    cloudItems: MediaItem[],
+  ) {
     const localMap = new Map(localItems.map((item) => [item.id, item]));
     const cloudMap = new Map(cloudItems.map((item) => [item.id, item]));
 
@@ -270,11 +291,20 @@ export class SyncManager {
     };
   }
 
-  private analyzePlacesDifferences(localPlaces: PlaceItem[], cloudPlaces: PlaceItem[]) {
+  private analyzePlacesDifferences(
+    localPlaces: PlaceItem[],
+    cloudPlaces: PlaceItem[],
+  ) {
     const localMap = new Map(localPlaces.map((p) => [p.id, p]));
     const cloudMap = new Map(cloudPlaces.map((p) => [p.id, p]));
 
-    const conflicts: Array<{ id: string; name: string; local: PlaceItem; cloud: PlaceItem; conflictType: "modified" | "deleted-locally" | "deleted-in-cloud" }> = [];
+    const conflicts: Array<{
+      id: string;
+      name: string;
+      local: PlaceItem;
+      cloud: PlaceItem;
+      conflictType: "modified" | "deleted-locally" | "deleted-in-cloud";
+    }> = [];
     const localOnly: PlaceItem[] = [];
     const cloudOnly: PlaceItem[] = [];
 
@@ -285,8 +315,17 @@ export class SyncManager {
       } else {
         const lUpdated = lp.updatedAt ? new Date(lp.updatedAt).getTime() : 0;
         const cUpdated = cp.updatedAt ? new Date(cp.updatedAt).getTime() : 0;
-        if (lUpdated !== cUpdated || JSON.stringify(lp) !== JSON.stringify(cp)) {
-          conflicts.push({ id: lp.id, name: lp.name, local: lp, cloud: cp, conflictType: "modified" });
+        if (
+          lUpdated !== cUpdated ||
+          JSON.stringify(lp) !== JSON.stringify(cp)
+        ) {
+          conflicts.push({
+            id: lp.id,
+            name: lp.name,
+            local: lp,
+            cloud: cp,
+            conflictType: "modified",
+          });
         }
       }
     }
@@ -301,9 +340,17 @@ export class SyncManager {
   async intelligentSync(
     localItems: MediaItem[],
     localPlaces: PlaceItem[] = [],
-  ): Promise<{ success: boolean; items: { media: MediaItem[]; places: PlaceItem[] }; action: string }> {
+  ): Promise<{
+    success: boolean;
+    items: { media: MediaItem[]; places: PlaceItem[] };
+    action: string;
+  }> {
     if (!this.authService.isAuthenticated()) {
-      return { success: false, items: { media: localItems, places: localPlaces }, action: "not-authenticated" };
+      return {
+        success: false,
+        items: { media: localItems, places: localPlaces },
+        action: "not-authenticated",
+      };
     }
 
     try {
@@ -333,8 +380,13 @@ export class SyncManager {
           };
         }
 
-        const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
-        if (hasLocalChanges && (localItems.length < cloudItems.length || localPlaces.length < cloudPlaces.length)) {
+        const hasLocalChanges =
+          localStorage.getItem("hasLocalChanges") === "true";
+        if (
+          hasLocalChanges &&
+          (localItems.length < cloudItems.length ||
+            localPlaces.length < cloudPlaces.length)
+        ) {
           await this.uploadToCloud(localItems, localPlaces);
           this.saveToLocalSafely(localItems, localPlaces);
           return {
@@ -345,11 +397,18 @@ export class SyncManager {
         }
 
         const mergedMedia = this.autoMergeAdditions(localItems, cloudItems);
-        const mergedPlaces = this.autoMergePlacesAdditions(localPlaces, cloudPlaces);
+        const mergedPlaces = this.autoMergePlacesAdditions(
+          localPlaces,
+          cloudPlaces,
+        );
         await this.uploadToCloud(mergedMedia, mergedPlaces);
         this.saveToLocalSafely(mergedMedia, mergedPlaces);
 
-        return { success: true, items: { media: mergedMedia, places: mergedPlaces }, action: "auto-merged" };
+        return {
+          success: true,
+          items: { media: mergedMedia, places: mergedPlaces },
+          action: "auto-merged",
+        };
       }
       return {
         success: false,
@@ -358,18 +417,25 @@ export class SyncManager {
       };
     } catch (error) {
       console.error("Intelligent sync failed:", error);
-      return { success: false, items: { media: localItems, places: localPlaces }, action: "error" };
+      return {
+        success: false,
+        items: { media: localItems, places: localPlaces },
+        action: "error",
+      };
     }
   }
 
-  private autoMergeAdditions(localItems: MediaItem[], cloudItems: MediaItem[]): MediaItem[] {
-    const localMap = new Map(localItems.map(item => [item.id, item]));
+  private autoMergeAdditions(
+    localItems: MediaItem[],
+    cloudItems: MediaItem[],
+  ): MediaItem[] {
+    const localMap = new Map(localItems.map((item) => [item.id, item]));
 
     const hasLocalChanges = localStorage.getItem("hasLocalChanges") === "true";
     if (hasLocalChanges && localItems.length < cloudItems.length) {
-      const merged = new Map(localItems.map(item => [item.id, item]));
+      const merged = new Map(localItems.map((item) => [item.id, item]));
 
-      cloudItems.forEach(cloudItem => {
+      cloudItems.forEach((cloudItem) => {
         if (!localMap.has(cloudItem.id)) {
           merged.set(cloudItem.id, cloudItem);
         }
@@ -386,8 +452,12 @@ export class SyncManager {
         merged.set(item.id, item);
       } else {
         // Prefer by updatedAt if available, else by completeness
-        const existingUpdated = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
-        const itemUpdated = item.updatedAt ? new Date(item.updatedAt).getTime() : 0;
+        const existingUpdated = existing.updatedAt
+          ? new Date(existing.updatedAt).getTime()
+          : 0;
+        const itemUpdated = item.updatedAt
+          ? new Date(item.updatedAt).getTime()
+          : 0;
         if (itemUpdated && itemUpdated > existingUpdated) {
           merged.set(item.id, item);
         } else if (!itemUpdated && !existingUpdated) {
@@ -419,7 +489,10 @@ export class SyncManager {
     return score;
   }
 
-  private async uploadToCloud(items: MediaItem[], places: PlaceItem[] = []): Promise<void> {
+  private async uploadToCloud(
+    items: MediaItem[],
+    places: PlaceItem[] = [],
+  ): Promise<void> {
     const driveService = this.authService.getDriveService();
     const success = await driveService.saveData({
       mediaItems: items,
@@ -442,7 +515,10 @@ export class SyncManager {
     localStorage.removeItem("hasLocalChanges");
   }
 
-  private saveToLocalSafely(items: MediaItem[], places: PlaceItem[] = []): void {
+  private saveToLocalSafely(
+    items: MediaItem[],
+    places: PlaceItem[] = [],
+  ): void {
     const timestamp = new Date().toISOString();
     localStorage.setItem("mediaItems", JSON.stringify(items));
     localStorage.setItem("placeItems", JSON.stringify(places));
@@ -460,7 +536,10 @@ export class SyncManager {
     return JSON.stringify(sorted1) === JSON.stringify(sorted2);
   }
 
-  private autoMergePlacesAdditions(localPlaces: PlaceItem[], cloudPlaces: PlaceItem[]): PlaceItem[] {
+  private autoMergePlacesAdditions(
+    localPlaces: PlaceItem[],
+    cloudPlaces: PlaceItem[],
+  ): PlaceItem[] {
     const localMap = new Map(localPlaces.map((p) => [p.id, p]));
 
     const merged = new Map<string, PlaceItem>();
@@ -473,7 +552,9 @@ export class SyncManager {
         merged.set(p.id, p);
       } else {
         // Prefer most recent by updatedAt, fallback to local
-        const existingUpdated = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+        const existingUpdated = existing.updatedAt
+          ? new Date(existing.updatedAt).getTime()
+          : 0;
         const itemUpdated = p.updatedAt ? new Date(p.updatedAt).getTime() : 0;
         if (itemUpdated && itemUpdated > existingUpdated) {
           merged.set(p.id, p);
@@ -493,7 +574,9 @@ export class SyncManager {
   }
 
   // Sharing functionality
-  async createShareableFile(shareData: Record<string, unknown>): Promise<string> {
+  async createShareableFile(
+    shareData: Record<string, unknown>,
+  ): Promise<string> {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to create shareable files");
     }
@@ -516,7 +599,10 @@ export class SyncManager {
   }
 
   // Places-only sharing
-  async createPlacesShareFile(placeItems: PlaceItem[], sharedByEmail: string): Promise<string> {
+  async createPlacesShareFile(
+    placeItems: PlaceItem[],
+    sharedByEmail: string,
+  ): Promise<string> {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to create shareable files");
     }
@@ -535,8 +621,13 @@ export class SyncManager {
     return fileId;
   }
 
-  async updatePlacesShareFile(fileId: string, placeItems: PlaceItem[], sharedByEmail: string): Promise<boolean> {
-    if (!this.authService.isAuthenticated()) throw new Error("Must be authenticated");
+  async updatePlacesShareFile(
+    fileId: string,
+    placeItems: PlaceItem[],
+    sharedByEmail: string,
+  ): Promise<boolean> {
+    if (!this.authService.isAuthenticated())
+      throw new Error("Must be authenticated");
     const driveService = this.authService.getDriveService();
     const payload = {
       type: "isolist-share-places",
@@ -548,8 +639,11 @@ export class SyncManager {
     return await driveService.updateFileById(fileId, payload);
   }
 
-  async accessPlacesShareFile(fileId: string): Promise<{ placeItems: PlaceItem[] } | null> {
-    if (!this.authService.isAuthenticated()) throw new Error("Must be authenticated");
+  async accessPlacesShareFile(
+    fileId: string,
+  ): Promise<{ placeItems: PlaceItem[] } | null> {
+    if (!this.authService.isAuthenticated())
+      throw new Error("Must be authenticated");
     const driveService = this.authService.getDriveService();
     const data = await driveService.loadSharedData(fileId);
     if (data?.type !== "isolist-share-places") return null;
@@ -574,12 +668,16 @@ export class SyncManager {
 
       // Handle specific error types
       if (err.status === 404) {
-        const wrappedErr = new Error(`Shared file not found (deleted by owner): ${fileId}`) as Error & { status?: number };
+        const wrappedErr = new Error(
+          `Shared file not found (deleted by owner): ${fileId}`,
+        ) as Error & { status?: number };
         wrappedErr.status = 404;
         throw wrappedErr;
       }
 
-      const wrappedErr = new Error(`Failed to access shared file: ${err.message}`) as Error & { status?: number };
+      const wrappedErr = new Error(
+        `Failed to access shared file: ${err.message}`,
+      ) as Error & { status?: number };
       wrappedErr.status = err.status || 500;
       throw wrappedErr;
     }
@@ -599,7 +697,9 @@ export class SyncManager {
     }
   }
 
-  async listUserSharedFiles(): Promise<Array<{ id: string, name: string, createdTime: string }>> {
+  async listUserSharedFiles(): Promise<
+    Array<{ id: string; name: string; createdTime: string }>
+  > {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to list shared files");
     }
@@ -613,7 +713,10 @@ export class SyncManager {
     }
   }
 
-  async updateSharedFile(fileId: string, shareData: Record<string, unknown>): Promise<boolean> {
+  async updateSharedFile(
+    fileId: string,
+    shareData: Record<string, unknown>,
+  ): Promise<boolean> {
     if (!this.authService.isAuthenticated()) {
       throw new Error("Must be authenticated to update shared files");
     }

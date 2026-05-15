@@ -9,7 +9,18 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, error, helperText, startAdornment, endAdornment, ...props }, ref) => {
+  (
+    {
+      className,
+      type,
+      error,
+      helperText,
+      startAdornment,
+      endAdornment,
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <div className="w-full">
         <div className="relative">
@@ -72,14 +83,58 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = "Input";
 
-const InputSearch = React.forwardRef<HTMLInputElement, Omit<InputProps, "type" | "startAdornment">>(
-  ({ className, placeholder = "Search...", ...props }, ref) => {
-    return (
-      <Input
-        ref={ref}
-        type="search"
-        placeholder={placeholder}
-        startAdornment={
+const InputSearch = React.forwardRef<
+  HTMLInputElement,
+  Omit<InputProps, "type" | "startAdornment">
+>(({ className, placeholder = "Search...", ...props }, ref) => {
+  return (
+    <Input
+      ref={ref}
+      type="search"
+      placeholder={placeholder}
+      startAdornment={
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+      }
+      className={cn(
+        "bg-bg-layer-2 border-border-subtle",
+        "hover:bg-bg-layer-1 focus-visible:bg-bg-layer-1",
+        className,
+      )}
+      {...props}
+    />
+  );
+});
+InputSearch.displayName = "InputSearch";
+
+const InputPassword = React.forwardRef<
+  HTMLInputElement,
+  Omit<InputProps, "type" | "endAdornment">
+>(({ className, ...props }, ref) => {
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  return (
+    <Input
+      ref={ref}
+      type={showPassword ? "text" : "password"}
+      endAdornment={
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="p-1 hover:bg-bg-layer-2 rounded-sm transition-colors duration-short"
+          tabIndex={-1}
+        >
           <svg
             width="16"
             height="16"
@@ -90,69 +145,27 @@ const InputSearch = React.forwardRef<HTMLInputElement, Omit<InputProps, "type" |
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.35-4.35" />
+            {showPassword ? (
+              <>
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                <line x1="2" x2="22" y1="2" y2="22" />
+              </>
+            ) : (
+              <>
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </>
+            )}
           </svg>
-        }
-        className={cn(
-          "bg-bg-layer-2 border-border-subtle",
-          "hover:bg-bg-layer-1 focus-visible:bg-bg-layer-1",
-          className,
-        )}
-        {...props}
-      />
-    );
-  },
-);
-InputSearch.displayName = "InputSearch";
-
-const InputPassword = React.forwardRef<HTMLInputElement, Omit<InputProps, "type" | "endAdornment">>(
-  ({ className, ...props }, ref) => {
-    const [showPassword, setShowPassword] = React.useState(false);
-
-    return (
-      <Input
-        ref={ref}
-        type={showPassword ? "text" : "password"}
-        endAdornment={
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="p-1 hover:bg-bg-layer-2 rounded-sm transition-colors duration-short"
-            tabIndex={-1}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {showPassword ? (
-                <>
-                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-                  <line x1="2" x2="22" y1="2" y2="22" />
-                </>
-              ) : (
-                <>
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-                  <circle cx="12" cy="12" r="3" />
-                </>
-              )}
-            </svg>
-          </button>
-        }
-        className={className}
-        {...props}
-      />
-    );
-  },
-);
+        </button>
+      }
+      className={className}
+      {...props}
+    />
+  );
+});
 InputPassword.displayName = "InputPassword";
 
 export { Input, InputPassword, InputSearch };

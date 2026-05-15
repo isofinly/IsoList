@@ -98,8 +98,8 @@ export default function RatingsPage() {
           No Rated Items Yet
         </h2>
         <p>
-          You haven&apos;t marked any movies, series, or anime as &apos;completed&apos; with a
-          rating!
+          You haven&apos;t marked any movies, series, or anime as
+          &apos;completed&apos; with a rating!
         </p>
       </div>
     );

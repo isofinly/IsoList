@@ -94,7 +94,7 @@ export default function MediaCard({
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden transition-all duration-medium ease-fluent-standard",
+        "group relative transition-all duration-medium ease-fluent-standard",
         "hover:shadow-fluent-dialog hover:scale-[1.01] hover:border-border-interactive",
         "reveal-hover fluent-surface-hover",
         isExpanded && [

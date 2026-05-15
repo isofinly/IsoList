@@ -13,7 +13,7 @@ const Card = React.forwardRef<
       "bg-gradient-to-br from-bg-layer-1 to-bg-layer-2",
       "reveal-hover transition-all duration-medium ease-fluent-standard",
       "hover:border-border-interactive hover:shadow-fluent-popup hover:translate-y-[-1px]",
-      "relative overflow-hidden",
+      "relative",
       className,
     )}
     {...props}
@@ -129,7 +129,7 @@ const CardGlass = React.forwardRef<
       "text-text-primary reveal-hover",
       "transition-all duration-medium ease-fluent-standard",
       "hover:shadow-fluent-flyout hover:translate-y-[-2px]",
-      "relative overflow-hidden",
+      "relative",
       className,
     )}
     {...props}
